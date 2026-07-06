@@ -1,13 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://tower_scene"]
+[gd_scene format=3 uid="uid://skx8ogjgy53t"]
 
-[ext_resource type="Script" path="res://scripts/Tower.gd" id="1"]
+[ext_resource type="Script" uid="uid://buhl6ixoak1qc" path="res://scripts/Tower.gd" id="1"]
 
-[node name="Tower" type="Area2D"]
+[node name="Tower" type="Area2D" unique_id=7973874]
 script = ExtResource("1")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, 0)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2094233409]
 texture_filter = 1
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 0)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1288812004]

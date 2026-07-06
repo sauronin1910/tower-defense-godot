@@ -3,12 +3,19 @@
 # Signal emitted when enemy reaches end of path — carries damage amount
 signal enemy_reached_end(damage_amount)
 
+# Signal emitted when enemy is defeated by combat — carries gold reward
+signal enemy_defeated(gold_reward)
+
 # Exported variable for enemy type selection
 @export var enemy_type: String = "peasant"
 
 # Health system
 var health: int = 0
 @export var speed: float = 100.0
+
+# Gold reward when defeated in combat
+var gold_reward: int = 0
+
 
 func _ready():
 	print("Enemy created with type: ", enemy_type)
@@ -20,9 +27,11 @@ func _ready():
 	if enemy_type == "knight":
 		health = 80
 		speed = 70
+		gold_reward = 25
 	else:
 		health = 30
 		speed = 100
+		gold_reward = 10
 	
 	print("Enemy type: ", enemy_type, " - Health: ", health, " - Speed: ", speed)
 	
@@ -39,6 +48,7 @@ func _ready():
 	# Start at the beginning of the path
 	progress_ratio = 0.0
 
+
 func _process(delta):
 	# Move forward along the path based on speed and delta time
 	progress_ratio += delta * speed / get_parent().curve.get_baked_length()
@@ -54,8 +64,10 @@ func _process(delta):
 		enemy_reached_end.emit(damage)
 		queue_free() # Remove this enemy from the scene
 
+
 func take_damage(damage: int):
 	health -= damage
 	if health <= 0:
 		print(enemy_type, " defeated")
+		enemy_defeated.emit(gold_reward)
 		queue_free()
