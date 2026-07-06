@@ -1,7 +1,7 @@
-﻿extends Resource
+extends Resource
 
 @export var peasant: Dictionary = {
-	"texture": "res://assets/sprites/Peasant .png",
+	"texture": "res://assets/sprites/Peasant.png",
 	"health": 30,
 	"speed": 100
 }

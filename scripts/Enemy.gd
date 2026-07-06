@@ -1,4 +1,4 @@
-﻿extends PathFollow2D
+extends PathFollow2D
 
 # Signal emitted when enemy reaches end of path — carries damage amount
 signal enemy_reached_end(damage_amount)
@@ -40,7 +40,7 @@ func _ready():
 	if enemy_type == "knight":
 		sprite_node.texture = preload("res://assets/sprites/Knight.png")
 	else:
-		sprite_node.texture = preload("res://assets/sprites/Peasant .png")
+		sprite_node.texture = preload("res://assets/sprites/Peasant.png")
 	
 	# Scale the sprite for better visibility on 720x1280 screen
 	sprite_node.scale = Vector2(0.5, 0.5)

@@ -1,4 +1,4 @@
-extends Node2D
+﻿extends Node2D
 
 # Class-level state
 var enemies_spawned = 0
@@ -21,6 +21,17 @@ const TOWER_STATS = {
 	"arrow": {"cost": 75, "attack_range": 200.0, "fire_rate": 1.5, "damage": 8},
 	"shells": {"cost": 120, "attack_range": 130.0, "fire_rate": 0.5, "damage": 30}
 }
+
+# Wave configuration table
+const WAVE_CONFIG = [
+	{"peasants": 7,  "knights": 0},   # Wave 1
+	{"peasants": 10, "knights": 1},   # Wave 2
+	{"peasants": 8,  "knights": 3},   # Wave 3
+	{"peasants": 6,  "knights": 5},   # Wave 4
+	{"peasants": 3,  "knights": 7},   # Wave 5
+	{"peasants": 0,  "knights": 8},   # Wave 6
+	{"peasants": 0,  "knights": 10},  # Wave 7
+]
 
 func gold_earned(amount: int):
 	current_gold += amount
@@ -200,18 +211,14 @@ func update_tower_selection_ui():
 
 # --- Wave spawning (unchanged) ---
 
-func _get_enemies_per_wave(wave: int) -> int:
-	return 5 + (wave - 1)
 
+func _get_wave_config(wave: int) -> Dictionary:
+	var idx = wave - 1
+	if idx >= WAVE_CONFIG.size(): idx = WAVE_CONFIG.size() - 1
+	return WAVE_CONFIG[idx]
 
-func _get_knight_count(wave: int) -> int:
-	var total = _get_enemies_per_wave(wave)
-	var max_knights = floor(total / 2.0)
-	return min(wave, max_knights)
-
-
-# Function to spawn an enemy of a specific type
 func spawn_enemy(enemy_type: String):
+
 	var enemy_scene = preload("res://scenes/Enemy.tscn")
 	var new_enemy = enemy_scene.instantiate()
 	new_enemy.enemy_type = enemy_type
@@ -236,8 +243,7 @@ func start_wave(wave_number: int):
 
 	enemies_spawned = 0
 
-	# Set wave-specific enemy count and update UI
-	var _total_enemies = _get_enemies_per_wave(wave_number)
+
 	spawn_timer.wait_time = spawn_interval
 	update_wave_display()
 
@@ -247,11 +253,10 @@ func start_wave(wave_number: int):
 
 # Called when the spawn timer times out
 func _on_spawn_timer_timeout():
-	var wave = current_wave_number
-	var total = _get_enemies_per_wave(wave)
-	var knight_count = _get_knight_count(wave)
+	var config = _get_wave_config(current_wave_number)
+	var total = config["peasants"] + config["knights"]
 
-	if enemies_spawned < total - knight_count:
+	if enemies_spawned < config["peasants"]:
 		spawn_enemy("peasant")
 	else:
 		spawn_enemy("knight")
@@ -259,10 +264,9 @@ func _on_spawn_timer_timeout():
 	enemies_spawned += 1
 
 	if enemies_spawned >= total:
-		print("Wave ", wave, " complete")
+		print("Wave ", current_wave_number, " complete")
 		spawn_timer.stop()
 
-		# Start delay timer before next wave (3 seconds)
 		next_wave_timer.wait_time = 3.0
 		next_wave_timer.start()
 
@@ -274,41 +278,44 @@ func _on_next_wave_delay_done():
 
 # Handle input events for tower placement
 func _unhandled_input(event):
-	# Check if this is a mouse button press (for desktop) or screen touch (for mobile)
 	if event is InputEventMouseButton:
-		# Only respond to left mouse button clicks
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			place_tower(event.position)
-
 	elif event is InputEventScreenTouch:
-		# Only respond to first touch (primary finger)
 		if event.pressed:
 			place_tower(event.position)
 
 
-# Function to place a tower at the given position
-func place_tower(tap_position):
-	# Get stats for the currently selected tower type
+
+func place_tower(tap_pos):
+	if _is_ui_hit(tap_pos):
+		return
+
 	var stats = TOWER_STATS[selected_tower_type]
 	var tower_cost = stats["cost"]
 
-	# Check if player can afford this tower
 	if not can_afford(tower_cost):
 		print("Not enough gold!")
 		return
 
-	# Spend gold and place the tower
 	spend_gold(tower_cost)
 
-	# Load and instantiate the Tower scene
 	var tower_scene = preload("res://scenes/Tower.tscn")
 	var new_tower = tower_scene.instantiate()
 
-	# Set the tower type so Tower.gd configures its stats/texture
 	new_tower.tower_type = selected_tower_type
-
-	# Set the position where the tap occurred
-	new_tower.position = tap_position
-
-	# Add it as a child to this node (Main)
+	new_tower.position = tap_pos
 	add_child(new_tower)
+
+
+func _is_ui_hit(tap_pos: Vector2) -> bool:
+	if is_instance_valid(spear_button) and spear_button.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(arrow_button) and arrow_button.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(shells_button) and shells_button.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(game_over_screen) and game_over_screen.visible:
+		if is_instance_valid(restart_button) and restart_button.get_global_rect().has_point(tap_pos):
+			return true
+	return false
