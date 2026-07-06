@@ -1,4 +1,7 @@
-extends PathFollow2D
+﻿extends PathFollow2D
+
+# Signal emitted when enemy reaches end of path — carries damage amount
+signal enemy_reached_end(damage_amount)
 
 # Exported variable for enemy type selection
 @export var enemy_type: String = "peasant"
@@ -9,6 +12,9 @@ var health: int = 0
 
 func _ready():
 	print("Enemy created with type: ", enemy_type)
+	
+	# Prevent looping — clamp at end of path so reached-end logic fires once
+	loop = false
 	
 	# Set stats based on enemy type directly
 	if enemy_type == "knight":
@@ -37,13 +43,19 @@ func _process(delta):
 	# Move forward along the path based on speed and delta time
 	progress_ratio += delta * speed / get_parent().curve.get_baked_length()
 	
+	# Clamp progress so it doesn't exceed 1.0 (loop=false prevents wrap, but be explicit)
+	if progress_ratio > 1.0:
+		progress_ratio = 1.0
+	
 	# Check if enemy has reached the end of the path
 	if progress_ratio >= 1.0:
-		print("Enemy reached the end")
+		var damage = 3 if enemy_type == "knight" else 1
+		print(enemy_type, " reached base! Dealing ", damage, " damage.")
+		enemy_reached_end.emit(damage)
 		queue_free() # Remove this enemy from the scene
 
 func take_damage(damage: int):
 	health -= damage
 	if health <= 0:
-		print("Enemy defeated!")
+		print(enemy_type, " defeated")
 		queue_free()
