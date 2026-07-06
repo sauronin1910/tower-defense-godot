@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "id": "evt-1783205183563-29a7c1b8",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T22:46:23.563Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783205181493-0a67b2b6",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T22:46:21.493Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783205179484-f4ea88af",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T22:46:19.484Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783205178133-fb1f95ad",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T22:46:18.133Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783204848995-d8f9b3cf",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T22:40:48.995Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783203479409-eb94d2f3",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T22:17:59.409Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783203477869-e179bbc6",
+      "trigger": "feature_created",
+      "timestamp": "2026-07-04T22:17:57.869Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783203477772-323yvp3aru5"
+    },
+    {
+      "id": "evt-1783131490174-67cbd6a0",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T02:18:10.174Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783131482367-73f9cojplfr"
+    },
+    {
+      "id": "evt-1783131482440-4d983184",
+      "trigger": "feature_created",
+      "timestamp": "2026-07-04T02:18:02.440Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783131482367-73f9cojplfr"
+    },
+    {
+      "id": "evt-1783131445256-cff3252f",
+      "trigger": "feature_error",
+      "timestamp": "2026-07-04T02:17:25.256Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783131443465-ow0vk5znaj"
+    },
+    {
+      "id": "evt-1783131443855-e79b6049",
+      "trigger": "feature_created",
+      "timestamp": "2026-07-04T02:17:23.855Z",
+      "featureName": "Setup Godot Project Structure",
+      "featureId": "feature-1783131443465-ow0vk5znaj"
+    }
+  ]
+}

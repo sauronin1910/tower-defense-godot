@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "notifications": [
+    {
+      "id": "edaeef89-2af0-47cf-9b46-c0315a2cd2cc",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T02:17:25.255Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783131443465-ow0vk5znaj",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "e8e89bae-c5f0-48f2-a13d-2703d2a435fc",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T02:17:25.255Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783131443465-ow0vk5znaj",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "8693435e-fb69-437e-ae96-1280b3bd70d3",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T02:18:10.177Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783131482367-73f9cojplfr",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "afb9cc1e-0690-4366-87b2-5bda24418031",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T22:17:59.412Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783203477772-323yvp3aru5",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "9ad6b6ba-6666-4b0a-96fe-3ffa5fe13207",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T22:40:48.997Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783203477772-323yvp3aru5",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "e829073c-ed71-43f4-a58b-33d86274ca43",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T22:46:18.135Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783203477772-323yvp3aru5",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "30eb767a-f4b6-4eae-bbdc-f0c9ef890304",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T22:46:19.486Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783203477772-323yvp3aru5",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "c81bf231-ca11-453c-acb4-0fbb544e0f75",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T22:46:21.495Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783203477772-323yvp3aru5",
+      "projectPath": "D:\\Projects/TowerDefense"
+    },
+    {
+      "id": "ac1dd87c-a2e9-4c79-bca1-bb486b085ed4",
+      "type": "auto_mode_error",
+      "title": "Setup Godot Project Structure",
+      "message": "Auto Mode Error: Authentication failed: Invalid or expired API key. Please check your API key configuration or re-authenticate with your provider.",
+      "createdAt": "2026-07-04T22:46:23.567Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1783203477772-323yvp3aru5",
+      "projectPath": "D:\\Projects/TowerDefense"
+    }
+  ]
+}
