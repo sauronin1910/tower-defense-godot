@@ -8,10 +8,12 @@
 
 config_version=5
 
+"ï»¿config_version"=5
+
 [application]
 
 config/name="TD game"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
