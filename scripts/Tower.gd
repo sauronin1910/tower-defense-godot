@@ -1,4 +1,4 @@
-extends Area2D
+﻿extends Area2D
 
 # Tower type selection
 @export var tower_type: String = "spear"
@@ -74,9 +74,22 @@ func _process(_delta):
 
 
 func _on_shoot_timer():
-	if not enemies_in_range.is_empty():
-		var target = enemies_in_range[0]  # Get the first enemy (closest logic can come later)
-		shoot(target)
+	if enemies_in_range.is_empty():
+		return
+
+	var best_target: Object = null
+	var best_progress: float = -1.0
+
+	for enemy in enemies_in_range:
+		if not is_instance_valid(enemy):
+			continue
+		if enemy.progress_ratio > best_progress:
+			best_progress = enemy.progress_ratio
+			best_target = enemy
+
+	if best_target != null:
+		shoot(best_target)
+
 
 
 func shoot(target):
