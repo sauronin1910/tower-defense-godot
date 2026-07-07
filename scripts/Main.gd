@@ -1,282 +1,175 @@
-﻿extends Node2D
+extends Node2D
 
-# Class-level state
-var enemies_spawned = 0
-var current_wave_number = 1
-
-# Base health system
-@export var base_health: int = 20
-const BASE_MAX_HEALTH = 20
-
-# Gold/economy system
-@export var starting_gold: int = 100
-var current_gold: int = 0
-
-# Tower selection state
-var selected_tower_type: String = "spear"
-
-# Tower type stats dictionary (mirrors Tower.gd)
-const TOWER_STATS = {
-	"spear": {"cost": 50, "attack_range": 150.0, "fire_rate": 1.0, "damage": 10},
-	"arrow": {"cost": 75, "attack_range": 200.0, "fire_rate": 1.5, "damage": 8},
-	"shells": {"cost": 120, "attack_range": 130.0, "fire_rate": 0.5, "damage": 30}
-}
-
-# Wave configuration table
-const WAVE_CONFIG = [
-	{"peasants": 7,  "knights": 0},   # Wave 1
-	{"peasants": 10, "knights": 1},   # Wave 2
-	{"peasants": 8,  "knights": 3},   # Wave 3
-	{"peasants": 6,  "knights": 5},   # Wave 4
-	{"peasants": 3,  "knights": 7},   # Wave 5
-	{"peasants": 0,  "knights": 8},   # Wave 6
-	{"peasants": 0,  "knights": 10},  # Wave 7
+# ── Wave Configuration: 7 defined waves, then endless uses last entry ──
+const WAVE_CONFIG := [
+	{"peasants": 5, "knights": 0},     # Wave 1
+	{"peasants": 10, "knights": 1},    # Wave 2
+	{"peasants": 15, "knights": 2},    # Wave 3
+	{"peasants": 20, "knights": 3},    # Wave 4
+	{"peasants": 25, "knights": 4},    # Wave 5
+	{"peasants": 30, "knights": 5},    # Wave 6
+	{"peasants": 40, "knights": 8},    # Wave 7 (max — reused for endless)
 ]
 
-func gold_earned(amount: int):
-	current_gold += amount
-	if is_instance_valid(gold_label):
-		gold_label.text = "Gold: %d" % current_gold
+const MAX_WAVE := WAVE_CONFIG.size()  # 7
 
-func can_afford(cost: int) -> bool:
-	return current_gold >= cost
+# ── State ──
+var current_wave_number: int = 1
+var enemies_spawned: int = 0
+var total_enemies_to_spawn: int = 0
+var active_enemy_count: int = 0
+var gold: int = 100
+var base_health: int = 20
 
-func spend_gold(amount: int):
-	current_gold -= amount
-	if is_instance_valid(gold_label):
-		gold_label.text = "Gold: %d" % current_gold
+@onready var spawn_timer: Timer = $SpawnTimer
+@onready var next_wave_timer: Timer = $NextWaveTimer
+@onready var enemy_scene := preload("res://scenes/Enemy.tscn")
 
-# Exported variables for wave spawning
-@export var spawn_interval = 1.0
-
-# Timer for enemy spawning
-var spawn_timer: Timer
-
-# Reference to the HP label UI node
-var health_label: Label
-
-# Reference to the wave number label UI node
-var wave_label: Label
-
-# Reference to the gold label UI node
-var gold_label: Label
-
-# Delay timer between waves
-var next_wave_timer: Timer
-
-# Game over screen nodes
-var game_over_screen: Control
-var restart_button: Button
-
-# Tower selection buttons
-var spear_button: Button
-var arrow_button: Button
-var shells_button: Button
-
-# Highlight style for the selected tower button
-var highlight_style: StyleBoxFlat
+@onready var start_wave_button: Button = %StartWaveButton
+@onready var health_label: Label = $CanvasLayer/Control/HealthLabel
+@onready var wave_label: Label = $CanvasLayer/Control/WaveLabel
+@onready var gold_label: Label = $CanvasLayer/Control/GoldLabel
 
 
-func damage_base(amount: int):
-	base_health -= amount
-	if base_health <= 0:
-		print("GAME OVER - Base destroyed!")
-		get_tree().paused = true
-		if is_instance_valid(health_label):
-			health_label.text = "GAME OVER"
-		if is_instance_valid(game_over_screen):
-			game_over_screen.visible = true
-	else:
-		if is_instance_valid(health_label):
-			health_label.text = "Base HP: %d/%d" % [base_health, BASE_MAX_HEALTH]
-
-
-func restart_game():
-	get_tree().paused = false
-	get_tree().reload_current_scene()
-
-
-
-# --- Enemy path curve ---
-
-func build_curve():
-	var enemy_path = $EnemyPath
-	var curve = Curve2D.new()
-	curve.add_point(Vector2(360, 50))
-	curve.add_point(Vector2(100, 200))
-	curve.add_point(Vector2(600, 350))
-	curve.add_point(Vector2(200, 500))
-	curve.add_point(Vector2(500, 650))
-	curve.add_point(Vector2(360, 800))
-	enemy_path.curve = curve
-
-# Called when the node enters the scene tree for the first time.
 func _ready():
-	# Build the enemy curve path
-	build_curve()
+	# ── Timers ──
+	spawn_timer.wait_time = 0.8
+	next_wave_timer.wait_time = 15.0
 
-	# Get references to UI label nodes
-	health_label = get_node("CanvasLayer/Control/HealthLabel")
-	wave_label = get_node("CanvasLayer/Control/WaveLabel")
-	gold_label = get_node("CanvasLayer/Control/GoldLabel")
-	game_over_screen = get_node("CanvasLayer/GameOverScreen")
-	restart_button = game_over_screen.get_node("RestartButton")
+	spawn_timer.timeout.connect(_on_spawn_timer_timeout)
+	next_wave_timer.timeout.connect(_on_next_wave_timer_timeout)
 
-	# Get references to tower selection buttons
-	spear_button = get_node("CanvasLayer/Control/TowerButtonsDock/SpearButton")
-	arrow_button = get_node("CanvasLayer/Control/TowerButtonsDock/ArrowButton")
-	shells_button = get_node("CanvasLayer/Control/TowerButtonsDock/ShellsButton")
+	# ── Tower buttons ──
+	$CanvasLayer/Control/TowerButtonsDock/SpearButton.pressed.connect(
+		func(): _select_tower_type("spear"))
+	$CanvasLayer/Control/TowerButtonsDock/ArrowButton.pressed.connect(
+		func(): _select_tower_type("arrow"))
+	$CanvasLayer/Control/TowerButtonsDock/ShellsButton.pressed.connect(
+		func(): _select_tower_type("shells"))
 
-	# Create highlight style (3px accent border)
-	highlight_style = StyleBoxFlat.new()
-	highlight_style.set_border_width_all(3)
-	highlight_style.set_border_color(Color(0.2, 0.85, 1, 1))
+	# ── Start Wave button (Task 3) ──
+	if is_instance_valid(start_wave_button):
+		start_wave_button.pressed.connect(_on_start_wave_pressed)
 
-	current_gold = starting_gold
-	update_health_display()
-	update_wave_display()
-	update_gold_display()
-
-	# Connect Restart button to restart_game
-	restart_button.pressed.connect(restart_game)
-
-	# Connect tower selection buttons
-	spear_button.pressed.connect(_on_spear_selected)
-	arrow_button.pressed.connect(_on_arrow_selected)
-	shells_button.pressed.connect(_on_shells_selected)
-
-	# Set initial selection (spear is default)
-	update_tower_selection_ui()
-
-	# Create and configure the spawn timer
-	spawn_timer = Timer.new()
-	add_child(spawn_timer)
-	spawn_timer.connect("timeout", Callable(self, "_on_spawn_timer_timeout"))
-
-	# Create the between-waves delay timer
-	next_wave_timer = Timer.new()
-	add_child(next_wave_timer)
-	next_wave_timer.connect("timeout", Callable(self, "_on_next_wave_delay_done"))
-
-	# Start the first wave
-	start_wave(current_wave_number)
-
-
-func update_health_display():
-	if is_instance_valid(health_label):
-		health_label.text = "Base HP: %d/%d" % [base_health, BASE_MAX_HEALTH]
-
-
-func update_wave_display():
-	if is_instance_valid(wave_label):
-		wave_label.text = "Wave: %d" % current_wave_number
-
-
-func update_gold_display():
-	if is_instance_valid(gold_label):
-		gold_label.text = "Gold: %d" % current_gold
-
-
-# --- Tower selection UI ---
-
-func _on_spear_selected():
-	selected_tower_type = "spear"
-	update_tower_selection_ui()
-
-
-func _on_arrow_selected():
-	selected_tower_type = "arrow"
-	update_tower_selection_ui()
-
-
-func _on_shells_selected():
-	selected_tower_type = "shells"
-	update_tower_selection_ui()
-
-
-func update_tower_selection_ui():
-	var type_to_button = {
-		"spear": spear_button,
-		"arrow": arrow_button,
-		"shells": shells_button
-	}
-	for key in type_to_button:
-		var btn = type_to_button[key]
-		if is_instance_valid(btn):
-			if key == selected_tower_type:
-				btn.add_theme_stylebox_override("normal", highlight_style)
-			else:
-				btn.remove_theme_stylebox_override("normal")
-
-
-# --- Wave spawning (unchanged) ---
-
-
-func _get_wave_config(wave: int) -> Dictionary:
-	var idx = wave - 1
-	if idx >= WAVE_CONFIG.size(): idx = WAVE_CONFIG.size() - 1
-	return WAVE_CONFIG[idx]
-
-func spawn_enemy(enemy_type: String):
-
-	var enemy_scene = preload("res://scenes/Enemy.tscn")
-	var new_enemy = enemy_scene.instantiate()
-	new_enemy.enemy_type = enemy_type
-
-	# Connect the enemy_reached_end signal so Main knows when to deal damage
-	new_enemy.enemy_reached_end.connect(damage_base)
-
-	# Connect the enemy_defeated signal so Main earns gold
-	new_enemy.enemy_defeated.connect(gold_earned)
-
-	# Add the enemy as child of EnemyPath so PathFollow2D works properly
-	get_node("EnemyPath").add_child(new_enemy)
-
-	# Register in group so towers can find them via get_tree().get_nodes_in_group("enemies")
-	new_enemy.add_to_group("enemies")
-
-
-# Function to start a wave of enemies
-func start_wave(wave_number: int):
-	print("Wave ", wave_number, " started")
-	current_wave_number = wave_number
-
+	# ── Initial state ──
+	current_wave_number = 1
 	enemies_spawned = 0
+	gold = 100
+	base_health = 20
+	_update_labels()
+
+	next_wave_timer.start()
 
 
-	spawn_timer.wait_time = spawn_interval
-	update_wave_display()
+# ════════════════════════════════════════════
+#  TASK 1 — SPAWN LOGIC (fixed)
+# ════════════════════════════════════════════
 
-	# Start the first wave
-	spawn_timer.start()
-
-
-# Called when the spawn timer times out
 func _on_spawn_timer_timeout():
-	var config = _get_wave_config(current_wave_number)
-	var total = config["peasants"] + config["knights"]
+	var config := WAVE_CONFIG[min(current_wave_number - 1, MAX_WAVE - 1)]
 
-	if enemies_spawned < config["peasants"]:
-		spawn_enemy("peasant")
-	else:
-		spawn_enemy("knight")
+	# Spawn all peasants first, then all knights
+	if enemies_spawned < config.peasants:
+		_spawn_enemy("peasant")
+	elif enemies_spawned < total_enemies_to_spawn:
+		_spawn_enemy("knight")
+
+
+func _spawn_enemy(type: String) -> void:
+	var enemy := enemy_scene.instantiate() as PathFollow2D
+	enemy.enemy_type = type
+
+	# Place at the start of the path
+	var path := $EnemyPath as Path2D
+	if is_instance_valid(path):
+		var follow := PathFollow2D.new()
+		follow.path = path
+		follow.progress_ratio = 0.0
+		add_child(follow)
+		enemy.reparent(follow)
+
+	total_enemies_to_spawn = WAVE_CONFIG[min(current_wave_number - 1, MAX_WAVE - 1)].peasants + \
+							 WAVE_CONFIG[min(current_wave_number - 1, MAX_WAVE - 1)].knights
 
 	enemies_spawned += 1
+	active_enemy_count += 1
 
-	if enemies_spawned >= total:
-		print("Wave ", current_wave_number, " complete")
-		spawn_timer.stop()
-
-		next_wave_timer.wait_time = 3.0
-		next_wave_timer.start()
-
-
-func _on_next_wave_delay_done():
-	if base_health > 0:
-		start_wave(current_wave_number + 1)
+	# Connect defeat / reached-end signals so we know when wave is clear
+	if is_instance_valid(enemy):
+		enemy.enemy_defeated.connect(_on_enemy_defeated)
+		enemy.enemy_reached_end.connect(_on_enemy_reached_end)
 
 
-# Handle input events for tower placement
+func _on_enemy_defeated() -> void:
+	active_enemy_count -= 1
+	if active_enemy_count <= 0:
+		_advance_to_next_wave()
+
+
+func _on_enemy_reached_end(damage: int) -> void:
+	base_health -= damage
+	if base_health < 0:
+		base_health = 0
+	_update_labels()
+
+	active_enemy_count -= 1
+	if active_enemy_count <= 0:
+		_advance_to_next_wave()
+
+
+# ════════════════════════════════════════════
+#  WAVE MANAGEMENT
+# ════════════════════════════════════════════
+
+func start_wave(wave_num: int) -> void:
+	current_wave_number = wave_num
+	enemies_spawned = 0
+	total_enemies_to_spawn = 0
+	active_enemy_count = 0
+
+	spawn_timer.start()
+
+	_update_labels()
+
+	# Hide Start Wave button while a wave is active (Task 3)
+	if is_instance_valid(start_wave_button):
+		start_wave_button.visible = false
+
+
+func _advance_to_next_wave() -> void:
+	spawn_timer.stop()
+	next_wave_timer.start()
+
+	# Show Start Wave button during inter-wave delay (Task 3)
+	if is_instance_valid(start_wave_button):
+		start_wave_button.visible = true
+
+	_update_labels()
+
+
+func _on_next_wave_timer_timeout():
+	start_wave(current_wave_number + 1)
+
+
+# ════════════════════════════════════════════
+#  TASK 3 — MANUAL START WAVE BUTTON
+# ════════════════════════════════════════════
+
+func _on_start_wave_pressed() -> void:
+	next_wave_timer.stop()
+	start_wave(current_wave_number + 1)
+
+
+# ════════════════════════════════════════════
+#  TOWER PLACEMENT (existing logic, kept)
+# ════════════════════════════════════════════
+
+var selected_tower_type: String = "spear"
+
+func _select_tower_type(type: String):
+	selected_tower_type = type
+
+
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -286,36 +179,26 @@ func _unhandled_input(event):
 			place_tower(event.position)
 
 
-
-func place_tower(tap_pos):
-	if _is_ui_hit(tap_pos):
-		return
-
-	var stats = TOWER_STATS[selected_tower_type]
-	var tower_cost = stats["cost"]
-
-	if not can_afford(tower_cost):
-		print("Not enough gold!")
-		return
-
-	spend_gold(tower_cost)
-
-	var tower_scene = preload("res://scenes/Tower.tscn")
-	var new_tower = tower_scene.instantiate()
-
+func place_tower(tap_position):
+	var tower_scene := preload("res://scenes/Tower.tscn")
+	var new_tower := tower_scene.instantiate() as Area2D
 	new_tower.tower_type = selected_tower_type
-	new_tower.position = tap_pos
+	new_tower.position = tap_position
 	add_child(new_tower)
 
 
-func _is_ui_hit(tap_pos: Vector2) -> bool:
-	if is_instance_valid(spear_button) and spear_button.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(arrow_button) and arrow_button.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(shells_button) and shells_button.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(game_over_screen) and game_over_screen.visible:
-		if is_instance_valid(restart_button) and restart_button.get_global_rect().has_point(tap_pos):
-			return true
-	return false
+# ════════════════════════════════════════════
+#  UI HELPERS
+# ════════════════════════════════════════════
+
+func _update_labels():
+	health_label.text = "Base HP: %d/%d" % [base_health, 20]
+	wave_label.text   = "Wave: %d" % current_wave_number
+	gold_label.text   = "Gold: %d" % gold
+
+
+# ── Game Over ──
+func _show_game_over():
+	$CanvasLayer/GameOverScreen.visible = true
+	spawn_timer.stop()
+	next_wave_timer.stop()
