@@ -22,6 +22,7 @@ func _ready():
 	
 	# Prevent looping — clamp at end of path so reached-end logic fires once
 	loop = false
+	rotates = false
 	
 	# Set stats based on enemy type directly
 	if enemy_type == "knight":
@@ -43,7 +44,7 @@ func _ready():
 		sprite_node.texture = preload("res://assets/sprites/Peasant.png")
 	
 	# Scale the sprite for better visibility on 720x1280 screen
-	sprite_node.scale = Vector2(0.5, 0.5)
+	sprite_node.scale = Vector2(1.5, -1.5)
 	
 	# Start at the beginning of the path
 	progress_ratio = 0.0
