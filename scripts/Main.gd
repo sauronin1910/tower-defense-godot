@@ -13,6 +13,14 @@ const WAVE_CONFIG := [
 
 const MAX_WAVE := 7
 
+# � Tower Costs �
+const TOWER_COSTS := {
+	"spear": 50,
+	"arrow": 75,
+	"shells": 120,
+}
+
+
 # ── State ──
 var current_wave_number: int = 1
 var enemies_spawned: int = 0
@@ -31,7 +39,22 @@ var base_health: int = 20
 @onready var gold_label: Label = $CanvasLayer/Control/GoldLabel
 
 
+
+func build_curve() -> void:
+	var enemy_path: Path2D = $EnemyPath
+	var curve := Curve2D.new()
+	curve.add_point(Vector2(360, 50))
+	curve.add_point(Vector2(100, 200))
+	curve.add_point(Vector2(600, 350))
+	curve.add_point(Vector2(200, 500))
+	curve.add_point(Vector2(500, 650))
+	curve.add_point(Vector2(360, 800))
+	enemy_path.curve = curve
+
+
 func _ready():
+	build_curve()
+
 	# ── Timers ──
 	spawn_timer.wait_time = 0.8
 	next_wave_timer.wait_time = 15.0
@@ -50,6 +73,7 @@ func _ready():
 	# ── Start Wave button (Task 3) ──
 	if is_instance_valid(start_wave_button):
 		start_wave_button.pressed.connect(_on_start_wave_pressed)
+		start_wave_button.visible = false
 
 	# ── Initial state ──
 	current_wave_number = 1
@@ -76,30 +100,28 @@ func _on_spawn_timer_timeout():
 
 
 func _spawn_enemy(type: String) -> void:
-	var enemy := enemy_scene.instantiate() as PathFollow2D
+	var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
 	enemy.enemy_type = type
 
-	# Place at the start of the path
-	var path := $EnemyPath as Path2D
-	if is_instance_valid(path):
-		var follow := PathFollow2D.new()
-		follow.path = path
-		follow.progress_ratio = 0.0
-		add_child(follow)
-		enemy.reparent(follow)
+	var path: Path2D = $EnemyPath as Path2D
+	path.add_child(enemy)
+
+	enemy.progress_ratio = 0.0
+	enemy.add_to_group("enemies")
 
 	var config: Dictionary = _get_wave_config(current_wave_number)
 	total_enemies_to_spawn = config.peasants + config.knights
+
 	enemies_spawned += 1
 	active_enemy_count += 1
 
-	# Connect defeat / reached-end signals so we know when wave is clear
-	if is_instance_valid(enemy):
-		enemy.enemy_defeated.connect(_on_enemy_defeated)
-		enemy.enemy_reached_end.connect(_on_enemy_reached_end)
+	enemy.enemy_defeated.connect(_on_enemy_defeated)
+	enemy.enemy_reached_end.connect(_on_enemy_reached_end)
 
 
-func _on_enemy_defeated() -> void:
+func _on_enemy_defeated(gold_reward: int) -> void:
+	gold += gold_reward
+	_update_labels()
 	active_enemy_count -= 1
 	if active_enemy_count <= 0:
 		_advance_to_next_wave()
@@ -178,7 +200,16 @@ func _unhandled_input(event):
 			place_tower(event.position)
 
 
-func place_tower(tap_position):
+func place_tower(tap_position: Vector2) -> void:
+	if _is_ui_hit(tap_position):
+		return
+	var cost: int = TOWER_COSTS[selected_tower_type]
+	if gold < cost:
+		print("Not enough gold! Need ", cost, ", have ", gold)
+		return
+	gold -= cost
+	_update_labels()
+
 	var tower_scene := preload("res://scenes/Tower.tscn")
 	var new_tower := tower_scene.instantiate() as Area2D
 	new_tower.tower_type = selected_tower_type
@@ -186,9 +217,19 @@ func place_tower(tap_position):
 	add_child(new_tower)
 
 
-# ════════════════════════════════════════════
-#  UI HELPERS
-# ════════════════════════════════════════════
+func _is_ui_hit(tap_pos: Vector2) -> bool:
+	var spear_btn: Button = $CanvasLayer/Control/TowerButtonsDock/SpearButton
+	var arrow_btn: Button = $CanvasLayer/Control/TowerButtonsDock/ArrowButton
+	var shells_btn: Button = $CanvasLayer/Control/TowerButtonsDock/ShellsButton
+	if is_instance_valid(spear_btn) and spear_btn.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(arrow_btn) and arrow_btn.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(shells_btn) and shells_btn.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(start_wave_button) and start_wave_button.visible and start_wave_button.get_global_rect().has_point(tap_pos):
+		return true
+	return false
 
 func _update_labels():
 	health_label.text = "Base HP: %d/%d" % [base_health, 20]
