@@ -57,18 +57,28 @@ func build_background() -> void:
 	bg.z_index = -10
 	bg.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	bg.region_enabled = true
-	bg.region_rect = Rect2(0, 0, 720, 1280)
+	bg.z_as_relative = false
+	bg.region_rect = Rect2(0, 0, 4096, 4096)
 	add_child(bg)
+
+func build_base() -> void:
+	var base_sprite := Sprite2D.new()
+	base_sprite.texture = preload("res://assets/sprites/Base_castle_.png")
+	base_sprite.position = Vector2(1050, 400)
+	base_sprite.scale = Vector2(0.5, 0.5)
+	base_sprite.z_index = -1
+	add_child(base_sprite)
 
 func build_curve() -> void:
 	var enemy_path: Path2D = $EnemyPath
 	var curve := Curve2D.new()
-	curve.add_point(Vector2(360, 50))
-	curve.add_point(Vector2(100, 200))
-	curve.add_point(Vector2(600, 350))
-	curve.add_point(Vector2(200, 500))
-	curve.add_point(Vector2(500, 650))
-	curve.add_point(Vector2(360, 800))
+	curve.add_point(Vector2(80, 100))
+	curve.add_point(Vector2(400, 100))
+	curve.add_point(Vector2(400, 300))
+	curve.add_point(Vector2(150, 300))
+	curve.add_point(Vector2(150, 500))
+	curve.add_point(Vector2(700, 500))
+	curve.add_point(Vector2(950, 400))
 	enemy_path.curve = curve
 
 	# Road texture along the path
@@ -85,6 +95,7 @@ func build_curve() -> void:
 
 func _ready():
 	build_background()
+	build_base()
 	build_curve()
 
 	# ── Timers ──
