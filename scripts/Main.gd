@@ -60,6 +60,17 @@ func build_curve() -> void:
 	curve.add_point(Vector2(360, 800))
 	enemy_path.curve = curve
 
+	# Road texture along the path
+	var road := Line2D.new()
+	road.name = "Road"
+	road.points = curve.get_baked_points()
+	road.width = 80.0
+	road.texture = preload("res://assets/sprites/road_cobblestone.png")
+	road.texture_mode = Line2D.LINE_TEXTURE_TILE
+	road.default_color = Color(1, 1, 1, 1)
+	road.z_index = -1
+	enemy_path.add_child(road)
+
 
 func _ready():
 	build_curve()
