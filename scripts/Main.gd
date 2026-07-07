@@ -11,7 +11,7 @@ const WAVE_CONFIG := [
 	{"peasants": 40, "knights": 8},    # Wave 7 (max — reused for endless)
 ]
 
-const MAX_WAVE := WAVE_CONFIG.size()  # 7
+const MAX_WAVE := 7
 
 # ── State ──
 var current_wave_number: int = 1
@@ -66,7 +66,7 @@ func _ready():
 # ════════════════════════════════════════════
 
 func _on_spawn_timer_timeout():
-	var config := WAVE_CONFIG[min(current_wave_number - 1, MAX_WAVE - 1)]
+	var config: Dictionary = _get_wave_config(current_wave_number)
 
 	# Spawn all peasants first, then all knights
 	if enemies_spawned < config.peasants:
@@ -88,9 +88,8 @@ func _spawn_enemy(type: String) -> void:
 		add_child(follow)
 		enemy.reparent(follow)
 
-	total_enemies_to_spawn = WAVE_CONFIG[min(current_wave_number - 1, MAX_WAVE - 1)].peasants + \
-							 WAVE_CONFIG[min(current_wave_number - 1, MAX_WAVE - 1)].knights
-
+	var config: Dictionary = _get_wave_config(current_wave_number)
+	total_enemies_to_spawn = config.peasants + config.knights
 	enemies_spawned += 1
 	active_enemy_count += 1
 
@@ -198,6 +197,11 @@ func _update_labels():
 
 
 # ── Game Over ──
+# -- Wave Config Helper --
+func _get_wave_config(wave: int) -> Dictionary:
+	var index: int = min(wave - 1, MAX_WAVE - 1)
+	return WAVE_CONFIG[index]
+
 func _show_game_over():
 	$CanvasLayer/GameOverScreen.visible = true
 	spawn_timer.stop()
