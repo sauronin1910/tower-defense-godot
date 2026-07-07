@@ -20,6 +20,7 @@ var enemies_in_range = []
 
 
 func _ready():
+	add_to_group("towers")
 	# Set stats and textures based on tower type
 	if tower_type == "arrow":
 		attack_range = 200.0

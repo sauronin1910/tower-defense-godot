@@ -1,4 +1,4 @@
-extends Node2D
+﻿extends Node2D
 
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
 const WAVE_CONFIG := [
@@ -203,6 +203,12 @@ func _unhandled_input(event):
 func place_tower(tap_position: Vector2) -> void:
 	if _is_ui_hit(tap_position):
 		return
+	if _is_on_enemy_path(tap_position):
+		print("Cannot place tower on enemy path!")
+		return
+	if _is_too_close_to_tower(tap_position):
+		print("Too close to another tower!")
+		return
 	var cost: int = TOWER_COSTS[selected_tower_type]
 	if gold < cost:
 		print("Not enough gold! Need ", cost, ", have ", gold)
@@ -229,6 +235,22 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 		return true
 	if is_instance_valid(start_wave_button) and start_wave_button.visible and start_wave_button.get_global_rect().has_point(tap_pos):
 		return true
+	return false
+
+func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 40.0) -> bool:
+	var enemy_path: Path2D = $EnemyPath as Path2D
+	if not is_instance_valid(enemy_path) or enemy_path.curve == null:
+		return false
+	var closest_point: Vector2 = enemy_path.curve.get_closest_point(tap_pos)
+	return tap_pos.distance_to(closest_point) < min_distance
+
+func _is_too_close_to_tower(tap_pos: Vector2, min_distance: float = 50.0) -> bool:
+	var towers := get_tree().get_nodes_in_group("towers")
+	for tower in towers:
+		if not is_instance_valid(tower):
+			continue
+		if tap_pos.distance_to(tower.global_position) < min_distance:
+			return true
 	return false
 
 func _update_labels():
