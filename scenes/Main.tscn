@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bykerluewo61g"]
+﻿[gd_scene format=3 uid="uid://bykerluewo61g"]
 
 [ext_resource type="Script" uid="uid://cc3boxaux6b1w" path="res://scripts/Main.gd" id="1"]
 
@@ -86,6 +86,7 @@ visible = false
 
 [node name="GameOverScreen" type="Control" parent="CanvasLayer" unique_id=743068890]
 visible = false
+process_mode = 2
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -117,3 +118,54 @@ offset_top = 600.0
 offset_right = 430.0
 offset_bottom = 660.0
 text = "Restart"
+
+[node name="PauseMenu" type="Control" parent="CanvasLayer" unique_id=907364521]
+unique_name_in_owner = true
+visible = false
+process_mode = 2
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="PauseBG" type="ColorRect" parent="CanvasLayer/PauseMenu" unique_id=907364522]
+layout_mode = 0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 740.0
+offset_bottom = 1300.0
+mouse_filter = 1
+color = Color(0, 0, 0, 0.6)
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/PauseMenu" unique_id=907364523]
+layout_mode = 0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 740.0
+offset_bottom = 1300.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/PauseMenu/CenterContainer" unique_id=907364524]
+layout_mode = 2
+
+[node name="PauseLabel" type="Label" parent="CanvasLayer/PauseMenu/CenterContainer/VBoxContainer" unique_id=907364525]
+layout_mode = 1
+offset_left = -100.0
+offset_top = -40.0
+offset_right = 100.0
+offset_bottom = 40.0
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="CanvasLayer/PauseMenu/CenterContainer/VBoxContainer" unique_id=907364526]
+unique_name_in_owner = true
+process_mode = 2
+custom_minimum_size = Vector2(240, 80)
+layout_mode = 2
+text = "Resume"
+
+[node name="MainMenuButton" type="Button" parent="CanvasLayer/PauseMenu/CenterContainer/VBoxContainer" unique_id=907364527]
+unique_name_in_owner = true
+process_mode = 2
+custom_minimum_size = Vector2(240, 80)
+layout_mode = 2
+text = "Main Menu"

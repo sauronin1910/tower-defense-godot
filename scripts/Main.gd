@@ -1,4 +1,4 @@
-﻿extends Node2D
+extends Node2D
 
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
 const WAVE_CONFIG := [
@@ -13,7 +13,7 @@ const WAVE_CONFIG := [
 
 const MAX_WAVE := 7
 
-# � Tower Costs �
+# -- Tower Costs --  
 const TOWER_COSTS := {
 	"spear": 50,
 	"arrow": 75,
@@ -22,7 +22,8 @@ const TOWER_COSTS := {
 
 
 # ── State ──
-var current_wave_number: int = 1
+var current_wave_number: int = 0
+var wave_in_progress: bool = false
 var enemies_spawned: int = 0
 var total_enemies_to_spawn: int = 0
 var active_enemy_count: int = 0
@@ -38,6 +39,11 @@ var base_health: int = 20
 @onready var wave_label: Label = $CanvasLayer/Control/WaveLabel
 @onready var gold_label: Label = $CanvasLayer/Control/GoldLabel
 
+@onready var game_over_screen: Control = $CanvasLayer/GameOverScreen
+@onready var restart_button: Button = $CanvasLayer/GameOverScreen/RestartButton
+@onready var pause_menu: Control = %PauseMenu
+@onready var resume_button: Button = %ResumeButton
+@onready var main_menu_button: Button = %MainMenuButton
 
 
 func build_curve() -> void:
@@ -76,17 +82,33 @@ func _ready():
 		start_wave_button.visible = false
 
 	# ── Initial state ──
-	current_wave_number = 1
+	current_wave_number = 0
 	enemies_spawned = 0
 	gold = 100
 	base_health = 20
 	_update_labels()
 
-	next_wave_timer.start()
+  # Show Start Wave button so player can start first wave manually
+	if is_instance_valid(start_wave_button):
+		start_wave_button.visible = true
+
+	# Game Over setup	
+	if is_instance_valid(restart_button):
+		restart_button.pressed.connect(_on_restart_pressed)
+	if is_instance_valid(game_over_screen):
+		game_over_screen.visible = false
+
+	# Pause menu setup
+	if is_instance_valid(resume_button):
+		resume_button.pressed.connect(_on_resume_pressed)
+	if is_instance_valid(main_menu_button):
+		main_menu_button.pressed.connect(_on_main_menu_pressed)
+	if is_instance_valid(pause_menu):
+		pause_menu.visible = false
 
 
 # ════════════════════════════════════════════
-#  TASK 1 — SPAWN LOGIC (fixed)
+#  TASK 1 — SPAWN LOGIC (fixed)	
 # ════════════════════════════════════════════
 
 func _on_spawn_timer_timeout():
@@ -109,10 +131,7 @@ func _spawn_enemy(type: String) -> void:
 	enemy.progress_ratio = 0.0
 	enemy.add_to_group("enemies")
 
-	var config: Dictionary = _get_wave_config(current_wave_number)
-	total_enemies_to_spawn = config.peasants + config.knights
-
-	enemies_spawned += 1
+	enemies_spawned += 1	
 	active_enemy_count += 1
 
 	enemy.enemy_defeated.connect(_on_enemy_defeated)
@@ -123,45 +142,47 @@ func _on_enemy_defeated(gold_reward: int) -> void:
 	gold += gold_reward
 	_update_labels()
 	active_enemy_count -= 1
-	if active_enemy_count <= 0:
+	if active_enemy_count <= 0 and enemies_spawned >= total_enemies_to_spawn and total_enemies_to_spawn > 0:
 		_advance_to_next_wave()
 
 
 func _on_enemy_reached_end(damage: int) -> void:
 	base_health -= damage
-	if base_health < 0:
-		base_health = 0
 	_update_labels()
+	_check_game_over()
 
 	active_enemy_count -= 1
-	if active_enemy_count <= 0:
+	if active_enemy_count <= 0 and enemies_spawned >= total_enemies_to_spawn and total_enemies_to_spawn > 0:
 		_advance_to_next_wave()
 
 
-# ════════════════════════════════════════════
+# ══════
 #  WAVE MANAGEMENT
 # ════════════════════════════════════════════
 
 func start_wave(wave_num: int) -> void:
 	current_wave_number = wave_num
+	wave_in_progress = true
 	enemies_spawned = 0
-	total_enemies_to_spawn = 0
+	var config: Dictionary = _get_wave_config(wave_num)
+	total_enemies_to_spawn = config.peasants + config.knights
 	active_enemy_count = 0
 
 	spawn_timer.start()
 
 	_update_labels()
 
-	# Hide Start Wave button while a wave is active (Task 3)
+	# Hide Start Wave button while a wave is active
 	if is_instance_valid(start_wave_button):
 		start_wave_button.visible = false
 
 
 func _advance_to_next_wave() -> void:
 	spawn_timer.stop()
-	next_wave_timer.start()
+	wave_in_progress = false
 
-	# Show Start Wave button during inter-wave delay (Task 3)
+	# If more waves possible, start delay timer and show button
+	next_wave_timer.start()
 	if is_instance_valid(start_wave_button):
 		start_wave_button.visible = true
 
@@ -169,7 +190,8 @@ func _advance_to_next_wave() -> void:
 
 
 func _on_next_wave_timer_timeout():
-	start_wave(current_wave_number + 1)
+	if not wave_in_progress:
+		start_wave(current_wave_number + 1)
 
 
 # ════════════════════════════════════════════
@@ -177,6 +199,8 @@ func _on_next_wave_timer_timeout():
 # ════════════════════════════════════════════
 
 func _on_start_wave_pressed() -> void:
+	if wave_in_progress:
+		return
 	next_wave_timer.stop()
 	start_wave(current_wave_number + 1)
 
@@ -192,6 +216,10 @@ func _select_tower_type(type: String):
 
 
 func _unhandled_input(event):
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		_toggle_pause()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			place_tower(event.position)
@@ -265,7 +293,46 @@ func _get_wave_config(wave: int) -> Dictionary:
 	var index: int = min(wave - 1, MAX_WAVE - 1)
 	return WAVE_CONFIG[index]
 
-func _show_game_over():
-	$CanvasLayer/GameOverScreen.visible = true
+# ════════════════════════════════════════════
+#  GAME OVER
+# ════════════════════════════════════════════
+
+func _check_game_over() -> void:
+	if base_health <= 0:
+		_trigger_game_over()
+
+
+func _trigger_game_over() -> void:
+	print("GAME OVER")
 	spawn_timer.stop()
 	next_wave_timer.stop()
+	get_tree().paused = true
+	if is_instance_valid(game_over_screen):
+		game_over_screen.visible = true
+
+
+func _on_restart_pressed() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+
+# ════════════════════════════════════════════
+#  PAUSE MENU
+# ════════════════════════════════════════════
+
+func _toggle_pause() -> void:
+	var new_state: bool = not get_tree().paused
+	get_tree().paused = new_state
+	if is_instance_valid(pause_menu):
+		pause_menu.visible = new_state
+
+
+func _on_resume_pressed() -> void:
+	get_tree().paused = false
+	if is_instance_valid(pause_menu):
+		pause_menu.visible = false
+
+
+func _on_main_menu_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")

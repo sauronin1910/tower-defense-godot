@@ -1,4 +1,4 @@
-﻿extends Area2D
+extends Area2D
 
 # Tower type selection
 @export var tower_type: String = "spear"
