@@ -1,4 +1,4 @@
-﻿extends Node2D
+extends Node2D
 
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
 const WAVE_CONFIG := [
@@ -49,6 +49,17 @@ var base_health: int = 20
 var selected_tower = null
 
 
+func build_background() -> void:
+	var bg := Sprite2D.new()
+	bg.texture = preload("res://assets/sprites/grass_background.png")
+	bg.centered = false
+	bg.position = Vector2.ZERO
+	bg.z_index = -10
+	bg.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	bg.region_enabled = true
+	bg.region_rect = Rect2(0, 0, 720, 1280)
+	add_child(bg)
+
 func build_curve() -> void:
 	var enemy_path: Path2D = $EnemyPath
 	var curve := Curve2D.new()
@@ -73,6 +84,7 @@ func build_curve() -> void:
 
 
 func _ready():
+	build_background()
 	build_curve()
 
 	# ── Timers ──
