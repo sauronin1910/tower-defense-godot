@@ -1,4 +1,4 @@
-extends PanelContainer
+﻿extends PanelContainer
 
 signal upgrade_requested
 signal sell_requested
@@ -16,6 +16,16 @@ func _ready() -> void:
 	upgrade_button.pressed.connect(func(): upgrade_requested.emit())
 	sell_button.pressed.connect(func(): sell_requested.emit())
 	close_button.pressed.connect(func(): close_requested.emit())
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.15, 0.15, 0.18, 1.0)
+	style.set_border_width_all(2)
+	style.border_color = Color(0.3, 0.3, 0.35, 1.0)
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	add_theme_stylebox_override("panel", style)
 	visible = false
 
 

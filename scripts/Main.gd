@@ -1,4 +1,4 @@
-extends Node2D
+﻿extends Node2D
 
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
 const WAVE_CONFIG := [
@@ -238,6 +238,10 @@ func _unhandled_input(event):
 
 
 func place_tower(tap_position: Vector2) -> void:
+	if is_instance_valid(upgrade_panel) and upgrade_panel.visible:
+		upgrade_panel.visible = false
+		selected_tower = null
+		return
 	if _is_ui_hit(tap_position):
 		return
 	if _is_on_enemy_path(tap_position):

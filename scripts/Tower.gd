@@ -60,7 +60,7 @@ func _ready():
 	# Create and set the collision shape radius to match attack range
 	var collision_shape = get_node("CollisionShape2D")
 	var circle_shape = CircleShape2D.new()
-	circle_shape.radius = attack_range
+	circle_shape.radius = 32.0
 	collision_shape.shape = circle_shape
 
 	# Load and set tower's own sprite texture (its visual on the map)
@@ -77,9 +77,10 @@ func _ready():
 	timer.wait_time = 1.0 / fire_rate
 	timer.start()
 	
-	# Enable input for click detection
-	input_pickable = true
+	# Enable input for click detection (deferred to avoid catching the placement click)
+	input_pickable = false
 	input_event.connect(_on_input_event)
+	call_deferred("_enable_input_after_frame")
 
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -148,10 +149,6 @@ func _apply_level_stats() -> void:
 	fire_rate = base_fire_rate * multiplier
 	tower_damage = int(base_tower_damage * multiplier)
 	
-	# Update collision radius
-	var collision_shape = get_node("CollisionShape2D")
-	if collision_shape.shape != null:
-		collision_shape.shape.radius = attack_range
 	
 	# Visual: darken by 25% per level (level 1 = 1.0, level 2 = 0.75, level 3 = 0.5)
 	var sprite = get_node("Sprite2D")
@@ -177,3 +174,6 @@ func upgrade() -> bool:
 	level += 1
 	_apply_level_stats()
 	return true
+func _enable_input_after_frame() -> void:
+	await get_tree().process_frame
+	input_pickable = true
