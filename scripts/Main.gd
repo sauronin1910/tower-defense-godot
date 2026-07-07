@@ -44,6 +44,9 @@ var base_health: int = 20
 @onready var pause_menu: Control = %PauseMenu
 @onready var resume_button: Button = %ResumeButton
 @onready var main_menu_button: Button = %MainMenuButton
+@onready var upgrade_panel = %TowerUpgradePanel
+
+var selected_tower = null
 
 
 func build_curve() -> void:
@@ -105,6 +108,12 @@ func _ready():
 		main_menu_button.pressed.connect(_on_main_menu_pressed)
 	if is_instance_valid(pause_menu):
 		pause_menu.visible = false
+
+	# Tower upgrade panel setup
+	if is_instance_valid(upgrade_panel):
+		upgrade_panel.upgrade_requested.connect(_on_upgrade_requested)
+		upgrade_panel.sell_requested.connect(_on_sell_requested)
+		upgrade_panel.close_requested.connect(_on_close_upgrade_panel)
 
 
 # ════════════════════════════════════════════
@@ -248,6 +257,7 @@ func place_tower(tap_position: Vector2) -> void:
 	var new_tower := tower_scene.instantiate() as Area2D
 	new_tower.tower_type = selected_tower_type
 	new_tower.position = tap_position
+	new_tower.tower_clicked.connect(_on_tower_clicked)
 	add_child(new_tower)
 
 
@@ -262,6 +272,8 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 	if is_instance_valid(shells_btn) and shells_btn.get_global_rect().has_point(tap_pos):
 		return true
 	if is_instance_valid(start_wave_button) and start_wave_button.visible and start_wave_button.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(upgrade_panel) and upgrade_panel.visible and upgrade_panel.get_global_rect().has_point(tap_pos):
 		return true
 	return false
 
@@ -336,3 +348,43 @@ func _on_resume_pressed() -> void:
 func _on_main_menu_pressed() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+# ════════════════════════════════════════════
+#  TOWER UPGRADE / SELL
+# ════════════════════════════════════════════
+
+func _on_tower_clicked(tower) -> void:
+	selected_tower = tower
+	if is_instance_valid(upgrade_panel):
+		upgrade_panel.show_for_tower(tower)
+
+
+func _on_upgrade_requested() -> void:
+	if not is_instance_valid(selected_tower):
+		return
+	var cost: int = selected_tower.get_upgrade_cost()
+	if gold < cost:
+		print("Not enough gold to upgrade! Need ", cost, ", have ", gold)
+		return
+	if selected_tower.upgrade():
+		gold -= cost
+		_update_labels()
+		upgrade_panel.show_for_tower(selected_tower)
+
+
+func _on_sell_requested() -> void:
+	if not is_instance_valid(selected_tower):
+		return
+	gold += selected_tower.get_sell_value()
+	_update_labels()
+	selected_tower.queue_free()
+	selected_tower = null
+	if is_instance_valid(upgrade_panel):
+		upgrade_panel.visible = false
+
+
+func _on_close_upgrade_panel() -> void:
+	selected_tower = null
+	if is_instance_valid(upgrade_panel):
+		upgrade_panel.visible = false

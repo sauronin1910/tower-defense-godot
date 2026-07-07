@@ -1,9 +1,19 @@
 extends Area2D
 
+signal tower_clicked(tower)
+
 # Tower type selection
 @export var tower_type: String = "spear"
 
-# Tower stats (set in _ready() based on tower_type)
+# Upgrade system
+var level: int = 1
+const MAX_LEVEL: int = 3
+var total_gold_invested: int = 0
+
+# Tower stats (set in _ready() based on tower_type, then scaled by level)
+var base_attack_range: float = 150.0
+var base_fire_rate: float = 1.0
+var base_tower_damage: int = 10
 var attack_range: float = 150.0
 var fire_rate: float = 1.0
 var tower_cost: int = 50
@@ -23,26 +33,29 @@ func _ready():
 	add_to_group("towers")
 	# Set stats and textures based on tower type
 	if tower_type == "arrow":
-		attack_range = 200.0
-		fire_rate = 1.5
+		base_attack_range = 200.0
+		base_fire_rate = 1.5
 		tower_cost = 75
-		tower_damage = 8
+		base_tower_damage = 8
 		tower_texture_path = "res://assets/sprites/Tower_basic_arrow.png"
 		projectile_texture_path = "res://assets/sprites/arrow.png"
 	elif tower_type == "shells":
-		attack_range = 130.0
-		fire_rate = 0.5
+		base_attack_range = 130.0
+		base_fire_rate = 0.5
 		tower_cost = 120
-		tower_damage = 30
+		base_tower_damage = 30
 		tower_texture_path = "res://assets/sprites/Tower_basic_shells.png"
 		projectile_texture_path = "res://assets/sprites/Shell.png"
 	else: # spear (default)
-		attack_range = 150.0
-		fire_rate = 1.0
+		base_attack_range = 150.0
+		base_fire_rate = 1.0
 		tower_cost = 50
-		tower_damage = 10
+		base_tower_damage = 10
 		tower_texture_path = "res://assets/sprites/Tower_basic_spear.png"
 		projectile_texture_path = "res://assets/sprites/Spear.png"
+	
+	total_gold_invested = tower_cost
+	_apply_level_stats()	
 
 	# Create and set the collision shape radius to match attack range
 	var collision_shape = get_node("CollisionShape2D")
@@ -63,6 +76,16 @@ func _ready():
 	timer.connect("timeout",Callable(self,"_on_shoot_timer"))
 	timer.wait_time = 1.0 / fire_rate
 	timer.start()
+	
+	# Enable input for click detection
+	input_pickable = true
+	input_event.connect(_on_input_event)
+
+
+func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		tower_clicked.emit(self)
+		get_viewport().set_input_as_handled()
 
 
 func _process(_delta):
@@ -112,3 +135,45 @@ func shoot(target):
 
 	# Add projectile as child of the scene
 	get_tree().root.add_child(projectile)
+
+
+# ════════════════════════════════════════════
+#  UPGRADE SYSTEM
+# ════════════════════════════════════════════
+
+func _apply_level_stats() -> void:
+	# Each level: +15% damage, +15% fire rate, +15% range
+	var multiplier: float = pow(1.15, level - 1)
+	attack_range = base_attack_range * multiplier
+	fire_rate = base_fire_rate * multiplier
+	tower_damage = int(base_tower_damage * multiplier)
+	
+	# Update collision radius
+	var collision_shape = get_node("CollisionShape2D")
+	if collision_shape.shape != null:
+		collision_shape.shape.radius = attack_range
+	
+	# Visual: darken by 25% per level (level 1 = 1.0, level 2 = 0.75, level 3 = 0.5)
+	var sprite = get_node("Sprite2D")
+	var darkness: float = 1.0 - (level - 1) * 0.25
+	sprite.modulate = Color(darkness, darkness, darkness, 1.0)
+
+
+func get_upgrade_cost() -> int:
+	if level >= MAX_LEVEL:
+		return 0
+	return int(tower_cost * 0.75)
+
+
+func get_sell_value() -> int:
+	return int(total_gold_invested * 0.7)
+
+
+func upgrade() -> bool:
+	if level >= MAX_LEVEL:
+		return false
+	var cost: int = get_upgrade_cost()
+	total_gold_invested += cost
+	level += 1
+	_apply_level_stats()
+	return true

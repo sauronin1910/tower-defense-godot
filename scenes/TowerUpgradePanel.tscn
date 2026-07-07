@@ -1,0 +1,38 @@
+﻿[gd_scene load_steps=2 format=3 uid="uid://cxupgpanel001"]
+
+[ext_resource type="Script" path="res://scripts/TowerUpgradePanel.gd" id="1_script"]
+
+[node name="TowerUpgradePanel" type="PanelContainer"]
+custom_minimum_size = Vector2(200, 240)
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Spear Tower"
+horizontal_alignment = 1
+
+[node name="LevelLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Level 1/3"
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Damage: 10
+Range: 150
+Rate: 1.0"
+
+[node name="UpgradeButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Upgrade (38g)"
+
+[node name="SellButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Sell (35g)"
+
+[node name="CloseButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Close"
