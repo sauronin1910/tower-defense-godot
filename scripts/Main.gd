@@ -205,6 +205,8 @@ func _spawn_enemy(type: String) -> void:
 	enemy.enemy_defeated.connect(_on_enemy_defeated)
 	enemy.enemy_reached_end.connect(_on_enemy_reached_end)
 
+	enemy.split_requested.connect(_on_slime_split)
+
 
 func _on_enemy_defeated(gold_reward: int) -> void:
 	gold += gold_reward
@@ -342,7 +344,7 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 		return true
 	return false
 
-func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 40.0) -> bool:
+func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 64.0) -> bool:
 	var enemy_path: Path2D = $EnemyPath as Path2D
 	if not is_instance_valid(enemy_path) or enemy_path.curve == null:
 		return false
@@ -466,3 +468,17 @@ func _on_speed_button_pressed() -> void:
 			speed_button.text = "Speed: 1.5x"
 		else:
 			speed_button.text = "Speed: 2x"
+
+func _on_slime_split(spawn_position: Vector2, spawn_progress_ratio: float) -> void:
+	# Spawn 3 slime_mini at the same progress_ratio, slightly offset
+	for i in range(3):
+		var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
+		enemy.enemy_type = "slime_mini"
+		var path: Path2D = $EnemyPath as Path2D
+		path.add_child(enemy)
+		enemy.progress_ratio = clamp(spawn_progress_ratio - 0.005 * i, 0.0, 0.999)
+		enemy.add_to_group("enemies")
+		enemy.enemy_defeated.connect(_on_enemy_defeated)
+		enemy.enemy_reached_end.connect(_on_enemy_reached_end)
+		enemy.split_requested.connect(_on_slime_split)
+		active_enemy_count += 1

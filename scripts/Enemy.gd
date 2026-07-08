@@ -6,6 +6,8 @@ signal enemy_reached_end(damage_amount)
 # Signal emitted when enemy is defeated by combat — carries gold reward
 signal enemy_defeated(gold_reward)
 
+signal split_requested(spawn_position, spawn_progress_ratio)
+
 # Exported variable for enemy type selection
 @export var enemy_type: String = "peasant"
 
@@ -48,6 +50,10 @@ func _ready():
 		health = 150
 		speed = 60
 		gold_reward = 30
+	elif enemy_type == "slime_mini":
+		health = 15
+		speed = 35
+		gold_reward = 1
 	else:
 		# fallback for peasant/knight (keep for compatibility, but shouldnt be used)
 		health = 30
@@ -73,6 +79,9 @@ func _ready():
 	elif enemy_type == "hobgoblin":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/hobgoblin.png")
 		sprite_node.scale = Vector2(0.06, 0.06)
+	elif enemy_type == "slime_mini":
+		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
+		sprite_node.scale = Vector2(0.03, 0.03)
 	else:
 		sprite_node.texture = preload("res://assets/sprites/Peasant.png")
 		sprite_node.scale = Vector2(0.05, 0.05)
@@ -135,5 +144,7 @@ func take_damage(damage: int):
 	health -= damage
 	if health <= 0:
 		print(enemy_type, " defeated")
+		if enemy_type == "slime_big":
+			split_requested.emit(global_position, progress_ratio)
 		enemy_defeated.emit(gold_reward)
 		queue_free()
