@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cc3boxaux6b1w" path="res://scripts/Main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/TowerUpgradePanel.tscn" id="2_rvslj"]
+[ext_resource type="PackedScene" uid="uid://cxlvlcmp001" path="res://scenes/LevelComplete.tscn" id="3_0bbpv"]
 
 [node name="CanvasLayer" type="Node2D" unique_id=307350470]
 script = ExtResource("1")
@@ -182,3 +183,8 @@ process_mode = 2
 custom_minimum_size = Vector2(240, 80)
 layout_mode = 2
 text = "Main Menu"
+
+[node name="LevelComplete" parent="CanvasLayer" unique_id=1765673187 instance=ExtResource("3_0bbpv")]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15

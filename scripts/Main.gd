@@ -14,9 +14,10 @@ const WAVE_CONFIG := [
 	{"slime": 0,  "slime_big": 6, "goblin_small": 5, "goblin_fast": 8, "hobgoblin": 3},   # Wave 10
 	{"slime": 0,  "slime_big": 4, "goblin_small": 6, "goblin_fast": 10, "hobgoblin": 5},  # Wave 11
 	{"slime": 0,  "slime_big": 8, "goblin_small": 4, "goblin_fast": 8, "hobgoblin": 8},   # Wave 12
+	{"slime": 0,  "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 15},  # Wave 13 (BOSS)
 ]
 
-const MAX_WAVE := 12
+const MAX_WAVE := 13
 
 # -- Tower Costs --  
 const TOWER_COSTS := {
@@ -47,6 +48,7 @@ const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 @onready var gold_label: Label = $CanvasLayer/Control/GoldLabel
 
 @onready var game_over_screen: Control = $CanvasLayer/GameOverScreen
+@onready var level_complete: Control = %LevelComplete
 @onready var restart_button: Button = $CanvasLayer/GameOverScreen/RestartButton
 @onready var pause_menu: Control = %PauseMenu
 @onready var resume_button: Button = %ResumeButton
@@ -144,6 +146,11 @@ func _ready():
 	# Game Over setup	
 	if is_instance_valid(restart_button):
 		restart_button.pressed.connect(_on_restart_pressed)
+	if is_instance_valid(level_complete):
+		level_complete.retry_requested.connect(_on_level_complete_retry)
+		level_complete.main_menu_requested.connect(_on_level_complete_main_menu)
+		level_complete.next_level_requested.connect(_on_level_complete_next)
+		level_complete.visible = false
 	if is_instance_valid(game_over_screen):
 		game_over_screen.visible = false
 
@@ -250,6 +257,11 @@ func start_wave(wave_num: int) -> void:
 func _advance_to_next_wave() -> void:
 	spawn_timer.stop()
 	wave_in_progress = false
+
+	# Check if we just completed the final wave
+	if current_wave_number >= MAX_WAVE:
+		_trigger_level_complete()
+		return
 
 	# If more waves possible, start delay timer and show button
 	next_wave_timer.start()
@@ -469,7 +481,7 @@ func _on_speed_button_pressed() -> void:
 		else:
 			speed_button.text = "Speed: 2x"
 
-func _on_slime_split(spawn_position: Vector2, spawn_progress_ratio: float) -> void:
+func _on_slime_split(_spawn_position: Vector2, spawn_progress_ratio: float) -> void:
 	# Spawn 3 slime_mini at the same progress_ratio, slightly offset
 	for i in range(3):
 		var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
@@ -482,3 +494,30 @@ func _on_slime_split(spawn_position: Vector2, spawn_progress_ratio: float) -> vo
 		enemy.enemy_reached_end.connect(_on_enemy_reached_end)
 		enemy.split_requested.connect(_on_slime_split)
 		active_enemy_count += 1
+
+func _trigger_level_complete() -> void:
+	print("LEVEL COMPLETE!")
+	spawn_timer.stop()
+	next_wave_timer.stop()
+	get_tree().paused = true
+	if is_instance_valid(level_complete):
+		level_complete.visible = true
+	if is_instance_valid(start_wave_button):
+		start_wave_button.visible = false
+
+
+func _on_level_complete_retry() -> void:
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	get_tree().reload_current_scene()
+
+
+func _on_level_complete_main_menu() -> void:
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+func _on_level_complete_next() -> void:
+	# Placeholder - no next level exists yet
+	pass
