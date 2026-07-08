@@ -35,6 +35,8 @@ var active_enemy_count: int = 0
 var gold: int = 100
 var base_health: int = 20
 
+var speed_index: int = 0
+const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 @onready var spawn_timer: Timer = $SpawnTimer
 @onready var next_wave_timer: Timer = $NextWaveTimer
 @onready var enemy_scene := preload("res://scenes/Enemy.tscn")
@@ -50,6 +52,7 @@ var base_health: int = 20
 @onready var resume_button: Button = %ResumeButton
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var upgrade_panel = %TowerUpgradePanel
+@onready var speed_button: Button = %SpeedButton
 
 var selected_tower = null
 
@@ -130,9 +133,13 @@ func _ready():
 	base_health = 20
 	_update_labels()
 
-  # Show Start Wave button so player can start first wave manually
+	# Show Start Wave button so player can start first wave manually
 	if is_instance_valid(start_wave_button):
 		start_wave_button.visible = true
+	# Speed button
+	if is_instance_valid(speed_button):
+		speed_button.pressed.connect(_on_speed_button_pressed)
+		speed_button.text = "Speed: 1x"
 
 	# Game Over setup	
 	if is_instance_valid(restart_button):
@@ -331,6 +338,8 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 		return true
 	if is_instance_valid(upgrade_panel) and upgrade_panel.visible and upgrade_panel.get_global_rect().has_point(tap_pos):
 		return true
+	if is_instance_valid(speed_button) and speed_button.get_global_rect().has_point(tap_pos):
+		return true
 	return false
 
 func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 40.0) -> bool:
@@ -444,3 +453,16 @@ func _on_close_upgrade_panel() -> void:
 	selected_tower = null
 	if is_instance_valid(upgrade_panel):
 		upgrade_panel.visible = false
+
+
+func _on_speed_button_pressed() -> void:
+	speed_index = (speed_index + 1) % SPEED_LEVELS.size()
+	var new_speed: float = SPEED_LEVELS[speed_index]
+	Engine.time_scale = new_speed
+	if is_instance_valid(speed_button):
+		if new_speed == 1.0:
+			speed_button.text = "Speed: 1x"
+		elif new_speed == 1.5:
+			speed_button.text = "Speed: 1.5x"
+		else:
+			speed_button.text = "Speed: 2x"
