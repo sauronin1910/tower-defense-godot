@@ -99,18 +99,18 @@ func _process(delta):
 
 	elif enemy_type == "goblin_small":
 		# Bobbing + rocking + subtle secondary bobbing
-		sprite_node.offset.y = sin(anim_time * 10.0) * 2.76 + sin(anim_time * 3.3) * 1.1
-		sprite_node.rotation = sin(anim_time * 5.0) * 0.136
+		sprite_node.offset.y = sin(anim_time * 10.0) * 13.68 + sin(anim_time * 3.3) * 5.46
+		sprite_node.rotation = sin(anim_time * 22.5) * 0.109
 
 	elif enemy_type == "goblin_fast":
 		# Faster bobbing + rocking + subtle secondary bobbing
-		sprite_node.offset.y = sin(anim_time * 14.0) * 4.14 + sin(anim_time * 4.2) * 1.38
-		sprite_node.rotation = sin(anim_time * 7.0) * 0.184
+		sprite_node.offset.y = sin(anim_time * 14.0) * 20.55 + sin(anim_time * 4.2) * 6.87
+		sprite_node.rotation = sin(anim_time * 31.5) * 0.147
 
 	elif enemy_type == "hobgoblin":
 		# Slow heavy rocking
-		sprite_node.rotation = sin(anim_time * 3.0) * 0.08
-		sprite_node.offset.y = sin(anim_time * 3.0) * 1.5
+		sprite_node.rotation = sin(anim_time * 13.5) * 0.064
+		sprite_node.offset.y = sin(anim_time * 3.0) * 9.0
 
 	# Move forward along the path based on speed and delta time
 	progress_ratio += delta * speed / get_parent().curve.get_baked_length()
