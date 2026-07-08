@@ -16,6 +16,9 @@ var health: int = 0
 # Gold reward when defeated in combat
 var gold_reward: int = 0
 
+var anim_time: float = 0.0
+var base_scale: Vector2 = Vector2.ONE
+
 
 func _ready():
 	print("Enemy created with type: ", enemy_type)
@@ -76,9 +79,39 @@ func _ready():
 	
 	# Start at the beginning of the path
 	progress_ratio = 0.0
+	base_scale = get_node("Sprite2D").scale
 
 
 func _process(delta):
+	anim_time += delta
+
+	var sprite_node = get_node("Sprite2D")
+
+	if enemy_type == "slime":
+		# Scale pulse - 8 Hz, +/-15% amplitude
+		var pulse: float = 1.0 + sin(anim_time * 8.0) * 0.15
+		sprite_node.scale = Vector2(base_scale.x * pulse, base_scale.y * (2.0 - pulse))
+
+	elif enemy_type == "slime_big":
+		# Slower deeper pulse
+		var pulse: float = 1.0 + sin(anim_time * 5.0) * 0.2
+		sprite_node.scale = Vector2(base_scale.x * pulse, base_scale.y * (2.0 - pulse))
+
+	elif enemy_type == "goblin_small":
+		# Bobbing + rocking + subtle secondary bobbing
+		sprite_node.offset.y = sin(anim_time * 10.0) * 2.76 + sin(anim_time * 3.3) * 1.1
+		sprite_node.rotation = sin(anim_time * 5.0) * 0.136
+
+	elif enemy_type == "goblin_fast":
+		# Faster bobbing + rocking + subtle secondary bobbing
+		sprite_node.offset.y = sin(anim_time * 14.0) * 4.14 + sin(anim_time * 4.2) * 1.38
+		sprite_node.rotation = sin(anim_time * 7.0) * 0.184
+
+	elif enemy_type == "hobgoblin":
+		# Slow heavy rocking
+		sprite_node.rotation = sin(anim_time * 3.0) * 0.08
+		sprite_node.offset.y = sin(anim_time * 3.0) * 1.5
+
 	# Move forward along the path based on speed and delta time
 	progress_ratio += delta * speed / get_parent().curve.get_baked_length()
 	
