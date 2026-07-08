@@ -25,11 +25,28 @@ func _ready():
 	rotates = false
 	
 	# Set stats based on enemy type directly
-	if enemy_type == "knight":
-		health = 80
-		speed = 70
-		gold_reward = 25
+	if enemy_type == "slime":
+		health = 20
+		speed = 60
+		gold_reward = 5
+	elif enemy_type == "slime_big":
+		health = 60
+		speed = 45
+		gold_reward = 15
+	elif enemy_type == "goblin_small":
+		health = 40
+		speed = 90
+		gold_reward = 10
+	elif enemy_type == "goblin_fast":
+		health = 45
+		speed = 120
+		gold_reward = 15
+	elif enemy_type == "hobgoblin":
+		health = 150
+		speed = 60
+		gold_reward = 30
 	else:
+		# fallback for peasant/knight (keep for compatibility, but shouldnt be used)
 		health = 30
 		speed = 100
 		gold_reward = 10
@@ -38,13 +55,24 @@ func _ready():
 	
 	# Apply texture to sprite
 	var sprite_node = get_node("Sprite2D")
-	if enemy_type == "knight":
-		sprite_node.texture = preload("res://assets/sprites/Knight.png")
+	if enemy_type == "slime":
+		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
+		sprite_node.scale = Vector2(0.05, 0.05)
+	elif enemy_type == "slime_big":
+		sprite_node.texture = preload("res://assets/sprites/Enemy/slime_big.png")
+		sprite_node.scale = Vector2(0.07, 0.07)
+	elif enemy_type == "goblin_small":
+		sprite_node.texture = preload("res://assets/sprites/Enemy/goblin_small.png")
+		sprite_node.scale = Vector2(0.05, 0.05)
+	elif enemy_type == "goblin_fast":
+		sprite_node.texture = preload("res://assets/sprites/Enemy/goblin_fast.png")
+		sprite_node.scale = Vector2(0.05, 0.05)
+	elif enemy_type == "hobgoblin":
+		sprite_node.texture = preload("res://assets/sprites/Enemy/hobgoblin.png")
+		sprite_node.scale = Vector2(0.06, 0.06)
 	else:
 		sprite_node.texture = preload("res://assets/sprites/Peasant.png")
-	
-	# Scale the sprite for better visibility on 720x1280 screen
-	sprite_node.scale = Vector2(1.5, -1.5)
+		sprite_node.scale = Vector2(0.05, 0.05)
 	
 	# Start at the beginning of the path
 	progress_ratio = 0.0
@@ -60,10 +88,14 @@ func _process(delta):
 	
 	# Check if enemy has reached the end of the path
 	if progress_ratio >= 1.0:
-		var damage = 3 if enemy_type == "knight" else 1
+		var damage: int = 1
+		if enemy_type == "slime_big":
+			damage = 2
+		elif enemy_type == "hobgoblin":
+			damage = 3
 		print(enemy_type, " reached base! Dealing ", damage, " damage.")
 		enemy_reached_end.emit(damage)
-		queue_free() # Remove this enemy from the scene
+		queue_free()	
 
 
 func take_damage(damage: int):

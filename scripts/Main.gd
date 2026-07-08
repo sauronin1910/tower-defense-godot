@@ -2,16 +2,21 @@ extends Node2D
 
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
 const WAVE_CONFIG := [
-	{"peasants": 5, "knights": 0},     # Wave 1
-	{"peasants": 10, "knights": 1},    # Wave 2
-	{"peasants": 15, "knights": 2},    # Wave 3
-	{"peasants": 20, "knights": 3},    # Wave 4
-	{"peasants": 25, "knights": 4},    # Wave 5
-	{"peasants": 30, "knights": 5},    # Wave 6
-	{"peasants": 40, "knights": 8},    # Wave 7 (max — reused for endless)
+	{"slime": 8,  "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 1
+	{"slime": 12, "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 2
+	{"slime": 8,  "slime_big": 2, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 3
+	{"slime": 10, "slime_big": 0, "goblin_small": 4, "goblin_fast": 0, "hobgoblin": 0},   # Wave 4
+	{"slime": 6,  "slime_big": 3, "goblin_small": 6, "goblin_fast": 0, "hobgoblin": 0},   # Wave 5
+	{"slime": 0,  "slime_big": 4, "goblin_small": 8, "goblin_fast": 2, "hobgoblin": 0},   # Wave 6
+	{"slime": 5,  "slime_big": 3, "goblin_small": 5, "goblin_fast": 5, "hobgoblin": 0},   # Wave 7
+	{"slime": 0,  "slime_big": 5, "goblin_small": 6, "goblin_fast": 6, "hobgoblin": 1},   # Wave 8
+	{"slime": 0,  "slime_big": 0, "goblin_small": 8, "goblin_fast": 8, "hobgoblin": 2},   # Wave 9
+	{"slime": 0,  "slime_big": 6, "goblin_small": 5, "goblin_fast": 8, "hobgoblin": 3},   # Wave 10
+	{"slime": 0,  "slime_big": 4, "goblin_small": 6, "goblin_fast": 10, "hobgoblin": 5},  # Wave 11
+	{"slime": 0,  "slime_big": 8, "goblin_small": 4, "goblin_fast": 8, "hobgoblin": 8},   # Wave 12
 ]
 
-const MAX_WAVE := 7
+const MAX_WAVE := 12
 
 # -- Tower Costs --  
 const TOWER_COSTS := {
@@ -157,12 +162,25 @@ func _ready():
 func _on_spawn_timer_timeout():
 	var config: Dictionary = _get_wave_config(current_wave_number)
 
-	# Spawn all peasants first, then all knights
-	if enemies_spawned < config.peasants:
-		_spawn_enemy("peasant")
-	elif enemies_spawned < total_enemies_to_spawn:
-		_spawn_enemy("knight")
-
+	var cumulative: int = config.slime
+	if enemies_spawned < cumulative:
+		_spawn_enemy("slime")
+		return
+	cumulative += config.slime_big
+	if enemies_spawned < cumulative:
+		_spawn_enemy("slime_big")
+		return
+	cumulative += config.goblin_small
+	if enemies_spawned < cumulative:
+		_spawn_enemy("goblin_small")
+		return
+	cumulative += config.goblin_fast
+	if enemies_spawned < cumulative:
+		_spawn_enemy("goblin_fast")
+		return
+	cumulative += config.hobgoblin
+	if enemies_spawned < cumulative:
+		_spawn_enemy("hobgoblin")
 
 func _spawn_enemy(type: String) -> void:
 	var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
@@ -208,7 +226,7 @@ func start_wave(wave_num: int) -> void:
 	wave_in_progress = true
 	enemies_spawned = 0
 	var config: Dictionary = _get_wave_config(wave_num)
-	total_enemies_to_spawn = config.peasants + config.knights
+	total_enemies_to_spawn = config.slime + config.slime_big + config.goblin_small + config.goblin_fast + config.hobgoblin
 	active_enemy_count = 0
 
 	spawn_timer.start()
