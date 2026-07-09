@@ -27,6 +27,7 @@ var projectile_texture_path: String = ""
 
 # Tower state tracking
 var enemies_in_range = []
+var range_visible: bool = false
 
 
 func _ready():
@@ -137,6 +138,20 @@ func shoot(target):
 	# Add projectile as child of the scene
 	get_tree().root.add_child(projectile)
 
+func _draw() -> void:
+	if not range_visible:
+		return
+	draw_circle(Vector2.ZERO, attack_range, Color(0.2, 0.6, 1.0, 0.15))
+	draw_arc(Vector2.ZERO, attack_range, 0.0, TAU, 64, Color(0.2, 0.6, 1.0, 0.8), 2.0)
+
+func show_range() -> void:
+	range_visible = true
+	queue_redraw()
+
+func hide_range() -> void:
+	range_visible = false
+	queue_redraw()
+
 
 # ════════════════════════════════════════════
 #  UPGRADE SYSTEM
@@ -154,6 +169,8 @@ func _apply_level_stats() -> void:
 	var sprite = get_node("Sprite2D")
 	var darkness: float = 1.0 - (level - 1) * 0.25
 	sprite.modulate = Color(darkness, darkness, darkness, 1.0)
+	if range_visible:
+		queue_redraw()
 
 
 func get_upgrade_cost() -> int:

@@ -311,11 +311,14 @@ func _unhandled_input(event):
 
 
 func place_tower(tap_position: Vector2) -> void:
+	if _is_ui_hit(tap_position):
+		return
+	# If upgrade panel is open, close it and range — do NOT place a tower
 	if is_instance_valid(upgrade_panel) and upgrade_panel.visible:
 		upgrade_panel.visible = false
+		if is_instance_valid(selected_tower):
+			selected_tower.hide_range()
 		selected_tower = null
-		return
-	if _is_ui_hit(tap_position):
 		return
 	if _is_on_enemy_path(tap_position):
 		print("Cannot place tower on enemy path!")
@@ -435,6 +438,7 @@ func _on_main_menu_pressed() -> void:
 
 func _on_tower_clicked(tower) -> void:
 	selected_tower = tower
+	tower.show_range()
 	if is_instance_valid(upgrade_panel):
 		upgrade_panel.show_for_tower(tower)
 
@@ -457,6 +461,7 @@ func _on_sell_requested() -> void:
 		return
 	gold += selected_tower.get_sell_value()
 	_update_labels()
+	selected_tower.hide_range()
 	selected_tower.queue_free()
 	selected_tower = null
 	if is_instance_valid(upgrade_panel):
@@ -464,6 +469,8 @@ func _on_sell_requested() -> void:
 
 
 func _on_close_upgrade_panel() -> void:
+	if is_instance_valid(selected_tower):
+		selected_tower.hide_range()
 	selected_tower = null
 	if is_instance_valid(upgrade_panel):
 		upgrade_panel.visible = false
