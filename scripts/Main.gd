@@ -66,6 +66,10 @@ const ZOOM_MAX: float = 2.0
 const ZOOM_STEP: float = 0.1
 var target_zoom: float = 1.0
 
+var is_panning: bool = false
+var pan_start_mouse: Vector2 = Vector2.ZERO
+var pan_start_camera: Vector2 = Vector2.ZERO
+
 
 func build_background() -> void:
 	var bg := Sprite2D.new()
@@ -355,6 +359,29 @@ func _unhandled_input(event):
 			_zoom_at(get_viewport().get_mouse_position(), -ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
+	# Camera pan start (middle mouse button pressed)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
+		if event.pressed:
+			is_panning = true
+			pan_start_mouse = event.position
+			if is_instance_valid(game_camera):
+				pan_start_camera = game_camera.position
+			get_viewport().set_input_as_handled()
+			return
+		else:
+			is_panning = false
+			get_viewport().set_input_as_handled()
+			return
+
+	# Camera pan drag (middle button held)
+	if is_panning and event is InputEventMouseMotion:
+		if is_instance_valid(game_camera):
+			var mouse_delta: Vector2 = event.position - pan_start_mouse
+			var zoom_factor: float = game_camera.zoom.x
+			var new_pos: Vector2 = pan_start_camera - mouse_delta / zoom_factor
+			game_camera.position = _clamp_camera_position(new_pos)
+		return
+
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			place_tower(event.position)
@@ -597,6 +624,8 @@ func _process(_delta: float) -> void:
 		var current: float = game_camera.zoom.x
 		var new_zoom: float = lerp(current, target_zoom, min(_delta * 8.0, 1.0))
 		game_camera.zoom = Vector2(new_zoom, new_zoom)
+		# Re-clamp position after zoom change (limits change with zoom)
+		game_camera.position = _clamp_camera_position(game_camera.position)
 
 func _on_build_button_pressed() -> void:
 	if is_instance_valid(tower_buttons_dock):
@@ -664,3 +693,27 @@ func _place_tower_at(pos: Vector2, type: String) -> void:
 	new_tower.position = pos
 	new_tower.tower_clicked.connect(_on_tower_clicked)
 	add_child(new_tower)
+
+func _clamp_camera_position(pos: Vector2) -> Vector2:
+	# Map dimensions (world coordinates)
+	var map_size: Vector2 = Vector2(1152, 648)
+	# Viewport size (screen pixels)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	# Camera visible area in world coords depends on zoom
+	var zoom_factor: float = 1.0
+	if is_instance_valid(game_camera):
+		zoom_factor = game_camera.zoom.x
+	var half_view: Vector2 = viewport_size / (2.0 * zoom_factor)
+	# Clamp so camera doesn't show outside map
+	var min_x: float = half_view.x
+	var max_x: float = map_size.x - half_view.x
+	var min_y: float = half_view.y
+	var max_y: float = map_size.y - half_view.y
+	# If map is smaller than viewport at this zoom, center it
+	if min_x > max_x:
+		var center: float = map_size.x * 0.5
+		return Vector2(center, clamp(pos.y, min_y, max_y) if min_y <= max_y else map_size.y * 0.5)
+	if min_y > max_y:
+		var center_y: float = map_size.y * 0.5
+		return Vector2(clamp(pos.x, min_x, max_x), center_y)
+	return Vector2(clamp(pos.x, min_x, max_x), clamp(pos.y, min_y, max_y))
