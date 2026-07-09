@@ -29,6 +29,27 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="StartWaveButton" type="Button" parent="CanvasLayer/Control" unique_id=652516785]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(50, 25)
+layout_mode = 0
+offset_left = 900.0
+offset_top = 18.0
+offset_right = 970.0
+offset_bottom = 49.0
+text = "Start "
+
+[node name="SpeedButton" type="Button" parent="CanvasLayer/Control" unique_id=665888920]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 30)
+layout_mode = 0
+offset_left = 800.0
+offset_top = 18.0
+offset_right = 870.0
+offset_bottom = 49.0
+text = "1x"
+
 [node name="HealthLabel" type="Label" parent="CanvasLayer/Control" unique_id=1622691575]
 layout_mode = 1
 offset_left = 20.0
@@ -61,42 +82,30 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -20.0
+offset_left = 428.0
 offset_top = -95.0
-offset_right = 740.0
+offset_right = -316.0
 offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 0
 
 [node name="SpearButton" type="Button" parent="CanvasLayer/Control/TowerButtonsDock" unique_id=1854498408]
-custom_minimum_size = Vector2(240, 80)
+custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Spear
 50g"
 
 [node name="ArrowButton" type="Button" parent="CanvasLayer/Control/TowerButtonsDock" unique_id=1882969279]
-custom_minimum_size = Vector2(240, 80)
+custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Arrow
 75g"
 
 [node name="ShellsButton" type="Button" parent="CanvasLayer/Control/TowerButtonsDock" unique_id=1475065663]
-custom_minimum_size = Vector2(240, 80)
+custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Shells
 120g"
-
-[node name="StartWaveButton" type="Button" parent="CanvasLayer/Control/TowerButtonsDock" unique_id=1623489071]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(240, 80)
-layout_mode = 2
-text = "Start Wave"
-
-[node name="SpeedButton" type="Button" parent="CanvasLayer/Control/TowerButtonsDock" unique_id=39937219]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Speed: 1x"
 
 [node name="GameOverScreen" type="Control" parent="CanvasLayer" unique_id=743068890]
 process_mode = 2

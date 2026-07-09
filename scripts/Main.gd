@@ -141,7 +141,7 @@ func _ready():
 	# Speed button
 	if is_instance_valid(speed_button):
 		speed_button.pressed.connect(_on_speed_button_pressed)
-		speed_button.text = "Speed: 1x"
+		speed_button.text = "1x"
 
 	# Game Over setup	
 	if is_instance_valid(restart_button):
@@ -482,11 +482,11 @@ func _on_speed_button_pressed() -> void:
 	Engine.time_scale = new_speed
 	if is_instance_valid(speed_button):
 		if new_speed == 1.0:
-			speed_button.text = "Speed: 1x"
+			speed_button.text = "1x"
 		elif new_speed == 1.5:
-			speed_button.text = "Speed: 1.5x"
+			speed_button.text = "1.5x"
 		else:
-			speed_button.text = "Speed: 2x"
+			speed_button.text = "2x"
 
 func _on_slime_split(_spawn_position: Vector2, spawn_progress_ratio: float) -> void:
 	# Spawn 3 slime_mini at the same progress_ratio, slightly offset
