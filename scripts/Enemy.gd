@@ -13,10 +13,14 @@ signal split_requested(spawn_position, spawn_progress_ratio)
 
 # Health system
 var health: int = 0
+var max_health: int = 0
 @export var speed: float = 100.0
 
 # Gold reward when defeated in combat
 var gold_reward: int = 0
+
+var hp_bar_bg: ColorRect = null
+var hp_bar_fill: ColorRect = null
 
 var anim_time: float = 0.0
 var base_scale: Vector2 = Vector2.ONE
@@ -32,31 +36,38 @@ func _ready():
 	# Set stats based on enemy type directly
 	if enemy_type == "slime":
 		health = 20
+		max_health = health
 		speed = 60
 		gold_reward = 5
 	elif enemy_type == "slime_big":
 		health = 60
+		max_health = health
 		speed = 45
 		gold_reward = 15
 	elif enemy_type == "goblin_small":
 		health = 40
+		max_health = health
 		speed = 90
 		gold_reward = 10
 	elif enemy_type == "goblin_fast":
 		health = 45
+		max_health = health
 		speed = 120
 		gold_reward = 15
 	elif enemy_type == "hobgoblin":
 		health = 150
+		max_health = health
 		speed = 60
 		gold_reward = 30
 	elif enemy_type == "slime_mini":
 		health = 15
+		max_health = health
 		speed = 35
 		gold_reward = 1
 	else:
 		# fallback for peasant/knight (keep for compatibility, but shouldnt be used)
 		health = 30
+		max_health = health
 		speed = 100
 		gold_reward = 10
 	
@@ -89,6 +100,22 @@ func _ready():
 	# Start at the beginning of the path
 	progress_ratio = 0.0
 	base_scale = get_node("Sprite2D").scale
+
+	# Create HP bar (background)
+	hp_bar_bg = ColorRect.new()
+	hp_bar_bg.color = Color(0.15, 0.15, 0.15, 0.9)
+	hp_bar_bg.size = Vector2(24, 4)
+	hp_bar_bg.position = Vector2(-12, -18)
+	hp_bar_bg.z_index = 10
+	add_child(hp_bar_bg)
+
+	# Create HP bar (fill)
+	hp_bar_fill = ColorRect.new()
+	hp_bar_fill.color = Color(0.2, 0.9, 0.2, 1.0)
+	hp_bar_fill.size = Vector2(24, 4)
+	hp_bar_fill.position = Vector2(-12, -18)
+	hp_bar_fill.z_index = 11
+	add_child(hp_bar_fill)
 
 
 func _process(delta):
@@ -142,9 +169,25 @@ func _process(delta):
 
 func take_damage(damage: int):
 	health -= damage
+	_update_hp_bar()
 	if health <= 0:
 		print(enemy_type, " defeated")
 		if enemy_type == "slime_big":
 			split_requested.emit(global_position, progress_ratio)
 		enemy_defeated.emit(gold_reward)
 		queue_free()
+
+func _update_hp_bar() -> void:
+	if not is_instance_valid(hp_bar_fill):
+		return
+	if max_health <= 0:
+		return
+	var ratio: float = float(max(health, 0)) / float(max_health)
+	hp_bar_fill.size.x = 24.0 * ratio
+	# Color transition: green -> yellow -> red
+	if ratio > 0.5:
+		hp_bar_fill.color = Color(0.2, 0.9, 0.2, 1.0)
+	elif ratio > 0.25:
+		hp_bar_fill.color = Color(0.9, 0.8, 0.2, 1.0)
+	else:
+		hp_bar_fill.color = Color(0.9, 0.2, 0.2, 1.0)
