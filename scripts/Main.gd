@@ -124,12 +124,9 @@ func _ready():
 	next_wave_timer.timeout.connect(_on_next_wave_timer_timeout)
 
 	# ── Tower buttons ──
-	$CanvasLayer/Control/TowerButtonsDock/SpearButton.pressed.connect(
-		func(): _select_tower_type("spear"))
-	$CanvasLayer/Control/TowerButtonsDock/ArrowButton.pressed.connect(
-		func(): _select_tower_type("arrow"))
-	$CanvasLayer/Control/TowerButtonsDock/ShellsButton.pressed.connect(
-		func(): _select_tower_type("shells"))
+	$CanvasLayer/Control/TowerButtonsDock/SpearButton.button_down.connect(_start_drag.bind("spear"))
+	$CanvasLayer/Control/TowerButtonsDock/ArrowButton.button_down.connect(_start_drag.bind("arrow"))
+	$CanvasLayer/Control/TowerButtonsDock/ShellsButton.button_down.connect(_start_drag.bind("shells"))
 
 	# ── Start Wave button (Task 3) ──
 	if is_instance_valid(start_wave_button):
@@ -307,6 +304,10 @@ func _on_start_wave_pressed() -> void:
 
 var selected_tower_type: String = "spear"
 
+var tower_ghost: Node2D = null
+var is_dragging_tower: bool = false
+var dragging_tower_type: String = ""
+
 func _select_tower_type(type: String):
 	selected_tower_type = type
 	if is_instance_valid(tower_buttons_dock):
@@ -316,6 +317,20 @@ func _select_tower_type(type: String):
 func _unhandled_input(event):
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		_toggle_pause()
+		get_viewport().set_input_as_handled()
+		return
+
+	# Update ghost during drag
+	if is_dragging_tower and event is InputEventMouseMotion:
+		if is_instance_valid(tower_ghost):
+			tower_ghost.position = get_local_mouse_position()
+		_update_ghost_validity()
+		return
+
+	# Release drag
+	if is_dragging_tower and event is InputEventMouseButton and not event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_finish_drag()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -586,3 +601,66 @@ func _process(_delta: float) -> void:
 func _on_build_button_pressed() -> void:
 	if is_instance_valid(tower_buttons_dock):
 		tower_buttons_dock.visible = not tower_buttons_dock.visible
+
+func _start_drag(type: String) -> void:
+	var cost: int = TOWER_COSTS[type]
+	if gold < cost:
+		print("Not enough gold to build ", type)
+		return
+	dragging_tower_type = type
+	is_dragging_tower = true
+	if is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = false
+	if tower_ghost != null:
+		tower_ghost.queue_free()
+	var ghost_scene: GDScript = load("res://scripts/TowerGhost.gd")
+	tower_ghost = Node2D.new()
+	tower_ghost.set_script(ghost_scene)
+	add_child(tower_ghost)
+	tower_ghost.set_tower_type(type)
+	tower_ghost.position = get_local_mouse_position()
+	_update_ghost_validity()
+
+
+func _update_ghost_validity() -> void:
+	if not is_instance_valid(tower_ghost):
+		return
+	var pos: Vector2 = tower_ghost.position
+	var valid: bool = _can_place_tower_at(pos, dragging_tower_type)
+	tower_ghost.set_valid(valid)
+
+
+func _can_place_tower_at(pos: Vector2, type: String) -> bool:
+	var cost: int = TOWER_COSTS[type]
+	if gold < cost:
+		return false
+	if _is_on_enemy_path(pos):
+		return false
+	if _is_too_close_to_tower(pos):
+		return false
+	return true
+
+
+func _finish_drag() -> void:
+	if not is_dragging_tower:
+		return
+	is_dragging_tower = false
+	var final_pos: Vector2 = Vector2.ZERO
+	if is_instance_valid(tower_ghost):
+		final_pos = tower_ghost.position
+	tower_ghost.queue_free()
+	tower_ghost = null
+	if _can_place_tower_at(final_pos, dragging_tower_type):
+		_place_tower_at(final_pos, dragging_tower_type)
+
+
+func _place_tower_at(pos: Vector2, type: String) -> void:
+	var cost: int = TOWER_COSTS[type]
+	gold -= cost
+	_update_labels()
+	var tower_scene := preload("res://scenes/Tower.tscn")
+	var new_tower := tower_scene.instantiate() as Area2D
+	new_tower.tower_type = type
+	new_tower.position = pos
+	new_tower.tower_clicked.connect(_on_tower_clicked)
+	add_child(new_tower)
