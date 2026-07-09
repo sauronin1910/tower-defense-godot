@@ -21,6 +21,7 @@ var gold_reward: int = 0
 
 var hp_bar_bg: ColorRect = null
 var hp_bar_fill: ColorRect = null
+var sprite_node: Sprite2D = null
 
 var anim_time: float = 0.0
 var base_scale: Vector2 = Vector2.ONE
@@ -74,7 +75,7 @@ func _ready():
 	print("Enemy type: ", enemy_type, " - Health: ", health, " - Speed: ", speed)
 	
 	# Apply texture to sprite
-	var sprite_node = get_node("Sprite2D")
+	sprite_node = get_node("Sprite2D")
 	if enemy_type == "slime":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
 		sprite_node.scale = Vector2(0.05, 0.05)
@@ -101,11 +102,18 @@ func _ready():
 	progress_ratio = 0.0
 	base_scale = get_node("Sprite2D").scale
 
+	# Calculate HP bar offset based on sprite size
+	sprite_node = get_node("Sprite2D")
+	var sprite_height: float = 0.0
+	if sprite_node.texture != null:
+		sprite_height = sprite_node.texture.get_height() * abs(sprite_node.scale.y)
+	var bar_y_offset: float = -sprite_height * 0.5 - 8.0
+
 	# Create HP bar (background)
 	hp_bar_bg = ColorRect.new()
 	hp_bar_bg.color = Color(0.15, 0.15, 0.15, 0.9)
 	hp_bar_bg.size = Vector2(24, 4)
-	hp_bar_bg.position = Vector2(-12, -18)
+	hp_bar_bg.position = Vector2(-12, bar_y_offset)
 	hp_bar_bg.z_index = 10
 	add_child(hp_bar_bg)
 
@@ -113,7 +121,7 @@ func _ready():
 	hp_bar_fill = ColorRect.new()
 	hp_bar_fill.color = Color(0.2, 0.9, 0.2, 1.0)
 	hp_bar_fill.size = Vector2(24, 4)
-	hp_bar_fill.position = Vector2(-12, -18)
+	hp_bar_fill.position = Vector2(-12, bar_y_offset)
 	hp_bar_fill.z_index = 11
 	add_child(hp_bar_fill)
 
@@ -121,7 +129,7 @@ func _ready():
 func _process(delta):
 	anim_time += delta
 
-	var sprite_node = get_node("Sprite2D")
+	sprite_node = get_node("Sprite2D")
 
 	if enemy_type == "slime":
 		# Scale pulse - 8 Hz, +/-15% amplitude
