@@ -21,6 +21,7 @@ var gold_reward: int = 0
 
 var hp_bar_bg: ColorRect = null
 var hp_bar_fill: ColorRect = null
+var hp_displayed_ratio: float = 1.0
 var sprite_node: Sprite2D = null
 
 var anim_time: float = 0.0
@@ -172,7 +173,20 @@ func _process(delta):
 			damage = 3
 		print(enemy_type, " reached base! Dealing ", damage, " damage.")
 		enemy_reached_end.emit(damage)
-		queue_free()	
+		queue_free()
+
+	# Smooth HP bar interpolation
+	if is_instance_valid(hp_bar_fill) and max_health > 0:
+		var target_ratio: float = float(max(health, 0)) / float(max_health)
+		hp_displayed_ratio = lerp(hp_displayed_ratio, target_ratio, min(delta * 8.0, 1.0))
+		hp_bar_fill.size.x = 24.0 * hp_displayed_ratio
+		# Color transition based on target (not displayed) for immediate color feedback
+		if target_ratio > 0.5:
+			hp_bar_fill.color = Color(0.2, 0.9, 0.2, 1.0)
+		elif target_ratio > 0.25:
+			hp_bar_fill.color = Color(0.9, 0.8, 0.2, 1.0)
+		else:
+			hp_bar_fill.color = Color(0.9, 0.2, 0.2, 1.0)
 
 
 func take_damage(damage: int):
@@ -186,16 +200,6 @@ func take_damage(damage: int):
 		queue_free()
 
 func _update_hp_bar() -> void:
-	if not is_instance_valid(hp_bar_fill):
-		return
-	if max_health <= 0:
-		return
-	var ratio: float = float(max(health, 0)) / float(max_health)
-	hp_bar_fill.size.x = 24.0 * ratio
-	# Color transition: green -> yellow -> red
-	if ratio > 0.5:
-		hp_bar_fill.color = Color(0.2, 0.9, 0.2, 1.0)
-	elif ratio > 0.25:
-		hp_bar_fill.color = Color(0.9, 0.8, 0.2, 1.0)
-	else:
-		hp_bar_fill.color = Color(0.9, 0.2, 0.2, 1.0)
+	# This is called from take_damage() but we no longer update the size directly here.
+	# Actual smooth interpolation happens in _process.
+	pass
