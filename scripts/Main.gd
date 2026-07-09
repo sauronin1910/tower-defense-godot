@@ -55,8 +55,14 @@ const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var upgrade_panel = %TowerUpgradePanel
 @onready var speed_button: Button = %SpeedButton
+@onready var game_camera: Camera2D = %Camera2D
 
 var selected_tower = null
+
+const ZOOM_MIN: float = 1.0
+const ZOOM_MAX: float = 2.0
+const ZOOM_STEP: float = 0.1
+var target_zoom: float = 1.0
 
 
 func build_background() -> void:
@@ -302,6 +308,28 @@ func _unhandled_input(event):
 		_toggle_pause()
 		get_viewport().set_input_as_handled()
 		return
+
+	# Mouse wheel zoom
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_zoom_at(event.position, ZOOM_STEP)
+			get_viewport().set_input_as_handled()
+			return
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_zoom_at(event.position, -ZOOM_STEP)
+			get_viewport().set_input_as_handled()
+			return
+
+	# Keyboard zoom (Ctrl + plus/minus)
+	if event is InputEventKey and event.pressed and event.ctrl_pressed:
+		if event.keycode == KEY_EQUAL or event.keycode == KEY_PLUS:
+			_zoom_at(get_viewport().get_mouse_position(), ZOOM_STEP)
+			get_viewport().set_input_as_handled()
+			return
+		elif event.keycode == KEY_MINUS:
+			_zoom_at(get_viewport().get_mouse_position(), -ZOOM_STEP)
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			place_tower(event.position)
@@ -528,3 +556,17 @@ func _on_level_complete_main_menu() -> void:
 func _on_level_complete_next() -> void:
 	# Placeholder - no next level exists yet
 	pass
+
+
+func _zoom_at(screen_pos: Vector2, delta_zoom: float) -> void:
+	if not is_instance_valid(game_camera):
+		return
+	target_zoom = clamp(target_zoom + delta_zoom, ZOOM_MIN, ZOOM_MAX)
+
+
+func _process(_delta: float) -> void:
+	# Smooth zoom lerp
+	if is_instance_valid(game_camera):
+		var current: float = game_camera.zoom.x
+		var new_zoom: float = lerp(current, target_zoom, min(_delta * 8.0, 1.0))
+		game_camera.zoom = Vector2(new_zoom, new_zoom)

@@ -202,7 +202,5 @@ grow_vertical = 2
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=116151889]
 unique_name_in_owner = true
-position = Vector2(576, 324)
-zoom = Vector2(3, 3)
 position_smoothing_enabled = true
 position_smoothing_speed = 10.0
