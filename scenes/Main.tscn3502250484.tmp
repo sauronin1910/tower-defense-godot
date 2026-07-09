@@ -78,14 +78,15 @@ text = "Gold: 100"
 horizontal_alignment = 1
 
 [node name="TowerButtonsDock" type="HBoxContainer" parent="CanvasLayer/Control" unique_id=1095769042]
+visible = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 114.0
+offset_left = 90.0
 offset_top = -78.0
-offset_right = -630.0
+offset_right = -654.0
 offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 0

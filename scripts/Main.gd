@@ -55,6 +55,8 @@ const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var upgrade_panel = %TowerUpgradePanel
 @onready var speed_button: Button = %SpeedButton
+@onready var build_button: Button = %BuildButton
+@onready var tower_buttons_dock: Control = $CanvasLayer/Control/TowerButtonsDock
 @onready var game_camera: Camera2D = %Camera2D
 
 var selected_tower = null
@@ -148,6 +150,12 @@ func _ready():
 	if is_instance_valid(speed_button):
 		speed_button.pressed.connect(_on_speed_button_pressed)
 		speed_button.text = "1x"
+
+	# Build button
+	if is_instance_valid(build_button):
+		build_button.pressed.connect(_on_build_button_pressed)
+	if is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = false
 
 	# Game Over setup	
 	if is_instance_valid(restart_button):
@@ -301,6 +309,8 @@ var selected_tower_type: String = "spear"
 
 func _select_tower_type(type: String):
 	selected_tower_type = type
+	if is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = false
 
 
 func _unhandled_input(event):
@@ -384,6 +394,8 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 	if is_instance_valid(upgrade_panel) and upgrade_panel.visible and upgrade_panel.get_global_rect().has_point(tap_pos):
 		return true
 	if is_instance_valid(speed_button) and speed_button.get_global_rect().has_point(tap_pos):
+		return true
+	if is_instance_valid(build_button) and build_button.get_global_rect().has_point(tap_pos):
 		return true
 	return false
 
@@ -570,3 +582,7 @@ func _process(_delta: float) -> void:
 		var current: float = game_camera.zoom.x
 		var new_zoom: float = lerp(current, target_zoom, min(_delta * 8.0, 1.0))
 		game_camera.zoom = Vector2(new_zoom, new_zoom)
+
+func _on_build_button_pressed() -> void:
+	if is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = not tower_buttons_dock.visible
