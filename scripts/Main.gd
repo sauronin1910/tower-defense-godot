@@ -382,12 +382,14 @@ func _unhandled_input(event):
 			game_camera.position = _clamp_camera_position(new_pos)
 		return
 
-	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			place_tower(event.position)
-	elif event is InputEventScreenTouch:
-		if event.pressed:
-			place_tower(event.position)
+# Left click on map closes upgrade panel if open
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if is_instance_valid(upgrade_panel) and upgrade_panel.visible:
+			if not _is_ui_hit(event.position):
+				upgrade_panel.visible = false
+				if is_instance_valid(selected_tower):
+					selected_tower.hide_range()
+				selected_tower = null
 
 
 func place_tower(tap_position: Vector2) -> void:

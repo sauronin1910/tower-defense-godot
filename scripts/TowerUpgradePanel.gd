@@ -12,6 +12,8 @@ signal close_requested
 @onready var close_button: Button = $VBoxContainer/CloseButton
 
 
+var tracked_tower: Node2D = null
+
 func _ready() -> void:
 	upgrade_button.pressed.connect(func(): upgrade_requested.emit())
 	sell_button.pressed.connect(func(): sell_requested.emit())
@@ -43,6 +45,18 @@ func show_for_tower(tower) -> void:
 
 	sell_button.text = "Sell (%dg)" % tower.get_sell_value()
 
-	# Position the panel above the tower
-	global_position = tower.global_position + Vector2(-100, -260)
+	# Convert tower's world position to screen position (accounts for camera zoom/pan)
+	var tower_screen_pos: Vector2 = tower.get_global_transform_with_canvas().origin
+	global_position = tower_screen_pos + Vector2(-100, -260)
 	visible = true
+
+	tracked_tower = tower
+
+
+func _process(_delta: float) -> void:
+	if not visible:
+		return
+	if not is_instance_valid(tracked_tower):
+		return
+	var screen_pos: Vector2 = tracked_tower.get_global_transform_with_canvas().origin
+	global_position = screen_pos + Vector2(-100, -260)
