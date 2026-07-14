@@ -69,7 +69,7 @@ func _ready():
 	sprite.texture = load(tower_texture_path)
 
 	# Scale the sprite appropriately for 720x1280 screen (roughly 64x64 pixels)
-	sprite.scale = Vector2(0.5, 0.5)
+	sprite.scale = Vector2(1.3, 1.3)
 
 	# Setup timer for shooting
 	var timer = Timer.new()

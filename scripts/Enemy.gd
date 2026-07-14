@@ -79,25 +79,25 @@ func _ready():
 	sprite_node = get_node("Sprite2D")
 	if enemy_type == "slime":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
-		sprite_node.scale = Vector2(0.05, 0.05)
+		sprite_node.scale = Vector2(0.1125, 0.1125)
 	elif enemy_type == "slime_big":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/slime_big.png")
-		sprite_node.scale = Vector2(0.07, 0.07)
+		sprite_node.scale = Vector2(0.1575, 0.1575)
 	elif enemy_type == "goblin_small":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/goblin_small.png")
-		sprite_node.scale = Vector2(0.05, 0.05)
+		sprite_node.scale = Vector2(0.1125, 0.1125)
 	elif enemy_type == "goblin_fast":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/goblin_fast.png")
-		sprite_node.scale = Vector2(0.05, 0.05)
+		sprite_node.scale = Vector2(0.1125, 0.1125)
 	elif enemy_type == "hobgoblin":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/hobgoblin.png")
-		sprite_node.scale = Vector2(0.06, 0.06)
+		sprite_node.scale = Vector2(0.135, 0.135)
 	elif enemy_type == "slime_mini":
 		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
-		sprite_node.scale = Vector2(0.03, 0.03)
+		sprite_node.scale = Vector2(0.0675, 0.0675)
 	else:
 		sprite_node.texture = preload("res://assets/sprites/Peasant.png")
-		sprite_node.scale = Vector2(0.05, 0.05)
+		sprite_node.scale = Vector2(0.1125, 0.1125)
 	
 	# Start at the beginning of the path
 	progress_ratio = 0.0
