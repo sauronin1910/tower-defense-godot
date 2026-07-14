@@ -1,5 +1,4 @@
 extends Node2D
-
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
 const WAVE_CONFIG := [
 	{"slime": 8,  "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 1
@@ -16,9 +15,7 @@ const WAVE_CONFIG := [
 	{"slime": 0,  "slime_big": 8, "goblin_small": 4, "goblin_fast": 8, "hobgoblin": 8},   # Wave 12
 	{"slime": 0,  "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 15},  # Wave 13 (BOSS)
 ]
-
 const MAX_WAVE := 13
-
 # -- Tower Costs --  
 const TOWER_COSTS := {
 	"spear": 50,
@@ -26,118 +23,84 @@ const TOWER_COSTS := {
 	"shells": 120,
 }
 
+@onready var spawn_timer: Timer = $SpawnTimer
+@onready var next_wave_timer: Timer = $NextWaveTimer
 
-# ── State ──
+# Health system
+var base_health: int = 20
+
+# Gold system
+var gold: int = 0
+
+# Wave management
 var current_wave_number: int = 0
 var wave_in_progress: bool = false
 var enemies_spawned: int = 0
 var total_enemies_to_spawn: int = 0
 var active_enemy_count: int = 0
-var gold: int = 100
-var base_health: int = 20
 
-var speed_index: int = 0
-const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
-@onready var spawn_timer: Timer = $SpawnTimer
-@onready var next_wave_timer: Timer = $NextWaveTimer
-@onready var enemy_scene := preload("res://scenes/Enemy.tscn")
+# Selected tower type
+var selected_tower_type: String = "spear"
 
-@onready var start_wave_button: Button = %StartWaveButton
+# Enemy scene reference for spawning
+var enemy_scene = preload("res://scenes/Enemy.tscn")
+
+# UI labels — using existing node paths
 @onready var health_label: Label = $CanvasLayer/Control/HealthLabel
 @onready var wave_label: Label = $CanvasLayer/Control/WaveLabel
 @onready var gold_label: Label = $CanvasLayer/Control/GoldLabel
 
 @onready var game_over_screen: Control = $CanvasLayer/GameOverScreen
-@onready var level_complete: Control = %LevelComplete
 @onready var restart_button: Button = $CanvasLayer/GameOverScreen/RestartButton
 @onready var pause_menu: Control = %PauseMenu
 @onready var resume_button: Button = %ResumeButton
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var upgrade_panel = %TowerUpgradePanel
+@onready var start_wave_button: Button = %StartWaveButton
 @onready var speed_button: Button = %SpeedButton
 @onready var build_button: Button = %BuildButton
 @onready var tower_buttons_dock: Control = $CanvasLayer/Control/TowerButtonsDock
+@onready var level_complete: Control = %LevelComplete
 @onready var game_camera: Camera2D = %Camera2D
 
-var selected_tower = null
+# Speed control
+var speed_index: int = 0
+const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 
-const ZOOM_MIN: float = 1.0
+# Zoom control
+const ZOOM_MIN: float = 0.85
 const ZOOM_MAX: float = 2.0
 const ZOOM_STEP: float = 0.1
 var target_zoom: float = 1.0
 
+# Camera pan
 var is_panning: bool = false
 var pan_start_mouse: Vector2 = Vector2.ZERO
 var pan_start_camera: Vector2 = Vector2.ZERO
 
+# Drag-and-drop tower placement
+var tower_ghost: Node2D = null
+var is_dragging_tower: bool = false
+var dragging_tower_type: String = ""
 
-func build_background() -> void:
-	var bg := Sprite2D.new()
-	bg.texture = preload("res://assets/sprites/grass_background.png")
-	bg.centered = false
-	bg.position = Vector2.ZERO
-	bg.z_index = -10
-	bg.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	bg.region_enabled = true
-	bg.z_as_relative = false
-	bg.region_rect = Rect2(0, 0, 4096, 4096)
-	add_child(bg)
+var selected_tower = null
 
-func build_base() -> void:
-	var base_sprite := Sprite2D.new()
-	base_sprite.texture = preload("res://assets/sprites/Base_castle_.png")
-	base_sprite.position = Vector2(1050, 400)
-	base_sprite.scale = Vector2(0.5, 0.5)
-	base_sprite.z_index = -1
-	add_child(base_sprite)
-
-func build_curve() -> void:
-	var enemy_path: Path2D = $EnemyPath
-	var curve := Curve2D.new()
-	curve.add_point(Vector2(80, 100))
-	curve.add_point(Vector2(400, 100))
-	curve.add_point(Vector2(400, 300))
-	curve.add_point(Vector2(150, 300))
-	curve.add_point(Vector2(150, 500))
-	curve.add_point(Vector2(700, 500))
-	curve.add_point(Vector2(950, 400))
-	enemy_path.curve = curve
-
-	# Road texture along the path
-	var road := Line2D.new()
-	road.name = "Road"
-	road.points = curve.get_baked_points()
-	road.width = 80.0
-	road.texture = preload("res://assets/sprites/road_cobblestone.png")
-	road.texture_mode = Line2D.LINE_TEXTURE_TILE
-	road.default_color = Color(1, 1, 1, 1)
-	road.z_index = -1
-	enemy_path.add_child(road)
 
 
 func _ready():
-	build_background()
-	build_base()
-	build_curve()
+	# NOTE: build_background() and build_curve() removed.
+	# New map is drawn via TileMapLayer in the scene.
+	# The enemy path will be drawn manually as a Path2D in the editor.
 
-	# ── Timers ──
 	spawn_timer.wait_time = 0.8
-	next_wave_timer.wait_time = 15.0
-
+	spawn_timer.one_shot = false
 	spawn_timer.timeout.connect(_on_spawn_timer_timeout)
+
+	next_wave_timer.wait_time = 15.0
+	next_wave_timer.one_shot = true
 	next_wave_timer.timeout.connect(_on_next_wave_timer_timeout)
 
-	# ── Tower buttons ──
-	$CanvasLayer/Control/TowerButtonsDock/SpearButton.button_down.connect(_start_drag.bind("spear"))
-	$CanvasLayer/Control/TowerButtonsDock/ArrowButton.button_down.connect(_start_drag.bind("arrow"))
-	$CanvasLayer/Control/TowerButtonsDock/ShellsButton.button_down.connect(_start_drag.bind("shells"))
-
-	# ── Start Wave button (Task 3) ──
-	if is_instance_valid(start_wave_button):
-		start_wave_button.pressed.connect(_on_start_wave_pressed)
-		start_wave_button.visible = false
-
-	# ── Initial state ──
+	# Initialize state
 	current_wave_number = 0
 	enemies_spawned = 0
 	gold = 100
@@ -147,25 +110,10 @@ func _ready():
 	# Show Start Wave button so player can start first wave manually
 	if is_instance_valid(start_wave_button):
 		start_wave_button.visible = true
-	# Speed button
-	if is_instance_valid(speed_button):
-		speed_button.pressed.connect(_on_speed_button_pressed)
-		speed_button.text = "1x"
 
-	# Build button
-	if is_instance_valid(build_button):
-		build_button.pressed.connect(_on_build_button_pressed)
-	if is_instance_valid(tower_buttons_dock):
-		tower_buttons_dock.visible = false
-
-	# Game Over setup	
+	# Game Over setup
 	if is_instance_valid(restart_button):
 		restart_button.pressed.connect(_on_restart_pressed)
-	if is_instance_valid(level_complete):
-		level_complete.retry_requested.connect(_on_level_complete_retry)
-		level_complete.main_menu_requested.connect(_on_level_complete_main_menu)
-		level_complete.next_level_requested.connect(_on_level_complete_next)
-		level_complete.visible = false
 	if is_instance_valid(game_over_screen):
 		game_over_screen.visible = false
 
@@ -183,14 +131,40 @@ func _ready():
 		upgrade_panel.sell_requested.connect(_on_sell_requested)
 		upgrade_panel.close_requested.connect(_on_close_upgrade_panel)
 
+	# Start Wave button
+	if is_instance_valid(start_wave_button):
+		start_wave_button.pressed.connect(_on_start_wave_pressed)
 
-# ════════════════════════════════════════════
-#  TASK 1 — SPAWN LOGIC (fixed)	
-# ════════════════════════════════════════════
+	# Speed button
+	if is_instance_valid(speed_button):
+		speed_button.pressed.connect(_on_speed_button_pressed)
+		speed_button.text = "1x"
+
+	# Build button toggles tower panel
+	if is_instance_valid(build_button):
+		build_button.pressed.connect(_on_build_button_pressed)
+	if is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = false
+
+	# Tower selection buttons — drag-and-drop
+	$CanvasLayer/Control/TowerButtonsDock/SpearButton.button_down.connect(_start_drag.bind("spear"))
+	$CanvasLayer/Control/TowerButtonsDock/ArrowButton.button_down.connect(_start_drag.bind("arrow"))
+	$CanvasLayer/Control/TowerButtonsDock/ShellsButton.button_down.connect(_start_drag.bind("shells"))
+
+	# Level Complete setup
+	if is_instance_valid(level_complete):
+		level_complete.retry_requested.connect(_on_level_complete_retry)
+		level_complete.main_menu_requested.connect(_on_level_complete_main_menu)
+		level_complete.next_level_requested.connect(_on_level_complete_next)
+		level_complete.visible = false
+
 
 func _on_spawn_timer_timeout():
+	if not wave_in_progress:
+		return
+	if enemies_spawned >= total_enemies_to_spawn:
+		return
 	var config: Dictionary = _get_wave_config(current_wave_number)
-
 	var cumulative: int = config.slime
 	if enemies_spawned < cumulative:
 		_spawn_enemy("slime")
@@ -211,6 +185,7 @@ func _on_spawn_timer_timeout():
 	if enemies_spawned < cumulative:
 		_spawn_enemy("hobgoblin")
 
+
 func _spawn_enemy(type: String) -> void:
 	var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
 	enemy.enemy_type = type
@@ -221,12 +196,11 @@ func _spawn_enemy(type: String) -> void:
 	enemy.progress_ratio = 0.0
 	enemy.add_to_group("enemies")
 
-	enemies_spawned += 1	
+	enemies_spawned += 1
 	active_enemy_count += 1
 
 	enemy.enemy_defeated.connect(_on_enemy_defeated)
 	enemy.enemy_reached_end.connect(_on_enemy_reached_end)
-
 	enemy.split_requested.connect(_on_slime_split)
 
 
@@ -240,6 +214,8 @@ func _on_enemy_defeated(gold_reward: int) -> void:
 
 func _on_enemy_reached_end(damage: int) -> void:
 	base_health -= damage
+	if base_health < 0:
+		base_health = 0
 	_update_labels()
 	_check_game_over()
 
@@ -247,10 +223,6 @@ func _on_enemy_reached_end(damage: int) -> void:
 	if active_enemy_count <= 0 and enemies_spawned >= total_enemies_to_spawn and total_enemies_to_spawn > 0:
 		_advance_to_next_wave()
 
-
-# ══════
-#  WAVE MANAGEMENT
-# ════════════════════════════════════════════
 
 func start_wave(wave_num: int) -> void:
 	current_wave_number = wave_num
@@ -291,10 +263,6 @@ func _on_next_wave_timer_timeout():
 		start_wave(current_wave_number + 1)
 
 
-# ════════════════════════════════════════════
-#  TASK 3 — MANUAL START WAVE BUTTON
-# ════════════════════════════════════════════
-
 func _on_start_wave_pressed() -> void:
 	if wave_in_progress:
 		return
@@ -302,18 +270,9 @@ func _on_start_wave_pressed() -> void:
 	start_wave(current_wave_number + 1)
 
 
-# ════════════════════════════════════════════
-#  TOWER PLACEMENT (existing logic, kept)
-# ════════════════════════════════════════════
-
-var selected_tower_type: String = "spear"
-
-var tower_ghost: Node2D = null
-var is_dragging_tower: bool = false
-var dragging_tower_type: String = ""
-
-func _select_tower_type(type: String):
+func _select_tower_type(type: String) -> void:
 	selected_tower_type = type
+	print("Selected tower type: ", type)
 	if is_instance_valid(tower_buttons_dock):
 		tower_buttons_dock.visible = false
 
@@ -328,15 +287,15 @@ func _unhandled_input(event):
 	if is_dragging_tower and event is InputEventMouseMotion:
 		if is_instance_valid(tower_ghost):
 			tower_ghost.position = get_local_mouse_position()
-		_update_ghost_validity()
+			_update_ghost_validity()
 		return
 
 	# Release drag
 	if is_dragging_tower and event is InputEventMouseButton and not event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			_finish_drag()
-		get_viewport().set_input_as_handled()
-		return
+			get_viewport().set_input_as_handled()
+			return
 
 	# Mouse wheel zoom
 	if event is InputEventMouseButton and event.pressed:
@@ -359,6 +318,7 @@ func _unhandled_input(event):
 			_zoom_at(get_viewport().get_mouse_position(), -ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
+
 	# Camera pan start (middle mouse button pressed)
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
 		if event.pressed:
@@ -382,7 +342,7 @@ func _unhandled_input(event):
 			game_camera.position = _clamp_camera_position(new_pos)
 		return
 
-# Left click on map closes upgrade panel if open
+	# Left click on map closes upgrade panel if open
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if is_instance_valid(upgrade_panel) and upgrade_panel.visible:
 			if not _is_ui_hit(event.position):
@@ -390,37 +350,6 @@ func _unhandled_input(event):
 				if is_instance_valid(selected_tower):
 					selected_tower.hide_range()
 				selected_tower = null
-
-
-func place_tower(tap_position: Vector2) -> void:
-	if _is_ui_hit(tap_position):
-		return
-	# If upgrade panel is open, close it and range — do NOT place a tower
-	if is_instance_valid(upgrade_panel) and upgrade_panel.visible:
-		upgrade_panel.visible = false
-		if is_instance_valid(selected_tower):
-			selected_tower.hide_range()
-		selected_tower = null
-		return
-	if _is_on_enemy_path(tap_position):
-		print("Cannot place tower on enemy path!")
-		return
-	if _is_too_close_to_tower(tap_position):
-		print("Too close to another tower!")
-		return
-	var cost: int = TOWER_COSTS[selected_tower_type]
-	if gold < cost:
-		print("Not enough gold! Need ", cost, ", have ", gold)
-		return
-	gold -= cost
-	_update_labels()
-
-	var tower_scene := preload("res://scenes/Tower.tscn")
-	var new_tower := tower_scene.instantiate() as Area2D
-	new_tower.tower_type = selected_tower_type
-	new_tower.position = tap_position
-	new_tower.tower_clicked.connect(_on_tower_clicked)
-	add_child(new_tower)
 
 
 func _is_ui_hit(tap_pos: Vector2) -> bool:
@@ -443,12 +372,14 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 		return true
 	return false
 
-func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 64.0) -> bool:
+
+func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 55.0) -> bool:
 	var enemy_path: Path2D = $EnemyPath as Path2D
 	if not is_instance_valid(enemy_path) or enemy_path.curve == null:
 		return false
 	var closest_point: Vector2 = enemy_path.curve.get_closest_point(tap_pos)
 	return tap_pos.distance_to(closest_point) < min_distance
+
 
 func _is_too_close_to_tower(tap_pos: Vector2, min_distance: float = 50.0) -> bool:
 	var towers := get_tree().get_nodes_in_group("towers")
@@ -459,17 +390,21 @@ func _is_too_close_to_tower(tap_pos: Vector2, min_distance: float = 50.0) -> boo
 			return true
 	return false
 
-func _update_labels():
-	health_label.text = "Base HP: %d/%d" % [base_health, 20]
-	wave_label.text   = "Wave: %d" % current_wave_number
-	gold_label.text   = "Gold: %d" % gold
+
+func _update_labels() -> void:
+	if is_instance_valid(health_label):
+		health_label.text = "Base HP: %d/20" % base_health
+	if is_instance_valid(gold_label):
+		gold_label.text = "Gold: %d" % gold
+	if is_instance_valid(wave_label):
+		wave_label.text = "Wave: %d" % current_wave_number
 
 
-# ── Game Over ──
 # -- Wave Config Helper --
 func _get_wave_config(wave: int) -> Dictionary:
 	var index: int = min(wave - 1, MAX_WAVE - 1)
 	return WAVE_CONFIG[index]
+
 
 # ════════════════════════════════════════════
 #  GAME OVER
@@ -491,6 +426,7 @@ func _trigger_game_over() -> void:
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
+	Engine.time_scale = 1.0
 	get_tree().reload_current_scene()
 
 
@@ -513,6 +449,7 @@ func _on_resume_pressed() -> void:
 
 func _on_main_menu_pressed() -> void:
 	get_tree().paused = false
+	Engine.time_scale = 1.0
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 
@@ -521,6 +458,8 @@ func _on_main_menu_pressed() -> void:
 # ════════════════════════════════════════════
 
 func _on_tower_clicked(tower) -> void:
+	if is_instance_valid(selected_tower) and selected_tower != tower:
+		selected_tower.hide_range()
 	selected_tower = tower
 	tower.show_range()
 	if is_instance_valid(upgrade_panel):
@@ -545,7 +484,6 @@ func _on_sell_requested() -> void:
 		return
 	gold += selected_tower.get_sell_value()
 	_update_labels()
-	selected_tower.hide_range()
 	selected_tower.queue_free()
 	selected_tower = null
 	if is_instance_valid(upgrade_panel):
@@ -560,6 +498,10 @@ func _on_close_upgrade_panel() -> void:
 		upgrade_panel.visible = false
 
 
+# ════════════════════════════════════════════
+#  SPEED CONTROL
+# ════════════════════════════════════════════
+
 func _on_speed_button_pressed() -> void:
 	speed_index = (speed_index + 1) % SPEED_LEVELS.size()
 	var new_speed: float = SPEED_LEVELS[speed_index]
@@ -572,19 +514,58 @@ func _on_speed_button_pressed() -> void:
 		else:
 			speed_button.text = "2x"
 
-func _on_slime_split(_spawn_position: Vector2, spawn_progress_ratio: float) -> void:
-	# Spawn 3 slime_mini at the same progress_ratio, slightly offset
-	for i in range(3):
-		var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
-		enemy.enemy_type = "slime_mini"
-		var path: Path2D = $EnemyPath as Path2D
-		path.add_child(enemy)
-		enemy.progress_ratio = clamp(spawn_progress_ratio - 0.005 * i, 0.0, 0.999)
-		enemy.add_to_group("enemies")
-		enemy.enemy_defeated.connect(_on_enemy_defeated)
-		enemy.enemy_reached_end.connect(_on_enemy_reached_end)
-		enemy.split_requested.connect(_on_slime_split)
-		active_enemy_count += 1
+
+# ════════════════════════════════════════════
+#  ZOOM & PAN
+# ════════════════════════════════════════════
+
+func _zoom_at(_screen_pos: Vector2, delta_zoom: float) -> void:
+	if not is_instance_valid(game_camera):
+		return
+	target_zoom = clamp(target_zoom + delta_zoom, ZOOM_MIN, ZOOM_MAX)
+
+
+func _process(delta: float) -> void:
+	# Smooth zoom lerp
+	if is_instance_valid(game_camera):
+		var current: float = game_camera.zoom.x
+		var new_zoom: float = lerp(current, target_zoom, min(delta * 8.0, 1.0))
+		game_camera.zoom = Vector2(new_zoom, new_zoom)
+		game_camera.position = _clamp_camera_position(game_camera.position)
+
+
+func _clamp_camera_position(pos: Vector2) -> Vector2:
+	var map_size: Vector2 = Vector2(2000, 1500)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var zoom_factor: float = 1.0
+	if is_instance_valid(game_camera):
+		zoom_factor = game_camera.zoom.x
+	var half_view: Vector2 = viewport_size / (2.0 * zoom_factor)
+	var min_x: float = half_view.x
+	var max_x: float = map_size.x - half_view.x
+	var min_y: float = half_view.y
+	var max_y: float = map_size.y - half_view.y
+	if min_x > max_x:
+		var center: float = map_size.x * 0.5
+		return Vector2(center, clamp(pos.y, min_y, max_y) if min_y <= max_y else map_size.y * 0.5)
+	if min_y > max_y:
+		var center_y: float = map_size.y * 0.5
+		return Vector2(clamp(pos.x, min_x, max_x), center_y)
+	return Vector2(clamp(pos.x, min_x, max_x), clamp(pos.y, min_y, max_y))
+
+
+# ════════════════════════════════════════════
+#  BUILD TOGGLE
+# ════════════════════════════════════════════
+
+func _on_build_button_pressed() -> void:
+	if is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = not tower_buttons_dock.visible
+
+
+# ════════════════════════════════════════════
+#  LEVEL COMPLETE
+# ════════════════════════════════════════════
 
 func _trigger_level_complete() -> void:
 	print("LEVEL COMPLETE!")
@@ -610,28 +591,13 @@ func _on_level_complete_main_menu() -> void:
 
 
 func _on_level_complete_next() -> void:
-	# Placeholder - no next level exists yet
+	# Placeholder — no next level exists yet
 	pass
 
 
-func _zoom_at(screen_pos: Vector2, delta_zoom: float) -> void:
-	if not is_instance_valid(game_camera):
-		return
-	target_zoom = clamp(target_zoom + delta_zoom, ZOOM_MIN, ZOOM_MAX)
-
-
-func _process(_delta: float) -> void:
-	# Smooth zoom lerp
-	if is_instance_valid(game_camera):
-		var current: float = game_camera.zoom.x
-		var new_zoom: float = lerp(current, target_zoom, min(_delta * 8.0, 1.0))
-		game_camera.zoom = Vector2(new_zoom, new_zoom)
-		# Re-clamp position after zoom change (limits change with zoom)
-		game_camera.position = _clamp_camera_position(game_camera.position)
-
-func _on_build_button_pressed() -> void:
-	if is_instance_valid(tower_buttons_dock):
-		tower_buttons_dock.visible = not tower_buttons_dock.visible
+# ════════════════════════════════════════════
+#  TOWER DRAG-AND-DROP PLACEMENT
+# ════════════════════════════════════════════
 
 func _start_drag(type: String) -> void:
 	var cost: int = TOWER_COSTS[type]
@@ -679,8 +645,8 @@ func _finish_drag() -> void:
 	var final_pos: Vector2 = Vector2.ZERO
 	if is_instance_valid(tower_ghost):
 		final_pos = tower_ghost.position
-	tower_ghost.queue_free()
-	tower_ghost = null
+		tower_ghost.queue_free()
+		tower_ghost = null
 	if _can_place_tower_at(final_pos, dragging_tower_type):
 		_place_tower_at(final_pos, dragging_tower_type)
 
@@ -696,26 +662,20 @@ func _place_tower_at(pos: Vector2, type: String) -> void:
 	new_tower.tower_clicked.connect(_on_tower_clicked)
 	add_child(new_tower)
 
-func _clamp_camera_position(pos: Vector2) -> Vector2:
-	# Map dimensions (world coordinates)
-	var map_size: Vector2 = Vector2(1152, 648)
-	# Viewport size (screen pixels)
-	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	# Camera visible area in world coords depends on zoom
-	var zoom_factor: float = 1.0
-	if is_instance_valid(game_camera):
-		zoom_factor = game_camera.zoom.x
-	var half_view: Vector2 = viewport_size / (2.0 * zoom_factor)
-	# Clamp so camera doesn't show outside map
-	var min_x: float = half_view.x
-	var max_x: float = map_size.x - half_view.x
-	var min_y: float = half_view.y
-	var max_y: float = map_size.y - half_view.y
-	# If map is smaller than viewport at this zoom, center it
-	if min_x > max_x:
-		var center: float = map_size.x * 0.5
-		return Vector2(center, clamp(pos.y, min_y, max_y) if min_y <= max_y else map_size.y * 0.5)
-	if min_y > max_y:
-		var center_y: float = map_size.y * 0.5
-		return Vector2(clamp(pos.x, min_x, max_x), center_y)
-	return Vector2(clamp(pos.x, min_x, max_x), clamp(pos.y, min_y, max_y))
+
+# ════════════════════════════════════════════
+#  SLIME SPLIT
+# ════════════════════════════════════════════
+
+func _on_slime_split(_spawn_position: Vector2, spawn_progress_ratio: float) -> void:
+	for i in range(3):
+		var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
+		enemy.enemy_type = "slime_mini"
+		var path: Path2D = $EnemyPath as Path2D
+		path.add_child(enemy)
+		enemy.progress_ratio = clamp(spawn_progress_ratio - 0.005 * i, 0.0, 0.999)
+		enemy.add_to_group("enemies")
+		enemy.enemy_defeated.connect(_on_enemy_defeated)
+		enemy.enemy_reached_end.connect(_on_enemy_reached_end)
+		enemy.split_requested.connect(_on_slime_split)
+		active_enemy_count += 1
