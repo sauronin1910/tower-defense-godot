@@ -68,7 +68,7 @@ var speed_index: int = 0
 const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 
 # Zoom control
-const ZOOM_MIN: float = 0.85
+const ZOOM_MIN: float = 0.64
 const ZOOM_MAX: float = 2.0
 const ZOOM_STEP: float = 0.1
 var target_zoom: float = 1.0
