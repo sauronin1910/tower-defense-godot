@@ -25,6 +25,7 @@ const TOWER_COSTS := {
 
 @onready var spawn_timer: Timer = $SpawnTimer
 @onready var next_wave_timer: Timer = $NextWaveTimer
+@onready var tilemap: TileMapLayer = $TileMapLayer
 
 # Health system
 var base_health: int = 20
@@ -71,6 +72,8 @@ const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 const ZOOM_MIN: float = 0.64
 const ZOOM_MAX: float = 2.0
 const ZOOM_STEP: float = 0.1
+const ROAD_SOURCE_ID: int = 13
+const TOWER_FOOTPRINT_RADIUS: float = 32.0
 var target_zoom: float = 1.0
 
 # Camera pan
@@ -373,12 +376,22 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 	return false
 
 
-func _is_on_enemy_path(tap_pos: Vector2, min_distance: float = 55.0) -> bool:
-	var enemy_path: Path2D = $EnemyPath as Path2D
-	if not is_instance_valid(enemy_path) or enemy_path.curve == null:
+func _is_on_enemy_path(tap_pos: Vector2, _min_distance: float = 55.0) -> bool:
+	if not is_instance_valid(tilemap):
 		return false
-	var closest_point: Vector2 = enemy_path.curve.get_closest_point(tap_pos)
-	return tap_pos.distance_to(closest_point) < min_distance
+	var r: float = TOWER_FOOTPRINT_RADIUS
+	var offsets: Array = [
+		Vector2.ZERO,
+		Vector2(-r, -r), Vector2(r, -r),
+		Vector2(-r, r), Vector2(r, r),
+	]
+	for offset in offsets:
+		var sample_pos: Vector2 = tap_pos + offset
+		var cell: Vector2i = tilemap.local_to_map(tilemap.to_local(sample_pos))
+		var tile_data: TileData = tilemap.get_cell_tile_data(cell)
+		if tile_data != null and tile_data.get_custom_data("blocks_placement"):
+			return true
+	return false
 
 
 func _is_too_close_to_tower(tap_pos: Vector2, min_distance: float = 50.0) -> bool:
