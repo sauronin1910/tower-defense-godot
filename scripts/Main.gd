@@ -72,8 +72,8 @@ const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
 const ZOOM_MIN: float = 0.64
 const ZOOM_MAX: float = 2.0
 const ZOOM_STEP: float = 0.1
-const ROAD_SOURCE_ID: int = 13
 const TOWER_FOOTPRINT_RADIUS: float = 32.0
+const ROAD_COLLISION_MASK: int = 1 << 4
 var target_zoom: float = 1.0
 
 # Camera pan
@@ -148,6 +148,15 @@ func _ready():
 		build_button.pressed.connect(_on_build_button_pressed)
 	if is_instance_valid(tower_buttons_dock):
 		tower_buttons_dock.visible = false
+	print("collision_enabled=", tilemap.collision_enabled)
+	print("tilemap.global_transform=", tilemap.global_transform)
+	print("physics_layers_count=", tilemap.tile_set.get_physics_layers_count())
+	if tilemap.tile_set.get_physics_layers_count() > 0:
+		print("layer0 collision_layer=", tilemap.tile_set.get_physics_layer_collision_layer(0))
+	var td: TileData = tilemap.get_cell_tile_data(Vector2i(1, 3))
+	if td != null:
+		print("cell(1,3) polygons=", td.get_collision_polygons_count(0))
+		
 
 	# Tower selection buttons — drag-and-drop
 	$CanvasLayer/Control/TowerButtonsDock/SpearButton.button_down.connect(_start_drag.bind("spear"))
@@ -377,21 +386,16 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 
 
 func _is_on_enemy_path(tap_pos: Vector2, _min_distance: float = 55.0) -> bool:
-	if not is_instance_valid(tilemap):
-		return false
-	var r: float = TOWER_FOOTPRINT_RADIUS
-	var offsets: Array = [
-		Vector2.ZERO,
-		Vector2(-r, -r), Vector2(r, -r),
-		Vector2(-r, r), Vector2(r, r),
-	]
-	for offset in offsets:
-		var sample_pos: Vector2 = tap_pos + offset
-		var cell: Vector2i = tilemap.local_to_map(tilemap.to_local(sample_pos))
-		var tile_data: TileData = tilemap.get_cell_tile_data(cell)
-		if tile_data != null and tile_data.get_custom_data("blocks_placement"):
-			return true
-	return false
+	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var shape: CircleShape2D = CircleShape2D.new()
+	shape.radius = TOWER_FOOTPRINT_RADIUS
+	var params: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
+	params.shape = shape
+	params.transform = Transform2D(0.0, tap_pos)
+	params.collision_mask = ROAD_COLLISION_MASK
+	params.collide_with_bodies = true
+	params.collide_with_areas = false
+	return space.intersect_shape(params, 1).size() > 0
 
 
 func _is_too_close_to_tower(tap_pos: Vector2, min_distance: float = 50.0) -> bool:

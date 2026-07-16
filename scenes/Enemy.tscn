@@ -1,15 +1,12 @@
-[gd_scene format=2 uid="uid://c1maj67t0g4r"]
+[gd_scene format=3 uid="uid://c1maj67t0g4r"]
 
-[ext_resource type="Script" path="res://scripts/Enemy.gd" id="1"]
+[ext_resource type="Script" uid="uid://3fb1w24dug6r" path="res://scripts/Enemy.gd" id="1"]
 
-[node name="Enemy" type="PathFollow2D"]
+[node name="Enemy" type="PathFollow2D" unique_id=1101772134]
 script = ExtResource("1")
-unit_offset = 0.0
-rotation_mode = 3
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, 0)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1574598907]
 texture_filter = 1
 
-[node name="SpeedControl" type="Node2D" parent="."]
+[node name="SpeedControl" type="Node2D" parent="." unique_id=927035824]
 visible = false
