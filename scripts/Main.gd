@@ -148,15 +148,6 @@ func _ready():
 		build_button.pressed.connect(_on_build_button_pressed)
 	if is_instance_valid(tower_buttons_dock):
 		tower_buttons_dock.visible = false
-	print("collision_enabled=", tilemap.collision_enabled)
-	print("tilemap.global_transform=", tilemap.global_transform)
-	print("physics_layers_count=", tilemap.tile_set.get_physics_layers_count())
-	if tilemap.tile_set.get_physics_layers_count() > 0:
-		print("layer0 collision_layer=", tilemap.tile_set.get_physics_layer_collision_layer(0))
-	var td: TileData = tilemap.get_cell_tile_data(Vector2i(1, 3))
-	if td != null:
-		print("cell(1,3) polygons=", td.get_collision_polygons_count(0))
-		
 
 	# Tower selection buttons — drag-and-drop
 	$CanvasLayer/Control/TowerButtonsDock/SpearButton.button_down.connect(_start_drag.bind("spear"))
