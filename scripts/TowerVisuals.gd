@@ -10,7 +10,7 @@ const TARGET_HEIGHT: float = 240.0
 
 # Nudges the sprite down, as a fraction of its height, after the base has been
 # measured. Positive = lower. Tweak by eye until the tower sits on the cursor.
-const BASE_NUDGE_RATIO: float = 0.10
+const BASE_NUDGE_RATIO: float = 0.15
 
 # Ground footprint radius, as a fraction of the sprite's opaque width.
 # 0.5 = towers touch exactly; lower it to let them sit closer together.
@@ -28,16 +28,22 @@ const DATA := {
 		"path": "res://assets/sprites/Towers/spear_tower/Spear_Tower_%d.png",
 		"frames": 5,
 		"range": 150.0,
+		"projectile": "res://assets/sprites/Towers/spear_tower/Projectile_Spear.png",
+		"muzzle": 0.4,
 	},
 	"arrow": {
 		"path": "res://assets/sprites/Tower_basic_arrow.png",
 		"frames": 1,
 		"range": 200.0,
+		"projectile": "res://assets/sprites/arrow.png",
+		"muzzle": 0.75,
 	},
 	"shells": {
 		"path": "res://assets/sprites/Tower_basic_shells.png",
 		"frames": 1,
 		"range": 130.0,
+		"projectile": "res://assets/sprites/Shell.png",
+		"muzzle": 0.75,
 	},
 }
 
@@ -141,3 +147,13 @@ static func footprint_radius(type: String) -> float:
 
 static func attack_range(type: String) -> float:
 	return float(_entry(type)["range"])
+
+
+static func projectile_path(type: String) -> String:
+	return str(_entry(type)["projectile"])
+
+
+# Where shots leave the tower, relative to its origin (which sits at the base).
+# "muzzle" is a fraction of TARGET_HEIGHT: 0.0 = ground, 1.0 = very top.
+static func muzzle_offset(type: String) -> Vector2:
+	return Vector2(0.0, -TARGET_HEIGHT * float(_entry(type)["muzzle"]))

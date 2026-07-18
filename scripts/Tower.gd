@@ -43,18 +43,16 @@ func _ready():
 		base_fire_rate = 1.5
 		tower_cost = 75
 		base_tower_damage = 8
-		projectile_texture_path = "res://assets/sprites/arrow.png"
 	elif tower_type == "shells":
 		base_fire_rate = 0.5
 		tower_cost = 120
 		base_tower_damage = 30
-		projectile_texture_path = "res://assets/sprites/Shell.png"
 	else: # spear (default)
 		base_fire_rate = 1.0
 		tower_cost = 50
 		base_tower_damage = 10
-		projectile_texture_path = "res://assets/sprites/Spear.png"
 
+	projectile_texture_path = TowerVisuals.projectile_path(tower_type)
 	base_attack_range = TowerVisuals.attack_range(tower_type)
 	footprint_radius = TowerVisuals.footprint_radius(tower_type)
 	total_gold_invested = tower_cost
@@ -151,9 +149,6 @@ func shoot(target):
 	var projectile_scene = preload("res://scenes/Projectile.tscn")
 	var projectile = projectile_scene.instantiate()
 
-	# Set projectile position to tower's position
-	projectile.global_position = global_position
-
 	# Give projectile reference to target enemy
 	projectile.target = target
 
@@ -163,8 +158,12 @@ func shoot(target):
 	# Pass texture path so projectile loads its own visual
 	projectile.texture_path = projectile_texture_path
 
-	# Add projectile as child of the scene
-	get_tree().root.add_child(projectile)
+	# Same parent as the tower, so a scene reload takes shots in flight with it
+	get_parent().add_child(projectile)
+
+	# Position after entering the tree, so global_position means what it says.
+	# Shots leave the top of the tower, not its base.
+	projectile.global_position = global_position + TowerVisuals.muzzle_offset(tower_type)
 
 func _draw() -> void:
 	if not range_visible:

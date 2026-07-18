@@ -4,6 +4,14 @@ extends Area2D
 @export var speed: float = 400.0
 @export var damage: int = 10
 
+# On-map length of a projectile sprite, in map pixels (tile = 96).
+# Source art can be any resolution; this keeps every projectile the same size.
+const TARGET_LENGTH: float = 25.9
+
+# Sprite art points up (-Y), while angle 0 in Godot is +X, so rotate a quarter
+# turn on top of the travel direction to put the tip forward.
+const SPRITE_ANGLE_OFFSET: float = PI * 0.5
+
 # Target enemy reference
 var target = null
 
@@ -23,30 +31,39 @@ func _ready():
 	if texture_path != "":
 		sprite.texture = load(texture_path)
 
-	# Scale the sprite appropriately for 720x1280 screen (roughly 32x32 pixels)
-	sprite.scale = Vector2(0.5, 0.5)
+	# Scale to TARGET_LENGTH regardless of the source resolution
+	if sprite.texture != null and sprite.texture.get_size().y > 0.0:
+		var s: float = TARGET_LENGTH / sprite.texture.get_size().y
+		sprite.scale = Vector2(s, s)
+	else:
+		sprite.scale = Vector2(1.0, 1.0)
 
 
 func _process(delta):
-	if target != null:
-		# Move towards the target
-		var direction = target.global_position - global_position
-		var distance = direction.length()
-
-		# If we're close enough to the target, hit it
-		if distance < speed * delta:
-			hit_target()
-		else:
-			# Move toward target at constant speed
-			direction = direction.normalized() * speed * delta
-			global_position += direction
-	else:
-		# Target was destroyed or invalid
+	# Freed enemies leave a stale reference that is not null, so check validity
+	if not is_instance_valid(target):
 		queue_free()
+		return
+
+	# Move towards the target
+	var direction = target.global_position - global_position
+	var distance = direction.length()
+
+	# Point the tip along the direction of travel
+	if distance > 0.0:
+		rotation = direction.angle() + SPRITE_ANGLE_OFFSET
+
+	# If we're close enough to the target, hit it
+	if distance < speed * delta:
+		hit_target()
+	else:
+		# Move toward target at constant speed
+		direction = direction.normalized() * speed * delta
+		global_position += direction
 
 
 func hit_target():
-	if target != null and is_instance_valid(target):
+	if is_instance_valid(target):
 		# Apply damage to the enemy
 		target.take_damage(damage)
 	queue_free()
