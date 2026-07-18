@@ -368,7 +368,7 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 		return true
 	if is_instance_valid(start_wave_button) and start_wave_button.visible and start_wave_button.get_global_rect().has_point(tap_pos):
 		return true
-	if is_instance_valid(upgrade_panel) and upgrade_panel.visible and upgrade_panel.get_global_rect().has_point(tap_pos):
+	if is_instance_valid(upgrade_panel) and upgrade_panel.visible and upgrade_panel.contains_point(tap_pos):
 		return true
 	if is_instance_valid(speed_button) and speed_button.get_global_rect().has_point(tap_pos):
 		return true

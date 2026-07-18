@@ -8,11 +8,14 @@ signal tower_clicked(tower)
 # Upgrade system
 var level: int = 1
 const MAX_LEVEL: int = 3
+# Click hitbox height as a fraction of the sprite height (base-anchored)
+const HITBOX_HEIGHT_RATIO: float = 0.45
 var total_gold_invested: int = 0
 
 # Tower stats (set in _ready() based on tower_type, then scaled by level)
 var base_attack_range: float = 150.0
 var base_fire_rate: float = 1.0
+var shoot_timer: Timer = null
 var base_tower_damage: int = 10
 var attack_range: float = 150.0
 var fire_rate: float = 1.0
@@ -74,23 +77,28 @@ func _ready():
 
 	_apply_level_stats()
 
-	# Click hitbox matches the sprite so the whole tower is selectable
+	# Click hitbox: cover only the tower body sitting on the ground, NOT the
+	# full sprite. A full-height box reaches up past the flag and overlaps the
+	# tower behind it, so clicks land on the wrong tower. We build a shorter box
+	# anchored at the base (the origin) and rising HITBOX_HEIGHT_RATIO of the way up.
 	var collision_shape = get_node("CollisionShape2D")
 	var rect_shape = RectangleShape2D.new()
+	var full_size: Vector2 = Vector2(64.0, 64.0)
 	if sprite.texture != null:
-		rect_shape.size = sprite.texture.get_size() * sprite.scale
-	else:
-		rect_shape.size = Vector2(64.0, 64.0)
+		full_size = sprite.texture.get_size() * sprite.scale
+	var box_w: float = full_size.x * 1.1                       # 10% wider sides
+	var box_h: float = full_size.y * HITBOX_HEIGHT_RATIO       # shorter than the sprite
+	rect_shape.size = Vector2(box_w, box_h)
 	collision_shape.shape = rect_shape
-	# Follow wherever the sprite actually ended up, offset and all
-	collision_shape.position = sprite.offset * sprite.scale
+	# Origin sits at the base; put the box just above it, hugging the ground
+	collision_shape.position = Vector2(0.0, -box_h * 0.5)
 
 	# Setup timer for shooting
-	var timer = Timer.new()
-	add_child(timer)
-	timer.connect("timeout",Callable(self,"_on_shoot_timer"))
-	timer.wait_time = 1.0 / fire_rate
-	timer.start()
+	shoot_timer = Timer.new()
+	add_child(shoot_timer)
+	shoot_timer.connect("timeout",Callable(self,"_on_shoot_timer"))
+	shoot_timer.wait_time = 1.0 / fire_rate
+	shoot_timer.start()
 
 	# Enable input for click detection (deferred to avoid catching the placement click)
 	input_pickable = false
@@ -215,6 +223,11 @@ func _apply_level_stats() -> void:
 	attack_range = base_attack_range * multiplier
 	fire_rate = base_fire_rate * multiplier
 	tower_damage = int(base_tower_damage * multiplier)
+
+	# Push the new rate to the running timer (skipped during the first
+	# _apply_level_stats in _ready, before the timer is created)
+	if is_instance_valid(shoot_timer) and fire_rate > 0.0:
+		shoot_timer.wait_time = 1.0 / fire_rate
 
 
 	# Visual: darken by 25% per level (level 1 = 1.0, level 2 = 0.75, level 3 = 0.5)

@@ -14,7 +14,7 @@ const BASE_NUDGE_RATIO: float = 0.15
 
 # Ground footprint radius, as a fraction of the sprite's opaque width.
 # 0.5 = towers touch exactly; lower it to let them sit closer together.
-const FOOTPRINT_WIDTH_RATIO: float = 0.38
+const FOOTPRINT_WIDTH_RATIO: float = 0.5
 
 # The footprint is an ellipse, not a circle: the ground is seen at an angle, so
 # the same real gap looks shorter on screen vertically than horizontally.
