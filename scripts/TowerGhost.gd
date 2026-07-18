@@ -3,19 +3,17 @@ extends Node2D
 # Ghost preview of a tower while player is dragging to place it.
 # Shows the tower sprite semi-transparently plus a range circle.
 # Modulates green/red based on whether placement is currently valid.
+# All visuals come from TowerVisuals so this always matches the real tower.
 
 var tower_type: String = "spear"
 var attack_range: float = 150.0
 var is_valid: bool = true
-
 var sprite: Sprite2D = null
 
 
 func _ready() -> void:
 	z_index = 20
-	# Create sprite
 	sprite = Sprite2D.new()
-	sprite.scale = Vector2(0.5, 0.5)
 	add_child(sprite)
 	_apply_type()
 
@@ -27,18 +25,19 @@ func set_tower_type(new_type: String) -> void:
 
 
 func _apply_type() -> void:
-	var tex_path: String = "res://assets/sprites/Tower_basic_spear.png"
-	if tower_type == "arrow":
-		tex_path = "res://assets/sprites/Tower_basic_arrow.png"
-		attack_range = 200.0
-	elif tower_type == "shells":
-		tex_path = "res://assets/sprites/Tower_basic_shells.png"
-		attack_range = 130.0
+	attack_range = TowerVisuals.attack_range(tower_type)
+
+	# Preview uses the first frame; the ghost doesn't animate
+	var frames: Array = TowerVisuals.load_frames(tower_type)
+	if frames.is_empty():
+		sprite.texture = null
 	else:
-		attack_range = 150.0
-	
-	if ResourceLoader.exists(tex_path):
-		sprite.texture = load(tex_path)
+		sprite.texture = frames[0]
+		sprite.scale = TowerVisuals.scale_for(sprite.texture)
+		sprite.offset = TowerVisuals.base_offset(sprite.texture)
+
+	set_valid(is_valid)
+	queue_redraw()
 
 
 func set_valid(valid: bool) -> void:

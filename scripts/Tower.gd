@@ -19,9 +19,6 @@ var fire_rate: float = 1.0
 var tower_cost: int = 50
 var tower_damage: int = 10
 
-# Tower's own visual sprite path (used for the tower placed on the map)
-var tower_texture_path: String = ""
-
 # Projectile texture path (what this tower shoots at enemies)
 var projectile_texture_path: String = ""
 
@@ -29,47 +26,65 @@ var projectile_texture_path: String = ""
 var enemies_in_range = []
 var range_visible: bool = false
 
+# Ground footprint, used to stop towers overlapping each other
+var footprint_radius: float = 48.0
+
+# Idle animation state (flag waving)
+var frame_textures: Array = []
+var frame_index: int = 0
+var frame_timer: float = 0.0
+const FRAME_DURATION: float = 0.1
+
 
 func _ready():
 	add_to_group("towers")
-	# Set stats and textures based on tower type
+	# Stats per tower type; visuals and range come from TowerVisuals
 	if tower_type == "arrow":
-		base_attack_range = 200.0
 		base_fire_rate = 1.5
 		tower_cost = 75
 		base_tower_damage = 8
-		tower_texture_path = "res://assets/sprites/Tower_basic_arrow.png"
 		projectile_texture_path = "res://assets/sprites/arrow.png"
 	elif tower_type == "shells":
-		base_attack_range = 130.0
 		base_fire_rate = 0.5
 		tower_cost = 120
 		base_tower_damage = 30
-		tower_texture_path = "res://assets/sprites/Tower_basic_shells.png"
 		projectile_texture_path = "res://assets/sprites/Shell.png"
 	else: # spear (default)
-		base_attack_range = 150.0
 		base_fire_rate = 1.0
 		tower_cost = 50
 		base_tower_damage = 10
-		tower_texture_path = "res://assets/sprites/Tower_basic_spear.png"
 		projectile_texture_path = "res://assets/sprites/Spear.png"
-	
+
+	base_attack_range = TowerVisuals.attack_range(tower_type)
+	footprint_radius = TowerVisuals.footprint_radius(tower_type)
 	total_gold_invested = tower_cost
-	_apply_level_stats()	
 
-	# Create and set the collision shape radius to match attack range
-	var collision_shape = get_node("CollisionShape2D")
-	var circle_shape = CircleShape2D.new()
-	circle_shape.radius = 32.0
-	collision_shape.shape = circle_shape
-
-	# Load and set tower's own sprite texture (its visual on the map)
+	# Load visuals: animation frames if this type has them, otherwise one texture
 	var sprite = get_node("Sprite2D")
-	sprite.texture = load(tower_texture_path)
+	frame_textures = TowerVisuals.load_frames(tower_type)
+	if frame_textures.is_empty():
+		sprite.texture = null
+	else:
+		# Randomize the starting frame so towers don't wave in lockstep
+		frame_index = randi() % frame_textures.size()
+		frame_timer = randf() * FRAME_DURATION
+		sprite.texture = frame_textures[frame_index]
+		# Scale and offset come from frame 0 so every frame lines up identically
+		sprite.scale = TowerVisuals.scale_for(frame_textures[0])
+		sprite.offset = TowerVisuals.base_offset(frame_textures[0])
 
-	# Scale the sprite appropriately for 720x1280 screen (roughly 64x64 pixels)
-	sprite.scale = Vector2(1.3, 1.3)
+	_apply_level_stats()
+
+	# Click hitbox matches the sprite so the whole tower is selectable
+	var collision_shape = get_node("CollisionShape2D")
+	var rect_shape = RectangleShape2D.new()
+	if sprite.texture != null:
+		rect_shape.size = sprite.texture.get_size() * sprite.scale
+	else:
+		rect_shape.size = Vector2(64.0, 64.0)
+	collision_shape.shape = rect_shape
+	# Follow wherever the sprite actually ended up, offset and all
+	collision_shape.position = sprite.offset * sprite.scale
 
 	# Setup timer for shooting
 	var timer = Timer.new()
@@ -77,7 +92,7 @@ func _ready():
 	timer.connect("timeout",Callable(self,"_on_shoot_timer"))
 	timer.wait_time = 1.0 / fire_rate
 	timer.start()
-	
+
 	# Enable input for click detection (deferred to avoid catching the placement click)
 	input_pickable = false
 	input_event.connect(_on_input_event)
@@ -90,13 +105,26 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 		get_viewport().set_input_as_handled()
 
 
-func _process(_delta):
+func _process(delta):
+	_advance_flag_animation(delta)
+
 	# Manually check distance to all enemies in the scene
 	enemies_in_range.clear()
 	var all_enemies = get_tree().get_nodes_in_group("enemies")
 	for enemy in all_enemies:
 		if is_instance_valid(enemy) and global_position.distance_to(enemy.global_position) <= attack_range:
 			enemies_in_range.append(enemy)
+
+
+func _advance_flag_animation(delta: float) -> void:
+	if frame_textures.size() < 2:
+		return
+	frame_timer += delta
+	if frame_timer < FRAME_DURATION:
+		return
+	frame_timer -= FRAME_DURATION
+	frame_index = (frame_index + 1) % frame_textures.size()
+	get_node("Sprite2D").texture = frame_textures[frame_index]
 
 
 func _on_shoot_timer():
@@ -163,8 +191,8 @@ func _apply_level_stats() -> void:
 	attack_range = base_attack_range * multiplier
 	fire_rate = base_fire_rate * multiplier
 	tower_damage = int(base_tower_damage * multiplier)
-	
-	
+
+
 	# Visual: darken by 25% per level (level 1 = 1.0, level 2 = 0.75, level 3 = 0.5)
 	var sprite = get_node("Sprite2D")
 	var darkness: float = 1.0 - (level - 1) * 0.25

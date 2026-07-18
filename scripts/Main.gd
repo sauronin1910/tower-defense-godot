@@ -389,12 +389,15 @@ func _is_on_enemy_path(tap_pos: Vector2, _min_distance: float = 55.0) -> bool:
 	return space.intersect_shape(params, 1).size() > 0
 
 
-func _is_too_close_to_tower(tap_pos: Vector2, min_distance: float = 50.0) -> bool:
+func _is_too_close_to_tower(tap_pos: Vector2, type: String = "spear") -> bool:
+	var new_radius: float = TowerVisuals.footprint_radius(type)
 	var towers := get_tree().get_nodes_in_group("towers")
 	for tower in towers:
 		if not is_instance_valid(tower):
 			continue
-		if tap_pos.distance_to(tower.global_position) < min_distance:
+		var delta: Vector2 = tap_pos - tower.global_position
+		delta.y /= TowerVisuals.FOOTPRINT_VERTICAL_RATIO
+		if delta.length() < new_radius + tower.footprint_radius:
 			return true
 	return false
 
@@ -641,7 +644,7 @@ func _can_place_tower_at(pos: Vector2, type: String) -> bool:
 		return false
 	if _is_on_enemy_path(pos):
 		return false
-	if _is_too_close_to_tower(pos):
+	if _is_too_close_to_tower(pos, type):
 		return false
 	return true
 

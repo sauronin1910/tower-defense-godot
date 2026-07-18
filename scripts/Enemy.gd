@@ -11,6 +11,11 @@ signal split_requested(spawn_position, spawn_progress_ratio)
 # Exported variable for enemy type selection
 @export var enemy_type: String = "peasant"
 
+# Global tuning for the larger map. Base values below stay readable as
+# "design speed"; these scale every type at once.
+const SPEED_MULTIPLIER: float = 2.0
+const ANIM_SPEED_MULTIPLIER: float = 2.0
+
 # Health system
 var health: int = 0
 var max_health: int = 0
@@ -73,6 +78,9 @@ func _ready():
 		speed = 100
 		gold_reward = 10
 	
+	# Scale every type at once for the bigger map
+	speed *= SPEED_MULTIPLIER
+	
 	print("Enemy type: ", enemy_type, " - Health: ", health, " - Speed: ", speed)
 	
 	# Apply texture to sprite
@@ -128,7 +136,9 @@ func _ready():
 
 
 func _process(delta):
-	anim_time += delta
+	# Driving the clock faster speeds up every sin() below at once,
+	# keeping their relative rhythms intact
+	anim_time += delta * ANIM_SPEED_MULTIPLIER
 
 	sprite_node = get_node("Sprite2D")
 
