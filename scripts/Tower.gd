@@ -25,6 +25,7 @@ var projectile_texture_path: String = ""
 # Tower state tracking
 var enemies_in_range = []
 var range_visible: bool = false
+var range_reveal: float = 0.0
 
 # Ground footprint, used to stop towers overlapping each other
 var footprint_radius: float = 48.0
@@ -96,6 +97,8 @@ func _ready():
 	input_event.connect(_on_input_event)
 	call_deferred("_enable_input_after_frame")
 
+	_play_build_pop()
+
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -105,6 +108,9 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 
 func _process(delta):
 	_advance_flag_animation(delta)
+	if range_visible and range_reveal < 1.0:
+		range_reveal = min(range_reveal + delta * 6.0, 1.0)
+		queue_redraw()
 
 	# Manually check distance to all enemies in the scene
 	enemies_in_range.clear()
@@ -168,16 +174,35 @@ func shoot(target):
 func _draw() -> void:
 	if not range_visible:
 		return
-	draw_circle(Vector2.ZERO, attack_range, Color(0.2, 0.6, 1.0, 0.15))
-	draw_arc(Vector2.ZERO, attack_range, 0.0, TAU, 64, Color(0.2, 0.6, 1.0, 0.8), 2.0)
+	# Range ring animates open on click, then holds at full size (static)
+	var ring_r: float = attack_range * range_reveal
+	draw_arc(Vector2.ZERO, ring_r, 0.0, TAU, 64, Color(0.0, 0.0, 0.0, 1.0), 2.0)
+
+
+func set_footprint_visible(_value: bool) -> void:
+	# Footprint overlay removed; kept as a no-op so Main can call it safely
+	pass
 
 func show_range() -> void:
 	range_visible = true
+	range_reveal = 0.0
 	queue_redraw()
 
 func hide_range() -> void:
 	range_visible = false
 	queue_redraw()
+
+
+func _play_build_pop() -> void:
+	# Build-in animation: the tower springs up from its base.
+	# Scale-only, so it never fights the flag animation (texture) or
+	# the level tint (modulate). Origin is at the base, so it grows upward.
+	var sprite := get_node("Sprite2D")
+	var final_scale: Vector2 = sprite.scale
+	sprite.scale = Vector2(final_scale.x * 0.05, final_scale.y * 0.05)
+	var tween := create_tween()
+	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(sprite, "scale", final_scale, 0.22)
 
 
 # ════════════════════════════════════════════

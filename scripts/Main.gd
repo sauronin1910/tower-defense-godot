@@ -84,6 +84,7 @@ var pan_start_camera: Vector2 = Vector2.ZERO
 # Drag-and-drop tower placement
 var tower_ghost: Node2D = null
 var is_dragging_tower: bool = false
+var dock_was_open: bool = false
 var dragging_tower_type: String = ""
 
 var selected_tower = null
@@ -610,6 +611,12 @@ func _on_level_complete_next() -> void:
 #  TOWER DRAG-AND-DROP PLACEMENT
 # ════════════════════════════════════════════
 
+func _set_all_footprints_visible(value: bool) -> void:
+	for tower in get_tree().get_nodes_in_group("towers"):
+		if is_instance_valid(tower):
+			tower.set_footprint_visible(value)
+
+
 func _start_drag(type: String) -> void:
 	var cost: int = TOWER_COSTS[type]
 	if gold < cost:
@@ -617,7 +624,9 @@ func _start_drag(type: String) -> void:
 		return
 	dragging_tower_type = type
 	is_dragging_tower = true
+	_set_all_footprints_visible(true)
 	if is_instance_valid(tower_buttons_dock):
+		dock_was_open = tower_buttons_dock.visible
 		tower_buttons_dock.visible = false
 	if tower_ghost != null:
 		tower_ghost.queue_free()
@@ -653,6 +662,7 @@ func _finish_drag() -> void:
 	if not is_dragging_tower:
 		return
 	is_dragging_tower = false
+	_set_all_footprints_visible(false)
 	var final_pos: Vector2 = Vector2.ZERO
 	if is_instance_valid(tower_ghost):
 		final_pos = tower_ghost.position
@@ -660,6 +670,8 @@ func _finish_drag() -> void:
 		tower_ghost = null
 	if _can_place_tower_at(final_pos, dragging_tower_type):
 		_place_tower_at(final_pos, dragging_tower_type)
+	if dock_was_open and is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = true
 
 
 func _place_tower_at(pos: Vector2, type: String) -> void:
