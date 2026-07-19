@@ -9,7 +9,7 @@ signal tower_clicked(tower)
 var level: int = 1
 const MAX_LEVEL: int = 3
 # Click hitbox height as a fraction of the sprite height (base-anchored)
-const HITBOX_HEIGHT_RATIO: float = 0.45
+const HITBOX_HEIGHT_RATIO: float = 0.75
 var total_gold_invested: int = 0
 
 # Tower stats (set in _ready() based on tower_type, then scaled by level)
@@ -77,21 +77,24 @@ func _ready():
 
 	_apply_level_stats()
 
-	# Click hitbox: cover only the tower body sitting on the ground, NOT the
-	# full sprite. A full-height box reaches up past the flag and overlaps the
-	# tower behind it, so clicks land on the wrong tower. We build a shorter box
-	# anchored at the base (the origin) and rising HITBOX_HEIGHT_RATIO of the way up.
+	# Click hitbox: snug around the tower's VISIBLE pixels, not the padded
+	# texture. opaque_local_rect returns the tight bounds in the same local
+	# space the sprite renders in, so the box lands exactly on the artwork.
 	var collision_shape = get_node("CollisionShape2D")
 	var rect_shape = RectangleShape2D.new()
-	var full_size: Vector2 = Vector2(64.0, 64.0)
-	if sprite.texture != null:
-		full_size = sprite.texture.get_size() * sprite.scale
-	var box_w: float = full_size.x * 1.1                       # 10% wider sides
-	var box_h: float = full_size.y * HITBOX_HEIGHT_RATIO       # shorter than the sprite
+	var opaque: Rect2 = TowerVisuals.opaque_local_rect(tower_type)
+	# Keep the lower HITBOX_HEIGHT_RATIO of the tower (drop roof/flag) so
+	# stacked towers don't overlap; 1.0 would cover the whole silhouette.
+	var box_w: float = opaque.size.x * 1.1
+	var box_h: float = opaque.size.y * HITBOX_HEIGHT_RATIO
 	rect_shape.size = Vector2(box_w, box_h)
 	collision_shape.shape = rect_shape
-	# Origin sits at the base; put the box just above it, hugging the ground
-	collision_shape.position = Vector2(0.0, -box_h * 0.5)
+	# Center of the box = center-x of the opaque rect, and vertically the
+	# center of the kept bottom slice.
+	var center_x: float = opaque.position.x + opaque.size.x * 0.5
+	var bottom_y: float = opaque.position.y + opaque.size.y
+	var center_y: float = bottom_y - box_h * 0.5
+	collision_shape.position = Vector2(center_x, center_y)
 
 	# Setup timer for shooting
 	shoot_timer = Timer.new()

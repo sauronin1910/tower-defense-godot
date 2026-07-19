@@ -145,6 +145,45 @@ static func footprint_radius(type: String) -> float:
 	return radius
 
 
+static var _opaque_cache: Dictionary = {}
+
+
+# The tight bounding box of the tower's visible pixels, in LOCAL sprite space
+# (already scaled and shifted by the sprite's offset). Returns a Rect2 whose
+# position is relative to the node origin. Used to build a snug click hitbox
+# instead of one padded out by the texture's transparent margins.
+static func opaque_local_rect(type: String) -> Rect2:
+	var frames: Array = load_frames(type)
+	if frames.is_empty():
+		return Rect2(-32, -64, 64, 64)
+	var tex: Texture2D = frames[0]
+	var key: String = tex.resource_path
+	if key != "" and _opaque_cache.has(key):
+		return _opaque_cache[key]
+
+	var tex_size: Vector2 = tex.get_size()
+	var used := Rect2i(Vector2i.ZERO, Vector2i(tex_size))
+	var img: Image = tex.get_image()
+	if img != null:
+		if img.is_compressed():
+			img.decompress()
+		var r: Rect2i = img.get_used_rect()
+		if r.size.x > 0 and r.size.y > 0:
+			used = r
+
+	var s: Vector2 = scale_for(tex)
+	var off: Vector2 = base_offset(tex)
+	# Sprite is centered: texture pixel (px,py) maps to local
+	#   (px - tex_w/2)*s + off*s ... offset is already in texture px, so scale it too
+	var local_pos: Vector2 = (Vector2(used.position) - tex_size * 0.5 + off) * s
+	var local_size: Vector2 = Vector2(used.size) * s
+	var rect := Rect2(local_pos, local_size)
+
+	if key != "":
+		_opaque_cache[key] = rect
+	return rect
+
+
 static func attack_range(type: String) -> float:
 	return float(_entry(type)["range"])
 

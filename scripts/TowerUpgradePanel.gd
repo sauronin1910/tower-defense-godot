@@ -31,6 +31,7 @@ func _ready() -> void:
 	style.content_margin_top = 8
 	style.content_margin_bottom = 8
 	add_theme_stylebox_override("panel", style)
+	
 
 	# The panel must swallow clicks so they never reach Main's map handler
 	mouse_filter = Control.MOUSE_FILTER_STOP
