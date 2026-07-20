@@ -62,6 +62,15 @@ func _ready():
 	total_gold_invested = tower_cost
 
 	# Load visuals: animation frames if this type has them, otherwise one texture
+	
+	# Blob shadow on the ground at the base — added first so it draws under
+	# the sprite. Origin (0,0) is the base, so it sits right where the tower
+	# meets the ground.
+	var shadow := TowerVisuals.make_shadow(tower_type)
+	add_child(shadow)
+	move_child(shadow, 0)
+
+	# Load visuals: animation frames if this type has them, otherwise one texture
 	var sprite = get_node("Sprite2D")
 	frame_textures = TowerVisuals.load_frames(tower_type)
 	if frame_textures.is_empty():

@@ -196,3 +196,12 @@ static func projectile_path(type: String) -> String:
 # "muzzle" is a fraction of TARGET_HEIGHT: 0.0 = ground, 1.0 = very top.
 static func muzzle_offset(type: String) -> Vector2:
 	return Vector2(0.0, -TARGET_HEIGHT * float(_entry(type)["muzzle"]))
+	
+	
+# Creates a ready-to-use blob shadow node for a tower of this type. The caller
+# adds it as the FIRST child of the tower so it draws under the sprite, at the
+# base (node origin).
+static func make_shadow(type: String) -> TowerShadow:
+	var shadow := TowerShadow.new()
+	shadow.setup(footprint_radius(type), FOOTPRINT_VERTICAL_RATIO)
+	return shadow	
