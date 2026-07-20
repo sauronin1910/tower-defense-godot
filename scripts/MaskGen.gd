@@ -15,7 +15,7 @@ extends Node
 const OUTPUT_PATH: String = "res://assets/grass_mask.png"
 const ROAD_COLLISION_MASK: int = 1 << 4     # road physics layer 5 (value 16)
 const SUBDIV: int = 8                        # samples per tile per axis
-const PROBE_RADIUS: float = 8.0              # small circle to bridge tile seams
+const PROBE_RADIUS: float = 3.0              # small circle to bridge tile seams
 
 @export var tilemap_path: NodePath = ^"../TileMapLayer"
 

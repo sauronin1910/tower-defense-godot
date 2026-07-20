@@ -17,9 +17,9 @@ uniform float fray_amount = 40.0;
 uniform float shadow_alpha = 0.30;
 uniform float light_alpha  = 0.34;
 uniform float pixel_size = 12.0;    // chunky pixel grid (bigger = blockier)
-uniform float band_scale = 240.0;   // world px between streaks
-uniform float shadow_band = 0.10;   // 0..1 width of the shadow stripe
-uniform float light_band  = 0.16;   // 0..1 width of the light stripe (first)
+uniform float band_scale = 240.0;    // world px between streaks (SPACING only now)
+uniform float light_width = 60.0;    // world px — thickness of the light stripe
+uniform float shadow_width = 12.0;   // world px — thickness of the shadow edge
 uniform vec2 band_dir = vec2(1.0, -1.0); // straight diagonal
 uniform float band_speed = 35.0;
 void fragment() {
@@ -28,7 +28,7 @@ void fragment() {
 	if (mask_uv.x < 0.0 || mask_uv.x > 1.0 || mask_uv.y < 0.0 || mask_uv.y > 1.0) {
 		discard;
 	}
-	if (texture(road_mask, mask_uv).r < 0.5) {
+	if (texture(road_mask, mask_uv).r < 0.35) {
 		discard;
 	}
 	// Chunky pixel grid
@@ -40,16 +40,17 @@ void fragment() {
 	float across = dot(world, perp);
 	float n = texture(noise_tex, vec2(across / 400.0, 0.5)).r;
 	float along = dot(world, dir) - TIME * band_speed + (n - 0.5) * fray_amount;
-	float phase = fract(along / band_scale); // 0..1 across one cycle
-	// Two-tone streak profile across the cycle: light | shadow | (rest = ground)
-	// Light comes first, then the shadow edge — no gap between them.
-	float light_end2  = light_band;
-	float shadow_end2 = light_band + shadow_band;
+	// band_scale = distance between streaks (period). The streak widths below are
+	// in absolute world pixels, so changing the spacing no longer changes the
+	// streak thickness or the pixel look.
+	float cycle = mod(along, band_scale); // 0..band_scale — position within one period
+	float light_end2  = light_width;
+	float shadow_end2 = light_width + shadow_width;
 	// Sample gradient at texel centers: 3 pixels → centers at u = 1/6, 3/6, 5/6
-	if (phase < light_end2) {
+	if (cycle < light_end2) {
 		vec3 col = texture(gradient_tex, vec2(5.0/6.0, 0.5)).rgb; // rightmost = light first
 		COLOR = vec4(col, light_alpha);
-	} else if (phase < shadow_end2) {
+	} else if (cycle < shadow_end2) {
 		vec3 col = texture(gradient_tex, vec2(1.0/6.0, 0.5)).rgb; // leftmost = shadow last
 		COLOR = vec4(col, shadow_alpha);
 	} else {
