@@ -1,8 +1,11 @@
 [gd_scene format=4 uid="uid://m55k5fvnulhl"]
 
 [ext_resource type="Script" uid="uid://cc3boxaux6b1w" path="res://scripts/Main.gd" id="1_wp0k4"]
+[ext_resource type="Texture2D" uid="uid://d4k6ukjpnifpu" path="res://shaders/clouds.png" id="2_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://b3tuetxdevdcs" path="res://scenes/TowerUpgradePanel.tscn" id="2_rvslj"]
+[ext_resource type="Shader" uid="uid://dalrfhhv6fn1j" path="res://shaders/cloud_shadows.gdshader" id="2_wp0k4"]
 [ext_resource type="PackedScene" uid="uid://cxlvlcmp001" path="res://scenes/LevelComplete.tscn" id="3_0bbpv"]
+[ext_resource type="Script" uid="uid://dppb6ocjhvtgm" path="res://scripts/CloudShadows.gd" id="3_mwfav"]
 [ext_resource type="Texture2D" uid="uid://n7hkf2vm4kxy" path="res://shaders/gradient.png" id="3_q8u5g"]
 [ext_resource type="Texture2D" uid="uid://xhcm8ib85hs0" path="res://shaders/noise.png" id="4_lhr70"]
 [ext_resource type="Texture2D" uid="uid://di6jwcodwjji7" path="res://assets/terrain/light_green_brown_cobblestone.svg" id="5_c01mt"]
@@ -12,6 +15,21 @@
 [ext_resource type="Script" uid="uid://bf1e2yj0nitw0" path="res://scripts/Grass.gd" id="8_lhr70"]
 
 [sub_resource type="TileSet" id="TileSet_mp12f"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_wp0k4"]
+load_path = "res://.godot/imported/clouds.png-d2691e4facfeb9c9ef0be7f3ce23b5d1.ctex"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lhr70"]
+shader = ExtResource("2_wp0k4")
+shader_parameter/cloud_tex = SubResource("CompressedTexture2D_wp0k4")
+shader_parameter/rect_world_origin = Vector2(-1248, -384)
+shader_parameter/rect_world_size = Vector2(4512, 2592)
+shader_parameter/cloud_scale = 1500.0
+shader_parameter/cloud_dir = Vector2(-1, 1.3)
+shader_parameter/cloud_speed = 15.0
+shader_parameter/shadow_strength = 0.32
+shader_parameter/coverage = 0.5
+shader_parameter/softness = 0.15
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlsqs"]
 shader = ExtResource("6_jlsqs")
@@ -27,10 +45,10 @@ shader_parameter/shadow_alpha = 0.8
 shader_parameter/light_alpha = 0.5
 shader_parameter/pixel_size = 3.0
 shader_parameter/band_scale = 800.0
-shader_parameter/light_width = 60.0
+shader_parameter/light_width = 80.0
 shader_parameter/shadow_width = 3.0
 shader_parameter/band_dir = Vector2(1, -0.5)
-shader_parameter/band_speed = 35.0
+shader_parameter/band_speed = 31.0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c01mt"]
 texture = ExtResource("5_c01mt")
@@ -333,8 +351,23 @@ wait_time = 0.8
 [node name="NextWaveTimer" type="Timer" parent="." unique_id=472602921]
 wait_time = 15.0
 
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1068734360]
+modulate = Color(1, 1, 1, 0.08627451)
+texture = ExtResource("2_qmy6f")
+script = ExtResource("3_mwfav")
+
 [node name="GrassMask" type="TileMapLayer" parent="." unique_id=127904588]
 tile_set = SubResource("TileSet_mp12f")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1628899454]
+visible = false
+material = SubResource("ShaderMaterial_lhr70")
+offset_left = -1248.0
+offset_top = -384.0
+offset_right = 3264.0
+offset_bottom = 2208.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
 
 [node name="Grass" type="ColorRect" parent="." unique_id=560112073]
 material = SubResource("ShaderMaterial_jlsqs")
