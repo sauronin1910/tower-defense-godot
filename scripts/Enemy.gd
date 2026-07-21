@@ -117,6 +117,22 @@ func _ready():
 	if sprite_node.texture != null:
 		sprite_height = sprite_node.texture.get_height() * abs(sprite_node.scale.y)
 	var bar_y_offset: float = -sprite_height * 0.5 - 8.0
+	# Blob shadow at the enemy's real base. Origin is the enemy CENTER, so we
+	# measure the opaque pixels to find the true bottom and put the shadow there.
+	var opaque := _opaque_bounds(sprite_node)
+	var sprite_width: float = opaque.size.x * abs(sprite_node.scale.x)
+	# opaque.position.y is texture-space top of the visible pixels; bottom edge:
+	var opaque_bottom_local: float = (opaque.position.y + opaque.size.y - sprite_node.texture.get_height() * 0.5) * abs(sprite_node.scale.y)
+	var enemy_shadow := TowerShadow.new()
+	enemy_shadow.setup(sprite_width * 0.3, 0.5)
+	enemy_shadow.color = Color(0.0, 0.0, 0.0, 0.25)
+	enemy_shadow.y_offset = opaque_bottom_local
+	enemy_shadow.z_index = -1
+	enemy_shadow.x_offset = 0.0
+	enemy_shadow.width_mult = 1.0
+	enemy_shadow.height_mult = 1.0
+	add_child(enemy_shadow)
+	move_child(enemy_shadow, 0)
 
 	# Create HP bar (background)
 	hp_bar_bg = ColorRect.new()
@@ -213,3 +229,18 @@ func _update_hp_bar() -> void:
 	# This is called from take_damage() but we no longer update the size directly here.
 	# Actual smooth interpolation happens in _process.
 	pass
+
+# Tight bounds of the sprite's visible (opaque) pixels, in TEXTURE pixels.
+func _opaque_bounds(spr: Sprite2D) -> Rect2:
+	var tex: Texture2D = spr.texture
+	if tex == null:
+		return Rect2(0, 0, 0, 0)
+	var img: Image = tex.get_image()
+	if img == null:
+		return Rect2(Vector2.ZERO, tex.get_size())
+	if img.is_compressed():
+		img.decompress()
+	var r: Rect2i = img.get_used_rect()
+	if r.size.x <= 0 or r.size.y <= 0:
+		return Rect2(Vector2.ZERO, tex.get_size())
+	return Rect2(r.position, r.size)
