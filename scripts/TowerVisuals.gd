@@ -21,6 +21,15 @@ const FOOTPRINT_WIDTH_RATIO: float = 0.5
 # 1.0 = circle; lower = towers may stack closer above/below each other.
 const FOOTPRINT_VERTICAL_RATIO: float = 0.7
 
+# ── Cast shadow (variant B) — skewed silhouette cast on the ground ──
+# All tweakable by eye. Light is assumed upper-left, so the shadow falls to the
+# lower-right (positive skew / positive x offset).
+const SHADOW_SKEW: float = 0.9              # lean in radians; + leans right, - left
+const SHADOW_SQUASH: float = 0.35           # vertical scale (lower = flatter on ground)
+const SHADOW_ALPHA: float = 0.35            # darkness (0 = invisible, 1 = solid black)
+const SHADOW_OFFSET_X: float = 20.0         # base offset from the tower foot (+ = right)
+const SHADOW_OFFSET_Y: float = 0.0          # base offset (+ = down)
+
 # path: file path; use a %d placeholder when frames > 1
 # frames: 1 = static sprite, >1 = animation frames numbered from 1
 const DATA := {
@@ -196,12 +205,32 @@ static func projectile_path(type: String) -> String:
 # "muzzle" is a fraction of TARGET_HEIGHT: 0.0 = ground, 1.0 = very top.
 static func muzzle_offset(type: String) -> Vector2:
 	return Vector2(0.0, -TARGET_HEIGHT * float(_entry(type)["muzzle"]))
-	
-	
+
+
 # Creates a ready-to-use blob shadow node for a tower of this type. The caller
 # adds it as the FIRST child of the tower so it draws under the sprite, at the
-# base (node origin).
+# base (node origin). Kept for enemies (variant A); towers use make_cast_shadow.
 static func make_shadow(type: String) -> TowerShadow:
 	var shadow := TowerShadow.new()
 	shadow.setup(footprint_radius(type), FOOTPRINT_VERTICAL_RATIO)
-	return shadow	
+	return shadow
+
+
+# Builds a cast-shadow Sprite2D (variant B): same silhouette as the sprite,
+# filled black, skewed and squashed onto the ground. Tower.gd assigns the
+# current animation frame to it each tick so it waves in sync with the flag.
+# Returns null if the type has no frames.
+static func make_cast_shadow(type: String) -> Sprite2D:
+	var frames: Array = load_frames(type)
+	if frames.is_empty():
+		return null
+	var tex: Texture2D = frames[0]
+	var shadow := Sprite2D.new()
+	shadow.texture = tex
+	shadow.scale = Vector2(scale_for(tex).x, scale_for(tex).y * SHADOW_SQUASH)
+	shadow.offset = base_offset(tex)
+	shadow.skew = SHADOW_SKEW
+	shadow.position = Vector2(SHADOW_OFFSET_X, SHADOW_OFFSET_Y)
+	shadow.modulate = Color(0.0, 0.0, 0.0, SHADOW_ALPHA)
+	shadow.z_index = -1  # under the tower sprite
+	return shadow

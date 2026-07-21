@@ -35,6 +35,7 @@ var footprint_radius: float = 48.0
 
 # Idle animation state (flag waving)
 var frame_textures: Array = []
+var cast_shadow: Sprite2D = null
 var frame_index: int = 0
 var frame_timer: float = 0.0
 const FRAME_DURATION: float = 0.1
@@ -61,14 +62,13 @@ func _ready():
 	footprint_radius = TowerVisuals.footprint_radius(tower_type)
 	total_gold_invested = tower_cost
 
-	# Load visuals: animation frames if this type has them, otherwise one texture
-	
-	# Blob shadow on the ground at the base — added first so it draws under
-	# the sprite. Origin (0,0) is the base, so it sits right where the tower
-	# meets the ground.
-	var shadow := TowerVisuals.make_shadow(tower_type)
-	add_child(shadow)
-	move_child(shadow, 0)
+	# Cast shadow (variant B): black skewed copy of the silhouette on the ground,
+	# added first so it draws under the sprite. Frame-synced in
+	# _advance_flag_animation so it waves with the flag.
+	cast_shadow = TowerVisuals.make_cast_shadow(tower_type)
+	if cast_shadow != null:
+		add_child(cast_shadow)
+		move_child(cast_shadow, 0)
 
 	# Load visuals: animation frames if this type has them, otherwise one texture
 	var sprite = get_node("Sprite2D")
@@ -83,6 +83,9 @@ func _ready():
 		# Scale and offset come from frame 0 so every frame lines up identically
 		sprite.scale = TowerVisuals.scale_for(frame_textures[0])
 		sprite.offset = TowerVisuals.base_offset(frame_textures[0])
+		# Sync the shadow's starting frame to the sprite
+		if is_instance_valid(cast_shadow):
+			cast_shadow.texture = frame_textures[frame_index]
 
 	_apply_level_stats()
 
@@ -149,6 +152,9 @@ func _advance_flag_animation(delta: float) -> void:
 	frame_timer -= FRAME_DURATION
 	frame_index = (frame_index + 1) % frame_textures.size()
 	get_node("Sprite2D").texture = frame_textures[frame_index]
+	# Keep the cast shadow waving in sync with the flag
+	if is_instance_valid(cast_shadow):
+		cast_shadow.texture = frame_textures[frame_index]
 
 
 func _on_shoot_timer():
