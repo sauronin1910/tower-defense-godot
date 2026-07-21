@@ -25,10 +25,10 @@ const FOOTPRINT_VERTICAL_RATIO: float = 0.7
 # All tweakable by eye. Light is assumed upper-left, so the shadow falls to the
 # lower-right (positive skew / positive x offset).
 const SHADOW_SKEW: float = 0.9              # lean in radians; + leans right, - left
-const SHADOW_SQUASH: float = 0.35           # vertical scale (lower = flatter on ground)
-const SHADOW_ALPHA: float = 0.35            # darkness (0 = invisible, 1 = solid black)
+const SHADOW_SQUASH: float = 0.8           # vertical scale (lower = flatter on ground)
+const SHADOW_ALPHA: float = 0.33            # darkness (0 = invisible, 1 = solid black)
 const SHADOW_OFFSET_X: float = 20.0         # base offset from the tower foot (+ = right)
-const SHADOW_OFFSET_Y: float = 0.0          # base offset (+ = down)
+const SHADOW_OFFSET_Y: float = 5.0          # base offset (+ = down)
 
 # path: file path; use a %d placeholder when frames > 1
 # frames: 1 = static sprite, >1 = animation frames numbered from 1
