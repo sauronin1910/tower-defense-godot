@@ -22,13 +22,22 @@ uniform float light_width = 60.0;    // world px — thickness of the light stri
 uniform float shadow_width = 12.0;   // world px — thickness of the shadow edge
 uniform vec2 band_dir = vec2(1.0, -1.0); // straight diagonal
 uniform float band_speed = 35.0;
+// ── Animated (trembling) mask edge ──
+uniform float edge_jitter = 0.12;   // how much the edge wobbles (0 = static)
+uniform float edge_speed = 0.6;     // wobble speed
+uniform float edge_scale = 0.02;    // size of the wobble ripples along the edge
 void fragment() {
 	vec2 world_real = rect_world_origin + UV * rect_world_size;
 	vec2 mask_uv = (world_real - mask_world_origin) / mask_world_size;
 	if (mask_uv.x < 0.0 || mask_uv.x > 1.0 || mask_uv.y < 0.0 || mask_uv.y > 1.0) {
 		discard;
 	}
-	if (texture(road_mask, mask_uv).r < 0.35) {
+	// Living edge: wobble the mask threshold over time with noise so the grass
+	// boundary trembles instead of sitting still.
+	float en = texture(noise_tex, vec2(
+		(world_real.x + world_real.y) * edge_scale + TIME * edge_speed, 0.5)).r;
+	float edge_threshold = 0.35 + (en - 0.5) * edge_jitter;
+	if (texture(road_mask, mask_uv).r < edge_threshold) {
 		discard;
 	}
 	// Chunky pixel grid
