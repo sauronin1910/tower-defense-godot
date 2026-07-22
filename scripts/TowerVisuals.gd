@@ -36,7 +36,7 @@ const DATA := {
 	"spear": {
 		"path": "res://assets/sprites/Towers/spear_tower/Spear_Tower_%d.png",
 		"frames": 5,
-		"range": 150.0,
+		"range": 180.0,
 		"projectile": "res://assets/sprites/Towers/spear_tower/Projectile_Spear.png",
 		"muzzle": 0.4,
 	},
