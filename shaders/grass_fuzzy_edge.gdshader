@@ -22,12 +22,10 @@ uniform float light_width = 60.0;    // world px — thickness of the light stri
 uniform float shadow_width = 12.0;   // world px — thickness of the shadow edge
 uniform vec2 band_dir = vec2(1.0, -1.0); // straight diagonal
 uniform float band_speed = 35.0;
-// ── Animated (trembling) mask edge ──
+// ── Animated (trembling) mask edge — fuzzy "ворсинки" via 1D noise ──
 uniform float edge_jitter = 0.12;   // how much the edge wobbles (0 = static)
 uniform float edge_speed = 0.6;     // wobble speed
-uniform float edge_scale = 0.2;    // size of the wobble ripples along the edge
-uniform float edge_band_width = 1.3;   // thickness of the dark rim (mask units)
-uniform float edge_band_alpha = 1.55;   // darkness of the rim
+uniform float edge_scale = 0.02;    // size of the wobble ripples along the edge
 void fragment() {
 	vec2 world_real = rect_world_origin + UV * rect_world_size;
 	vec2 mask_uv = (world_real - mask_world_origin) / mask_world_size;
@@ -39,11 +37,9 @@ void fragment() {
 	float en = texture(noise_tex, vec2(
 		(world_real.x + world_real.y) * edge_scale + TIME * edge_speed, 0.5)).r;
 	float edge_threshold = 0.35 + (en - 0.5) * edge_jitter;
-	float mask_val = texture(road_mask, mask_uv).r;
-	if (mask_val < edge_threshold) {
+	if (texture(road_mask, mask_uv).r < edge_threshold) {
 		discard;
 	}
-	bool in_rim = mask_val < edge_threshold + edge_band_width;
 	// Chunky pixel grid
 	vec2 world = floor(world_real / pixel_size) * pixel_size;
 	// Band coordinate — straight, but each perpendicular column is nudged by noise
@@ -59,18 +55,12 @@ void fragment() {
 	float cycle = mod(along, band_scale); // 0..band_scale — position within one period
 	float light_end2  = light_width;
 	float shadow_end2 = light_width + shadow_width;
-	// Rim appears ONLY where a light streak meets the road edge (not the whole
-	// perimeter): intersection of "in a light streak" AND "at the edge".
+	// Sample gradient at texel centers: 3 pixels → centers at u = 1/6, 3/6, 5/6
 	if (cycle < light_end2) {
-		if (in_rim) {
-			vec3 rim = texture(gradient_tex, vec2(1.0/6.0, 0.5)).rgb; // dark tone
-			COLOR = vec4(rim, edge_band_alpha);
-		} else {
-			vec3 col = texture(gradient_tex, vec2(5.0/6.0, 0.5)).rgb; // light
-			COLOR = vec4(col, light_alpha);
-		}
+		vec3 col = texture(gradient_tex, vec2(5.0/6.0, 0.5)).rgb; // rightmost = light first
+		COLOR = vec4(col, light_alpha);
 	} else if (cycle < shadow_end2) {
-		vec3 col = texture(gradient_tex, vec2(1.0/6.0, 0.5)).rgb; // shadow
+		vec3 col = texture(gradient_tex, vec2(1.0/6.0, 0.5)).rgb; // leftmost = shadow last
 		COLOR = vec4(col, shadow_alpha);
 	} else {
 		discard;

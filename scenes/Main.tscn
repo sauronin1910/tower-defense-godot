@@ -40,18 +40,20 @@ shader_parameter/rect_world_origin = Vector2(-1248, -384)
 shader_parameter/rect_world_size = Vector2(4512, 2592)
 shader_parameter/gradient_tex = ExtResource("3_q8u5g")
 shader_parameter/noise_tex = ExtResource("4_lhr70")
-shader_parameter/fray_amount = 5.0
+shader_parameter/fray_amount = 4.0
 shader_parameter/shadow_alpha = 0.8
-shader_parameter/light_alpha = 0.5
-shader_parameter/pixel_size = 3.0
-shader_parameter/band_scale = 800.0
+shader_parameter/light_alpha = 0.8
+shader_parameter/pixel_size = 2.0
+shader_parameter/band_scale = 900.0
 shader_parameter/light_width = 80.0
-shader_parameter/shadow_width = 3.0
+shader_parameter/shadow_width = 2.0
 shader_parameter/band_dir = Vector2(1, -0.5)
 shader_parameter/band_speed = 31.0
-shader_parameter/edge_jitter = 0.12
+shader_parameter/edge_jitter = 0.2
 shader_parameter/edge_speed = 0.6
-shader_parameter/edge_scale = 0.02
+shader_parameter/edge_scale = 0.2
+shader_parameter/edge_band_width = 0.2
+shader_parameter/edge_band_alpha = 1.7
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c01mt"]
 texture = ExtResource("5_c01mt")
