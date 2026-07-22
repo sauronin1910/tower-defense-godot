@@ -68,8 +68,9 @@ func _ready():
 	cast_shadow = TowerVisuals.make_cast_shadow(tower_type)
 	if cast_shadow != null:
 		add_child(cast_shadow)
-		move_child(cast_shadow, 0)
+		move_child(cast_shadow, 0)  # lowest: shadow on the ground
 
+		
 	# Load visuals: animation frames if this type has them, otherwise one texture
 	var sprite = get_node("Sprite2D")
 	frame_textures = TowerVisuals.load_frames(tower_type)

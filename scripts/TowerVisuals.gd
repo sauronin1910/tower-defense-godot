@@ -205,6 +205,39 @@ static func projectile_path(type: String) -> String:
 # "muzzle" is a fraction of TARGET_HEIGHT: 0.0 = ground, 1.0 = very top.
 static func muzzle_offset(type: String) -> Vector2:
 	return Vector2(0.0, -TARGET_HEIGHT * float(_entry(type)["muzzle"]))
+	
+# Builds a grass tuft (ColorRect + grass_tuft.gdshader) that hugs the front of
+# the tower base. Sized to the footprint width; placed by Tower.gd under the
+# sprite, above the shadow. Returns null if the shader can't load.
+static func make_grass_tuft(type: String) -> ColorRect:
+	var sh: Shader = load("res://shaders/grass_tuft.gdshader")
+	if sh == null:
+		return null
+	var r: float = footprint_radius(type)
+	var tuft := ColorRect.new()
+	# Square rect; the elliptical grass ring is computed inside the shader.
+	var w: float = r * 3.0
+	var h: float = r * 3.0
+	tuft.size = Vector2(w, h)
+	# Center on the base, nudged up so the ring sits around the foot.
+	tuft.position = Vector2(-w * 0.5, -h * 0.6)
+	tuft.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	mat.shader = sh
+	var grad: Texture2D = load("res://shaders/gradient.png")
+	if grad != null:
+		mat.set_shader_parameter("gradient_tex", grad)
+	var noise: Texture2D = load("res://shaders/noise.png")
+	if noise != null:
+		mat.set_shader_parameter("noise_tex", noise)
+	mat.set_shader_parameter("ring_radius", 0.7)
+	mat.set_shader_parameter("ring_softness", 0.35)
+	mat.set_shader_parameter("vertical_ratio", 0.5)
+	mat.set_shader_parameter("edge_jitter", 0.15)
+	mat.set_shader_parameter("grass_alpha", 1.0)
+	mat.set_shader_parameter("tone", 0.4)
+	tuft.material = mat
+	return tuft
 
 
 # Creates a ready-to-use blob shadow node for a tower of this type. The caller

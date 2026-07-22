@@ -1,11 +1,34 @@
 [gd_scene format=3 uid="uid://skx8ogjgy53t"]
 
 [ext_resource type="Script" uid="uid://buhl6ixoak1qc" path="res://scripts/Tower.gd" id="1"]
+[ext_resource type="Shader" uid="uid://vs7mh0xuoam0" path="res://shaders/tower_base_grass.gdshader" id="2_6dv47"]
+[ext_resource type="Texture2D" uid="uid://xhcm8ib85hs0" path="res://shaders/noise.png" id="3_6dv47"]
+[ext_resource type="Texture2D" uid="uid://n7hkf2vm4kxy" path="res://shaders/gradient.png" id="3_6pmem"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7itwv"]
+shader = ExtResource("2_6dv47")
+shader_parameter/noise_tex = ExtResource("3_6dv47")
+shader_parameter/gradient_tex = ExtResource("3_6pmem")
+shader_parameter/band_bottom = 1.0
+shader_parameter/band_height = 0.1
+shader_parameter/arc = -0.3
+shader_parameter/blade_freq = 4.0
+shader_parameter/blade_thickness = 1.5
+shader_parameter/length_var = -2.4
+shader_parameter/fine_detail = 0.1
+shader_parameter/bend_amount = 0.9
+shader_parameter/sway_speed = 17.6
+shader_parameter/shadow_tone = 0.15
+shader_parameter/light_tone = 0.55
+shader_parameter/streak_scale = 24.0
+shader_parameter/streak_width = 0.45
+shader_parameter/grass_alpha = 0.0
 
 [node name="Tower" type="Area2D" unique_id=7973874]
 script = ExtResource("1")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2094233409]
 texture_filter = 1
+material = SubResource("ShaderMaterial_7itwv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1288812004]
