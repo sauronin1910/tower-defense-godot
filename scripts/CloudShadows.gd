@@ -17,7 +17,7 @@ extends Sprite2D
 @export var map_size: Vector2 = Vector2(4512.0, 2592.0)
 
 # World pixels one texture tile spans. Bigger = bigger clouds, fewer of them.
-@export var tile_world_size: Vector2 = Vector2(1600.0, 900.0)
+@export var tile_world_size: Vector2 = Vector2(2500.0, 1980.0)
 
 # Accumulated drift in WORLD pixels (kept in world units so speed stays in world px/sec)
 var _scroll_world: Vector2 = Vector2.ZERO
