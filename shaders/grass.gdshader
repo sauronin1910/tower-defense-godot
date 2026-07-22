@@ -22,6 +22,8 @@ uniform float light_width = 60.0;    // world px — thickness of the light stri
 uniform float shadow_width = 12.0;   // world px — thickness of the shadow edge
 uniform vec2 band_dir = vec2(1.0, -1.0); // straight diagonal
 uniform float band_speed = 35.0;
+uniform float bend_amount = 60.0;      // how far streaks curve sideways (world px)
+uniform float bend_wavelength = 500.0; // length of one curve (bigger = gentler bend)
 // ── Animated (trembling) mask edge ──
 uniform float edge_jitter = 0.12;   // how much the edge wobbles (0 = static)
 uniform float edge_speed = 0.6;     // wobble speed
@@ -52,7 +54,10 @@ void fragment() {
 	vec2 perp = vec2(-dir.y, dir.x);
 	float across = dot(world, perp);
 	float n = texture(noise_tex, vec2(across / 400.0, 0.5)).r;
-	float along = dot(world, dir) - TIME * band_speed + (n - 0.5) * fray_amount;
+	// Gentle wave: bend the streak sideways with a slow sine along its length,
+	// so the bands curve organically instead of being ruler-straight.
+	float wave = sin(across / bend_wavelength) * bend_amount;
+	float along = dot(world, dir) - TIME * band_speed + (n - 0.5) * fray_amount + wave;
 	// band_scale = distance between streaks (period). The streak widths below are
 	// in absolute world pixels, so changing the spacing no longer changes the
 	// streak thickness or the pixel look.
