@@ -28,6 +28,7 @@ uniform float bend_wavelength = 500.0; // length of one curve (bigger = gentler 
 uniform float edge_jitter = 0.12;   // how much the edge wobbles (0 = static)
 uniform float edge_speed = 0.6;     // wobble speed
 uniform float edge_scale = 0.2;    // size of the wobble ripples along the edge
+uniform float edge_length = 1.0;   // whisker length in WORLD pixels
 uniform float edge_band_width = 1.3;   // thickness of the dark rim (mask units)
 uniform float edge_band_alpha = 1.55;   // darkness of the rim
 void fragment() {
@@ -36,16 +37,20 @@ void fragment() {
 	if (mask_uv.x < 0.0 || mask_uv.x > 1.0 || mask_uv.y < 0.0 || mask_uv.y > 1.0) {
 		discard;
 	}
+	
 	// Living edge: wobble the mask threshold over time with noise so the grass
 	// boundary trembles instead of sitting still.
+	// Displace WHERE we sample the mask instead of nudging the threshold: the
+	// edge then moves by edge_length world pixels no matter how crisp the mask is.
 	float en = texture(noise_tex, vec2(
 		(world_real.x + world_real.y) * edge_scale + TIME * edge_speed, 0.5)).r;
-	float edge_threshold = 0.35 + (en - 0.5) * edge_jitter;
-	float mask_val = texture(road_mask, mask_uv).r;
-	if (mask_val < edge_threshold) {
+	vec2 push = normalize(vec2(1.0, 1.0)) * (en - 0.5) * 2.0 * edge_length;
+	vec2 mask_uv_j = (world_real + push - mask_world_origin) / mask_world_size;
+	float mask_val = texture(road_mask, mask_uv_j).r;
+	if (mask_val < 0.35) {
 		discard;
 	}
-	bool in_rim = mask_val < edge_threshold + edge_band_width;
+	bool in_rim = mask_val < 0.35 + edge_band_width;
 	// Chunky pixel grid
 	vec2 world = floor(world_real / pixel_size) * pixel_size;
 	// Band coordinate — straight, but each perpendicular column is nudged by noise
