@@ -1,16 +1,16 @@
 [gd_scene format=4 uid="uid://m55k5fvnulhl"]
 
 [ext_resource type="Script" uid="uid://cc3boxaux6b1w" path="res://scripts/Main.gd" id="1_wp0k4"]
-[ext_resource type="Texture2D" uid="uid://d4k6ukjpnifpu" path="res://shaders/clouds.png" id="2_qmy6f"]
+[ext_resource type="Texture2D" uid="uid://dtyqjow02dyed" path="res://shaders/clouds.png" id="2_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://b3tuetxdevdcs" path="res://scenes/TowerUpgradePanel.tscn" id="2_rvslj"]
 [ext_resource type="Shader" uid="uid://dalrfhhv6fn1j" path="res://shaders/cloud_shadows.gdshader" id="2_wp0k4"]
 [ext_resource type="PackedScene" uid="uid://cxlvlcmp001" path="res://scenes/LevelComplete.tscn" id="3_0bbpv"]
 [ext_resource type="Script" uid="uid://dppb6ocjhvtgm" path="res://scripts/CloudShadows.gd" id="3_mwfav"]
-[ext_resource type="Texture2D" uid="uid://n7hkf2vm4kxy" path="res://shaders/gradient.png" id="3_q8u5g"]
+[ext_resource type="Texture2D" uid="uid://cf5p1gypeowc2" path="res://shaders/gradient.png" id="3_q8u5g"]
 [ext_resource type="Texture2D" uid="uid://xhcm8ib85hs0" path="res://shaders/noise.png" id="4_lhr70"]
 [ext_resource type="Texture2D" uid="uid://di6jwcodwjji7" path="res://assets/terrain/light_green_brown_cobblestone.svg" id="5_c01mt"]
-[ext_resource type="Texture2D" uid="uid://c76l3p5ui70s" path="res://assets/grass_mask.png" id="5_lhr70"]
-[ext_resource type="Texture2D" uid="uid://ddf0o7asmbqap" path="res://assets/terrain/light_grass.png" id="5_vcsgt"]
+[ext_resource type="Texture2D" uid="uid://c6glhabaxhrei" path="res://assets/grass_mask.png" id="5_lhr70"]
+[ext_resource type="Texture2D" uid="uid://b0b4hhwotui3h" path="res://assets/terrain/light_grass.png" id="5_vcsgt"]
 [ext_resource type="Shader" uid="uid://day3hkcsqswop" path="res://shaders/grass.gdshader" id="6_jlsqs"]
 [ext_resource type="Script" uid="uid://bf1e2yj0nitw0" path="res://scripts/Grass.gd" id="8_lhr70"]
 
@@ -49,11 +49,11 @@ shader_parameter/light_width = 60.0
 shader_parameter/shadow_width = 2.0
 shader_parameter/band_dir = Vector2(1, -0.5)
 shader_parameter/band_speed = 42.0
-shader_parameter/bend_amount = 200.0
+shader_parameter/bend_amount = 150.0
 shader_parameter/bend_wavelength = 500.0
-shader_parameter/edge_jitter = 0.2
+shader_parameter/edge_jitter = 0.12
 shader_parameter/edge_speed = 0.6
-shader_parameter/edge_scale = 0.2
+shader_parameter/edge_scale = 3.2
 shader_parameter/edge_band_width = 0.2
 shader_parameter/edge_band_alpha = 1.7
 
@@ -62,25 +62,25 @@ texture = ExtResource("5_c01mt")
 texture_region_size = Vector2i(96, 96)
 0:0/0 = 0
 0:0/0/terrain_set = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, 20.146729, 43.9985, 20.810102, 38.647335, 21.850607, 33.890736, 23.931616, 29.728718, 26.309916, 26.161274, 29.580072, 23.485691, 33.147522, 21.404675, 38.2014, 20.661457, 43.998497, 20.269577, 48, 48, 48)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, 25.360085, 43.88552, 25.180223, 38.130043, 27.338526, 31.475273, 32.014854, 27.51838, 37.950188, 25.53994, 45.14454, 26.439232, 48, 48, 48)
 0:0/0/terrains_peering_bit/bottom_right_corner = 0
 0:0/0/custom_data_0 = true
 1:0/0 = 0
 1:0/0/terrain_set = 0
-1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, 19.244888, 45.14453, 20.863613, 41.007782, 21.583046, 35.97174, 21.583046, 28.777397, 20.324036, 24.101067, 17.806015, 18.885162, 16.367146, 12.230392, 15.827568, 7.91378, 16.547, 1.4388657, 18.345589, -3.5971756, 20.144176, -10.251953, 21.403187, -15.647713, 21.043472, -19.424744, 18.525448, -27.518387, 16.90672, -32.374573, 16.367146, -38.309914, 16.367146, -44.42511, 17.446297, -48, 18.30404, -48, 21.743729, -48, 48, 48, 48)
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, 24.82051, 46.223686, 26.439234, 41.727226, 27.878103, 35.25231, 27.878103, 30.21627, 27.15867, 24.101067, 24.640646, 18.165733, 23.021917, 10.07209, 23.201777, 5.0360336, 24.101068, 0.719429, 25.360083, -3.2374573, 26.619093, -10.07209, 27.338526, -16.36715, 26.798952, -22.482346, 24.820505, -27.69825, 23.921213, -33.09401, 23.381636, -36.511322, 23.381636, -41.007797, 24.101068, -48, 25.180223, -48, 26.079515, -48, 48, 48, 48)
 1:0/0/terrains_peering_bit/bottom_right_corner = 0
 1:0/0/terrains_peering_bit/bottom_side = 0
 1:0/0/terrains_peering_bit/bottom_left_corner = 0
 1:0/0/custom_data_0 = true
 2:0/0 = 0
 2:0/0/terrain_set = 0
-2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-18.672577, 48, -18.918274, 42.0133, -20.883804, 34.39686, -24.814873, 27.886024, -28.745945, 24.814877, -34.519703, 20.638115, -42.50469, 19.655348, -48, 20.146732, -48, 48)
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-23.741348, 48, -23.741356, 42.2668, -27.518387, 35.432167, -32.914154, 29.676691, -39.74878, 26.079515, -45.3244, 25.180223, -48, 25.180223, -48, 48, -30.396126, 48)
 2:0/0/terrains_peering_bit/bottom_left_corner = 0
 2:0/0/custom_data_0 = true
 3:0/0 = 0
 3:0/0/terrain_set = 0
 3:0/0/terrain = 0
-3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, -18.06321, 37.649826, -16.10455, 26.333115, -12.840115, 16.322174, -8.052273, 8.705154, -2.6115494, 0.43525696, 3.482067, -4.787842, 10.228565, -9.793312, 19.368984, -13.275375, 27.42126, -14.798782, 35.03828, -16.757446, 45.26685, -17.626152, 48, -48, 48, -48, -48, 48, -48)
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, -24.280924, 37.410614, -23.921211, 23.921211, -19.964317, 13.669266, -15.647709, 1.978447, -8.093643, -7.3742065, 1.079155, -13.669258, 11.3311, -19.065025, 21.223331, -22.302483, 28.777397, -23.561493, 37.0509, -24.460785, 44.42511, -24.64064, 48, -48, 48, -48, -48, 48, -48)
 3:0/0/terrains_peering_bit/bottom_left_corner = 0
 3:0/0/terrains_peering_bit/left_side = 0
 3:0/0/terrains_peering_bit/top_left_corner = 0
@@ -90,7 +90,7 @@ texture_region_size = Vector2i(96, 96)
 4:0/0 = 0
 4:0/0/terrain_set = 0
 4:0/0/terrain = 0
-4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(19.151352, 48, 19.151352, 40.261375, 14.36351, 26.986, 11.316711, 19.368988, 5.2230988, 11.53434, -0.21763611, 4.352581, -6.7465057, -2.8291779, -17.192696, -7.3993874, -24.592087, -11.53434, -35.255905, -14.581146, -45.049217, -15.886921, -48, -16.945374, -48, -48, 48, -48, 48, 48)
+4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(25.899658, 48, 25.000366, 36.151604, 21.762909, 23.921211, 17.086578, 13.849121, 10.2519455, 3.2374573, 0, -7.3742085, -10.791527, -15.108134, -19.424744, -19.424744, -25.899658, -21.762905, -34.173157, -23.921211, -44.065388, -24.460785, -48, -23.741348, -48, -48, 48, -48, 48, 48)
 4:0/0/terrains_peering_bit/right_side = 0
 4:0/0/terrains_peering_bit/bottom_right_corner = 0
 4:0/0/terrains_peering_bit/top_left_corner = 0
@@ -99,7 +99,7 @@ texture_region_size = Vector2i(96, 96)
 4:0/0/custom_data_0 = true
 0:1/0 = 0
 0:1/0/terrain_set = 0
-0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(20.674759, -48, 21.110016, -43.525814, 22.415802, -37.21457, 21.110016, -31.120956, 17.627953, -23.06868, 15.886917, -14.363518, 15.886917, -6.0936127, 19.368988, 3.917324, 21.762909, 13.710636, 18.716095, 21.762905, 15.234032, 35.473537, 16.975067, 42.43767, 18.933731, 48, 48, 48, 48, -48)
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(25.719803, 48, 23.741356, 43.70567, 23.201775, 35.971745, 25.719803, 26.798954, 27.518387, 20.144176, 28.417679, 14.208839, 27.878105, 8.4533615, 26.079521, -0.35971832, 23.741348, -7.194351, 23.921211, -12.590111, 24.820503, -21.942764, 27.878105, -28.597538, 28.597542, -37.590473, 26.978813, -42.98624, 25.360085, -48, 48, -48, 48, 48)
 0:1/0/terrains_peering_bit/right_side = 0
 0:1/0/terrains_peering_bit/bottom_right_corner = 0
 0:1/0/terrains_peering_bit/top_right_corner = 0
@@ -119,7 +119,7 @@ texture_region_size = Vector2i(96, 96)
 1:1/0/custom_data_0 = true
 2:1/0 = 0
 2:1/0/terrain_set = 0
-2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-18.933723, 48, -16.757431, 43.525814, -16.322174, 31.556217, -19.804237, 23.72157, -21.98053, 16.10455, -21.110016, 10.446194, -17.845581, 0.87051773, -14.363518, -10.663822, -14.798775, -18.716099, -18.06321, -24.374454, -21.762901, -29.379923, -22.198158, -36.779312, -19.586609, -42.437668, -18.716095, -48, -23.741348, -48, -36.33146, -48, -48, -48, -48, 48)
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-23.50393, 48, -22.415787, 43.09055, -22.198158, 32.42673, -24.809708, 23.068676, -26.768364, 14.798779, -26.768364, 7.181759, -23.50393, -0.87051773, -21.762901, -11.969601, -23.068672, -22.851053, -26.768364, -34.60302, -25.680222, -40.914265, -23.50393, -48, -48, -48, -48, 48)
 2:1/0/terrains_peering_bit/bottom_left_corner = 0
 2:1/0/terrains_peering_bit/left_side = 0
 2:1/0/terrains_peering_bit/top_left_corner = 0
@@ -127,7 +127,7 @@ texture_region_size = Vector2i(96, 96)
 3:1/0 = 0
 3:1/0/terrain_set = 0
 3:1/0/terrain = 0
-3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, 18.525452, 40.64808, 18.165733, 30.21627, 15.827568, 17.626152, 9.3526535, 6.6547775, 2.1583061, -3.5971756, -6.6547737, -11.690819, -18.16573, -15.287994, -29.316973, -16.975067, -38.9556, -17.845581, -48, -48, -48, -48, 48, 48, 48)
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-25.180222, -48, -24.10107, -36.87104, -20.863613, -25.360077, -16.906723, -14.208839, -10.431808, -3.5971756, -1.6187286, 6.1152, 9.172791, 14.388699, 18.165733, 19.424744, 25.53994, 21.942764, 34.532875, 24.820503, 42.98623, 25.899658, 48, 25.53994, 48, 48, -48, 48, -48, -48)
 3:1/0/terrains_peering_bit/bottom_right_corner = 0
 3:1/0/terrains_peering_bit/bottom_side = 0
 3:1/0/terrains_peering_bit/bottom_left_corner = 0
@@ -137,7 +137,7 @@ texture_region_size = Vector2i(96, 96)
 4:1/0 = 0
 4:1/0/terrain_set = 0
 4:1/0/terrain = 0
-4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(19.151352, -48, 18.933716, -41.349518, 17.627953, -33.514877, 14.798767, -25.68023, 9.140419, -15.016403, 3.482071, -4.1349525, -6.5288696, 4.352581, -15.669289, 10.228565, -28.509407, 15.669292, -40.69664, 17.192696, -48, 18.06321, -48, 48, 48, 48, 48, -48)
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-48, 26.07952, -36.331467, 25.539936, -24.101074, 22.482342, -13.309547, 18.345592, -1.6187286, 11.3311, 7.733925, 1.7985878, 14.748413, -8.4533615, 19.424736, -15.467854, 23.021912, -23.921211, 24.820503, -34.532875, 25.899658, -42.98623, 25.53994, -48, 48, -48, 48, 48, -48, 48)
 4:1/0/terrains_peering_bit/right_side = 0
 4:1/0/terrains_peering_bit/bottom_right_corner = 0
 4:1/0/terrains_peering_bit/bottom_side = 0
@@ -146,19 +146,19 @@ texture_region_size = Vector2i(96, 96)
 4:1/0/custom_data_0 = true
 0:2/0 = 0
 0:2/0/terrain_set = 0
-0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(19.65535, -48, 19.604599, -44.964684, 21.043472, -37.770336, 26.619095, -29.676693, 33.273865, -23.561495, 39.209198, -20.503897, 46.223694, -19.604603, 48, -19.532501, 48, -48)
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(26.079529, -48, 26.43924, -44.065388, 28.417679, -37.050896, 33.09401, -30.216265, 37.950195, -26.079515, 42.44667, -24.460787, 48, -23.741352, 48, -26.61909, 48, -48)
 0:2/0/terrains_peering_bit/top_right_corner = 0
 0:2/0/custom_data_0 = true
 1:2/0 = 0
 1:2/0/terrain_set = 0
-1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, -20.503895, 43.166092, -22.122625, 37.050903, -21.762909, 30.396133, -20.503897, 24.101074, -17.266441, 18.525452, -14.928276, 7.913788, -16.007427, -0.71943665, -17.266441, -6.115196, -20.503897, -12.0505295, -20.683756, -17.98587, -19.065027, -24.28093, -16.547005, -33.273865, -15.108135, -41.547363, -15.287994, -48, -16.187286, -48, -23.709259, -48, -32.43132, -48, -41.76761, -48, -48, 48, -48)
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(48, -22.842058, 45.684128, -25.000362, 41.54738, -26.259373, 35.072464, -26.079515, 28.417679, -25.539938, 24.101074, -23.561493, 20.14418, -22.30248, 13.669266, -22.122623, 5.0360565, -23.021917, 2.5180206, -24.101068, -2.8777313, -26.079515, -7.014488, -27.338526, -12.410248, -27.158667, -18.885162, -26.079515, -24.820496, -23.561493, -31.29541, -22.662199, -38.309906, -21.942764, -44.24524, -23.201775, -48, -23.561493, -48, -48, 48, -48)
 1:2/0/terrains_peering_bit/top_left_corner = 0
 1:2/0/terrains_peering_bit/top_side = 0
 1:2/0/terrains_peering_bit/top_right_corner = 0
 1:2/0/custom_data_0 = true
 2:2/0 = 0
 2:2/0/terrain_set = 0
-2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-17.56697, -48, -18.05835, -43.610302, -18.304039, -36.976624, -20.269577, -32.922707, -23.586418, -28.008871, -29.360176, -24.323494, -35.379623, -21.252346, -35.87101, -19.90104, -42.258995, -18.918274, -48, -19.286812, -48, -48, -19.286812, -48)
+2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-48, -24.64064, -43.166092, -24.640644, -36.511322, -25.719797, -29.316963, -30.755842, -25.360077, -37.770332, -23.38163, -45.863976, -23.561485, -48, -48, -48)
 2:2/0/terrains_peering_bit/top_left_corner = 0
 2:2/0/custom_data_0 = true
 3:2/0 = 0

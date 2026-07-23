@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://buhl6ixoak1qc" path="res://scripts/Tower.gd" id="1"]
 [ext_resource type="Shader" uid="uid://vs7mh0xuoam0" path="res://shaders/tower_base_grass.gdshader" id="2_6dv47"]
 [ext_resource type="Texture2D" uid="uid://xhcm8ib85hs0" path="res://shaders/noise.png" id="3_6dv47"]
-[ext_resource type="Texture2D" uid="uid://n7hkf2vm4kxy" path="res://shaders/gradient.png" id="3_6pmem"]
+[ext_resource type="Texture2D" uid="uid://cf5p1gypeowc2" path="res://shaders/gradient.png" id="3_6pmem"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7itwv"]
 shader = ExtResource("2_6dv47")
@@ -21,8 +21,8 @@ shader_parameter/sway_speed = 17.6
 shader_parameter/shadow_tone = 0.15
 shader_parameter/light_tone = 0.55
 shader_parameter/streak_scale = 24.0
-shader_parameter/streak_width = 0.45
-shader_parameter/grass_alpha = 0.0
+shader_parameter/streak_width = 2.75
+shader_parameter/grass_alpha = 1.0
 
 [node name="Tower" type="Area2D" unique_id=7973874]
 script = ExtResource("1")
