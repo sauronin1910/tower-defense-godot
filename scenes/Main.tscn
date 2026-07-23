@@ -49,13 +49,13 @@ shader_parameter/light_width = 60.0
 shader_parameter/shadow_width = 2.0
 shader_parameter/band_dir = Vector2(1, -0.5)
 shader_parameter/band_speed = 42.0
-shader_parameter/bend_amount = 150.0
+shader_parameter/bend_amount = 120.0
 shader_parameter/bend_wavelength = 500.0
-shader_parameter/edge_jitter = 0.12
+shader_parameter/edge_jitter = 0.3
 shader_parameter/edge_speed = 0.6
-shader_parameter/edge_scale = 3.2
-shader_parameter/edge_band_width = 0.2
-shader_parameter/edge_band_alpha = 1.7
+shader_parameter/edge_scale = 1.9
+shader_parameter/edge_band_width = 0.5
+shader_parameter/edge_band_alpha = 1.0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c01mt"]
 texture = ExtResource("5_c01mt")
