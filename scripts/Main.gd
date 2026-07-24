@@ -31,7 +31,8 @@ const TOWER_COSTS := {
 var base_health: int = 20
 
 # Gold system
-var gold: int = 0
+const DEBUG_MODE: bool = true
+var gold: int = 3000
 
 # Wave management
 var current_wave_number: int = 0
@@ -66,7 +67,7 @@ var enemy_scene = preload("res://scenes/Enemy.tscn")
 
 # Speed control
 var speed_index: int = 0
-const SPEED_LEVELS: Array = [1.0, 1.5, 2.0]
+const SPEED_LEVELS := [1.0, 1.5, 2.0, 4.0]
 
 # Zoom control
 const ZOOM_MIN: float = 0.64
@@ -107,7 +108,7 @@ func _ready():
 	# Initialize state
 	current_wave_number = 0
 	enemies_spawned = 0
-	gold = 100
+	gold = 3000
 	base_health = 20
 	_update_labels()
 
@@ -509,7 +510,8 @@ func _on_close_upgrade_panel() -> void:
 
 
 # ════════════════════════════════════════════
-#  SPEED CONTROL
+#  SPEED CONTROL 
+#debug control speed x4
 # ════════════════════════════════════════════
 
 func _on_speed_button_pressed() -> void:
@@ -517,12 +519,11 @@ func _on_speed_button_pressed() -> void:
 	var new_speed: float = SPEED_LEVELS[speed_index]
 	Engine.time_scale = new_speed
 	if is_instance_valid(speed_button):
-		if new_speed == 1.0:
-			speed_button.text = "1x"
-		elif new_speed == 1.5:
-			speed_button.text = "1.5x"
+		# Label built from the value itself, so a new speed level needs no branch
+		if new_speed == floor(new_speed):
+			speed_button.text = str(int(new_speed)) + "x"
 		else:
-			speed_button.text = "2x"
+			speed_button.text = str(new_speed) + "x"
 
 
 # ════════════════════════════════════════════
