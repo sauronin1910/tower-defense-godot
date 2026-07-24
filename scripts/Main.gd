@@ -377,13 +377,11 @@ func _is_ui_hit(tap_pos: Vector2) -> bool:
 	return false
 
 
-func _is_on_enemy_path(tap_pos: Vector2, _min_distance: float = 55.0) -> bool:
+func _is_on_enemy_path(tap_pos: Vector2, type: String = "spear") -> bool:
 	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
-	var shape: CircleShape2D = CircleShape2D.new()
-	shape.radius = TOWER_FOOTPRINT_RADIUS
 	var params: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
-	params.shape = shape
-	params.transform = Transform2D(0.0, tap_pos)
+	params.shape = TowerVisuals.base_query_shape(type)
+	params.transform = Transform2D(0.0, tap_pos + Vector2(0.0, TowerVisuals.BASE_CHECK_Y_OFFSET))
 	params.collision_mask = ROAD_COLLISION_MASK
 	params.collide_with_bodies = true
 	params.collide_with_areas = false
@@ -651,7 +649,7 @@ func _can_place_tower_at(pos: Vector2, type: String) -> bool:
 	var cost: int = TOWER_COSTS[type]
 	if gold < cost:
 		return false
-	if _is_on_enemy_path(pos):
+	if _is_on_enemy_path(pos, type):
 		return false
 	if _is_too_close_to_tower(pos, type):
 		return false

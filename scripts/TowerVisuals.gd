@@ -267,3 +267,64 @@ static func make_cast_shadow(type: String) -> Sprite2D:
 	shadow.modulate = Color(0.0, 0.0, 0.0, SHADOW_ALPHA)
 	shadow.z_index = -1  # under the tower sprite
 	return shadow
+
+# ── Base footprint measured from the sprite's bottom slice ──
+const BASE_SLICE_RATIO: float = 0.18
+const BASE_CHECK_Y_OFFSET: float = 6.0
+const BASE_MARGIN: float = 1.04   # 4% bigger than the measured stone
+
+static var _base_extents_cache: Dictionary = {}
+
+
+# Half-width / half-height (map px) of the ellipse that matches the tower's
+# stone foot. Width comes from the widest opaque pixels in the bottom slice;
+# height is squashed by FOOTPRINT_VERTICAL_RATIO because the ground is seen
+# at an angle.
+static func base_extents(type: String) -> Vector2:
+	if _base_extents_cache.has(type):
+		return _base_extents_cache[type]
+
+	var fallback: float = footprint_radius(type)
+	var result := Vector2(fallback, fallback * FOOTPRINT_VERTICAL_RATIO)
+
+	var frames: Array = load_frames(type)
+	if not frames.is_empty():
+		var tex: Texture2D = frames[0]
+		var img: Image = tex.get_image()
+		if img != null:
+			if img.is_compressed():
+				img.decompress()
+			var used: Rect2i = img.get_used_rect()
+			if used.size.x > 0 and used.size.y > 0:
+				var slice_h: int = max(1, int(round(float(used.size.y) * BASE_SLICE_RATIO)))
+				var y_start: int = used.position.y + used.size.y - slice_h
+				var min_x: int = used.position.x + used.size.x
+				var max_x: int = used.position.x - 1
+				for y in range(y_start, used.position.y + used.size.y):
+					for x in range(used.position.x, used.position.x + used.size.x):
+						if img.get_pixel(x, y).a > 0.3:
+							if x < min_x:
+								min_x = x
+							if x > max_x:
+								max_x = x
+				if max_x >= min_x:
+					var s: float = scale_for(tex).x
+					var half_w: float = float(max_x - min_x + 1) * 0.5 * s * BASE_MARGIN
+					result = Vector2(half_w, half_w * FOOTPRINT_VERTICAL_RATIO)
+
+	_base_extents_cache[type] = result
+	return result
+
+
+# Convex ellipse polygon for physics queries (Godot 2D has no ellipse shape,
+# and non-uniform scaling of a circle is unreliable, so we build the polygon).
+static func base_query_shape(type: String) -> ConvexPolygonShape2D:
+	var ext: Vector2 = base_extents(type)
+	var pts := PackedVector2Array()
+	var segments: int = 16
+	for i in range(segments):
+		var a: float = TAU * float(i) / float(segments)
+		pts.append(Vector2(cos(a) * ext.x, sin(a) * ext.y))
+	var shape := ConvexPolygonShape2D.new()
+	shape.points = pts
+	return shape
