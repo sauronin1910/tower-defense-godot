@@ -15,7 +15,13 @@ extends Node
 const OUTPUT_PATH: String = "res://assets/grass_mask.png"
 const ROAD_COLLISION_MASK: int = 1 << 4     # road physics layer 5 (value 16)
 const SUBDIV: int = 32
-const PROBE_RADIUS: float = 1          # small circle to bridge tile seams
+# Decor footprints are carved as ellipses — flatter than circles, since the
+# ground is seen at an angle.
+const PROBE_RADIUS: float = 1
+# Decor is carved by its own silhouette: the bottom slice of its opaque pixels is
+# what touches the ground, so any shape works without per-object tuning.
+const CARVE_SLICE_RATIO: float = 0.18   # bottom fraction of the art counted as ground contact
+const CARVE_DILATE: int = 2             # grow the stamp a little so it isn't a hairline      # small circle to bridge tile seams
 
 @export var tilemap_path: NodePath = ^"../TileMapLayer"
 
@@ -83,7 +89,52 @@ func _generate() -> void:
 			if space.intersect_shape(params, 1).size() > 0:
 				img.set_pixel(px, py, Color(0, 0, 0, 1))  # road = black
 				road_hits += 1
-
+# ── Carve decor into the mask ──
+	# Stamp the bottom slice of each decor sprite's silhouette, so grass streaks
+	# stop at trees and rocks and the trembling rim forms around them for free.
+	# Walking texture pixels (rather than mask pixels) lets to_global() handle
+	# scale, rotation and flips for us.
+	var carved: int = 0
+	for d in get_tree().get_nodes_in_group("decor"):
+		if not is_instance_valid(d) or not ("carves_grass" in d):
+			continue
+		if not d.carves_grass or d.texture == null:
+			continue
+		var img2: Image = d.texture.get_image()
+		if img2 == null:
+			continue
+		if img2.is_compressed():
+			img2.decompress()
+		var ob: Rect2i = img2.get_used_rect()
+		if ob.size.x <= 0 or ob.size.y <= 0:
+			continue
+		var tex_size: Vector2 = d.texture.get_size()
+		var slice_h: int = max(1, int(round(float(ob.size.y) * CARVE_SLICE_RATIO)))
+		var slice_top: int = ob.position.y + ob.size.y - slice_h
+		for ty in range(slice_top, ob.position.y + ob.size.y):
+			for tx in range(ob.position.x, ob.position.x + ob.size.x):
+				if img2.get_pixel(tx, ty).a <= 0.3:
+					continue
+				# Sprite2D draws centred, so local coords are texture pixels
+				# measured from the middle.
+				var local: Vector2 = Vector2(float(tx) + 0.5, float(ty) + 0.5) - tex_size * 0.5
+				local += d.offset
+				if d.flip_h:
+					local.x = -local.x
+				if d.flip_v:
+					local.y = -local.y
+				var wp2: Vector2 = d.to_global(local)
+				var mx: int = int((wp2.x - world_origin.x) / step.x)
+				var my: int = int((wp2.y - world_origin.y) / step.y)
+				for oy in range(-CARVE_DILATE, CARVE_DILATE + 1):
+					for ox in range(-CARVE_DILATE, CARVE_DILATE + 1):
+						var px2: int = mx + ox
+						var py2: int = my + oy
+						if px2 < 0 or py2 < 0 or px2 >= out_w or py2 >= out_h:
+							continue
+						img.set_pixel(px2, py2, Color(0, 0, 0, 1))
+						carved += 1
+	print("MaskGen: carved ", carved, " decor pixels")
 	var err := img.save_png(OUTPUT_PATH)
 	if err == OK:
 		print("MaskGen: saved ", OUTPUT_PATH,

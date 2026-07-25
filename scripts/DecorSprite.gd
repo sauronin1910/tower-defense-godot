@@ -21,6 +21,11 @@ enum ShadowMode { NONE, BLOB, SILHOUETTE }
 @export var cast_skew: float = 0.9       # lean in radians; + leans right
 @export var cast_squash: float = 0.5     # vertical scale, lower = flatter
 @export var cast_offset: Vector2 = Vector2(14.0, 4.0)
+@export_group("Grass mask")
+# Carve this object into grass_mask.png so the grass streaks stop at it and the
+# fuzzy rim forms around its base, exactly like along the road. The carved shape
+# is taken from the sprite's own silhouette, so no per-object radius is needed.
+@export var carves_grass: bool = true
 @export_group("Build blocking")
 @export var blocks_building: bool = true
 # Blocking radius as a fraction of the sprite's opaque width. A tree's canopy is
@@ -36,12 +41,16 @@ func _ready() -> void:
 	if texture != null:
 		h = texture.get_height() * abs(scale.y)
 	z_index = clampi(int(global_position.y + h * ground_anchor) + 2000, 0, 8000)
-	# Register as a build obstacle: towers can't be placed overlapping decor.
-	if blocks_building and texture != null:
+	# Ground contact point plus both radii. Registered unconditionally — each
+	# behaviour checks its own flag, so a flat puddle can carve grass without
+	# blocking construction and vice versa.
+	if texture != null:
 		var ob: Rect2 = _opaque_bounds()
 		var bottom_y: float = ob.position.y + ob.size.y - texture.get_height() * 0.5
 		block_center = to_global(Vector2(0.0, bottom_y))
-		block_extent = ob.size.x * abs(scale.x) * block_radius
+		var opaque_w: float = ob.size.x * abs(scale.x)
+		block_extent = opaque_w * block_radius
+		const CARVE_VERTICAL_RATIO: float = 0.55       # small circle to bridge tile seams
 		add_to_group("decor")
 
 	match shadow_mode:

@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://bdgqxdhasstho" path="res://assets/decor/trees/tree_002.png" id="15_1nqs0"]
 [ext_resource type="Texture2D" uid="uid://cb7q5orj51nc8" path="res://assets/decor/trees/tree_003.png" id="15_nfivy"]
 [ext_resource type="Texture2D" uid="uid://bh76kofshlm3x" path="res://assets/decor/trees/tree_005.png" id="18_yxlcp"]
+[ext_resource type="Script" uid="uid://ckyc3rqsyah2x" path="res://scripts/MaskGen.gd" id="23_ebg2g"]
 
 [sub_resource type="TileSet" id="TileSet_mp12f"]
 
@@ -516,6 +517,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree255" type="Sprite2D" parent="Decor" unique_id=1309552634]
 texture_filter = 1
@@ -528,6 +530,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree256" type="Sprite2D" parent="Decor" unique_id=1799164510]
 texture_filter = 1
@@ -540,6 +543,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree257" type="Sprite2D" parent="Decor" unique_id=886625889]
 texture_filter = 1
@@ -552,6 +556,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree258" type="Sprite2D" parent="Decor" unique_id=231951476]
 texture_filter = 1
@@ -564,6 +569,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree259" type="Sprite2D" parent="Decor" unique_id=2042633898]
 texture_filter = 1
@@ -576,6 +582,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree260" type="Sprite2D" parent="Decor" unique_id=1885017119]
 texture_filter = 1
@@ -588,6 +595,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree261" type="Sprite2D" parent="Decor" unique_id=1578162186]
 texture_filter = 1
@@ -600,6 +608,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree" type="Sprite2D" parent="Decor" unique_id=1624236851]
 texture_filter = 1
@@ -612,6 +621,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree42" type="Sprite2D" parent="Decor" unique_id=1437934877]
 texture_filter = 1
@@ -624,6 +634,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree44" type="Sprite2D" parent="Decor" unique_id=310501557]
 texture_filter = 1
@@ -636,6 +647,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree45" type="Sprite2D" parent="Decor" unique_id=12306680]
 texture_filter = 1
@@ -648,6 +660,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree46" type="Sprite2D" parent="Decor" unique_id=1603297028]
 texture_filter = 1
@@ -660,6 +673,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree47" type="Sprite2D" parent="Decor" unique_id=1945342712]
 texture_filter = 1
@@ -672,6 +686,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree48" type="Sprite2D" parent="Decor" unique_id=1145738101]
 texture_filter = 1
@@ -684,6 +699,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree64" type="Sprite2D" parent="Decor" unique_id=1141920886]
 texture_filter = 1
@@ -696,6 +712,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree65" type="Sprite2D" parent="Decor" unique_id=2041278144]
 texture_filter = 1
@@ -708,6 +725,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree66" type="Sprite2D" parent="Decor" unique_id=1377223560]
 texture_filter = 1
@@ -720,6 +738,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree49" type="Sprite2D" parent="Decor" unique_id=1509146369]
 texture_filter = 1
@@ -732,6 +751,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree50" type="Sprite2D" parent="Decor" unique_id=1511854724]
 texture_filter = 1
@@ -744,6 +764,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree86" type="Sprite2D" parent="Decor" unique_id=1039208911]
 texture_filter = 1
@@ -756,6 +777,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree87" type="Sprite2D" parent="Decor" unique_id=924671053]
 texture_filter = 1
@@ -768,6 +790,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree88" type="Sprite2D" parent="Decor" unique_id=1614256318]
 texture_filter = 1
@@ -780,6 +803,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree89" type="Sprite2D" parent="Decor" unique_id=987638266]
 texture_filter = 1
@@ -792,6 +816,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree90" type="Sprite2D" parent="Decor" unique_id=1386094618]
 texture_filter = 1
@@ -804,6 +829,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree43" type="Sprite2D" parent="Decor" unique_id=1832922540]
 texture_filter = 1
@@ -816,6 +842,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree24" type="Sprite2D" parent="Decor" unique_id=1109974302]
 texture_filter = 1
@@ -828,6 +855,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree97" type="Sprite2D" parent="Decor" unique_id=130538028]
 texture_filter = 1
@@ -840,6 +868,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree25" type="Sprite2D" parent="Decor" unique_id=784123442]
 texture_filter = 1
@@ -852,6 +881,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree26" type="Sprite2D" parent="Decor" unique_id=830435372]
 texture_filter = 1
@@ -864,6 +894,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree124" type="Sprite2D" parent="Decor" unique_id=350649618]
 texture_filter = 1
@@ -876,6 +907,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree125" type="Sprite2D" parent="Decor" unique_id=1744027040]
 texture_filter = 1
@@ -888,6 +920,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree126" type="Sprite2D" parent="Decor" unique_id=1912477656]
 texture_filter = 1
@@ -900,6 +933,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree127" type="Sprite2D" parent="Decor" unique_id=2142332322]
 texture_filter = 1
@@ -912,6 +946,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree222" type="Sprite2D" parent="Decor" unique_id=461390198]
 texture_filter = 1
@@ -924,6 +959,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree223" type="Sprite2D" parent="Decor" unique_id=1829507469]
 texture_filter = 1
@@ -936,6 +972,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree224" type="Sprite2D" parent="Decor" unique_id=1215261191]
 texture_filter = 1
@@ -948,6 +985,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree225" type="Sprite2D" parent="Decor" unique_id=292141509]
 texture_filter = 1
@@ -960,6 +998,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree226" type="Sprite2D" parent="Decor" unique_id=77948138]
 texture_filter = 1
@@ -972,6 +1011,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree128" type="Sprite2D" parent="Decor" unique_id=133442033]
 texture_filter = 1
@@ -984,6 +1024,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree129" type="Sprite2D" parent="Decor" unique_id=1141611773]
 texture_filter = 1
@@ -996,6 +1037,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree221" type="Sprite2D" parent="Decor" unique_id=1093417565]
 texture_filter = 1
@@ -1008,6 +1050,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree250" type="Sprite2D" parent="Decor" unique_id=567769379]
 texture_filter = 1
@@ -1020,6 +1063,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree251" type="Sprite2D" parent="Decor" unique_id=1384512330]
 texture_filter = 1
@@ -1032,6 +1076,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree252" type="Sprite2D" parent="Decor" unique_id=573570087]
 texture_filter = 1
@@ -1044,6 +1089,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree253" type="Sprite2D" parent="Decor" unique_id=299955547]
 texture_filter = 1
@@ -1056,6 +1102,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree254" type="Sprite2D" parent="Decor" unique_id=724178911]
 texture_filter = 1
@@ -1068,6 +1115,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree27" type="Sprite2D" parent="Decor" unique_id=779800564]
 texture_filter = 1
@@ -1080,6 +1128,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree28" type="Sprite2D" parent="Decor" unique_id=706541134]
 texture_filter = 1
@@ -1092,6 +1141,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree133" type="Sprite2D" parent="Decor" unique_id=73376255]
 texture_filter = 1
@@ -1104,6 +1154,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree134" type="Sprite2D" parent="Decor" unique_id=1342682189]
 texture_filter = 1
@@ -1116,6 +1167,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree135" type="Sprite2D" parent="Decor" unique_id=1301189340]
 texture_filter = 1
@@ -1128,6 +1180,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree136" type="Sprite2D" parent="Decor" unique_id=863230353]
 texture_filter = 1
@@ -1140,6 +1193,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree262" type="Sprite2D" parent="Decor" unique_id=512542082]
 texture_filter = 1
@@ -1152,6 +1206,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree138" type="Sprite2D" parent="Decor" unique_id=1748219465]
 texture_filter = 1
@@ -1164,6 +1219,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree139" type="Sprite2D" parent="Decor" unique_id=513089521]
 texture_filter = 1
@@ -1176,6 +1232,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree140" type="Sprite2D" parent="Decor" unique_id=1141896159]
 texture_filter = 1
@@ -1188,6 +1245,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree141" type="Sprite2D" parent="Decor" unique_id=2083069018]
 texture_filter = 1
@@ -1200,6 +1258,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree29" type="Sprite2D" parent="Decor" unique_id=300037911]
 texture_filter = 1
@@ -1212,6 +1271,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree30" type="Sprite2D" parent="Decor" unique_id=138408386]
 texture_filter = 1
@@ -1224,6 +1284,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree142" type="Sprite2D" parent="Decor" unique_id=688862982]
 texture_filter = 1
@@ -1236,6 +1297,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree31" type="Sprite2D" parent="Decor" unique_id=1816125002]
 texture_filter = 1
@@ -1248,6 +1310,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree32" type="Sprite2D" parent="Decor" unique_id=1097092498]
 texture_filter = 1
@@ -1260,6 +1323,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree33" type="Sprite2D" parent="Decor" unique_id=1065751955]
 texture_filter = 1
@@ -1272,6 +1336,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree143" type="Sprite2D" parent="Decor" unique_id=165603953]
 texture_filter = 1
@@ -1284,6 +1349,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree144" type="Sprite2D" parent="Decor" unique_id=1716535334]
 texture_filter = 1
@@ -1296,6 +1362,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree145" type="Sprite2D" parent="Decor" unique_id=132041077]
 texture_filter = 1
@@ -1308,6 +1375,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree146" type="Sprite2D" parent="Decor" unique_id=1688372452]
 texture_filter = 1
@@ -1320,6 +1388,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree173" type="Sprite2D" parent="Decor" unique_id=1776597082]
 texture_filter = 1
@@ -1332,6 +1401,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree147" type="Sprite2D" parent="Decor" unique_id=580968067]
 texture_filter = 1
@@ -1344,6 +1414,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree148" type="Sprite2D" parent="Decor" unique_id=1055834530]
 texture_filter = 1
@@ -1356,6 +1427,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree171" type="Sprite2D" parent="Decor" unique_id=1792384882]
 texture_filter = 1
@@ -1368,6 +1440,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree172" type="Sprite2D" parent="Decor" unique_id=903657940]
 texture_filter = 1
@@ -1380,6 +1453,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree174" type="Sprite2D" parent="Decor" unique_id=1071742923]
 texture_filter = 1
@@ -1392,6 +1466,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree175" type="Sprite2D" parent="Decor" unique_id=968039537]
 texture_filter = 1
@@ -1404,6 +1479,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree149" type="Sprite2D" parent="Decor" unique_id=999671728]
 texture_filter = 1
@@ -1416,6 +1492,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree150" type="Sprite2D" parent="Decor" unique_id=1624846631]
 texture_filter = 1
@@ -1428,6 +1505,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree151" type="Sprite2D" parent="Decor" unique_id=318730125]
 texture_filter = 1
@@ -1440,6 +1518,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree152" type="Sprite2D" parent="Decor" unique_id=406184888]
 texture_filter = 1
@@ -1452,6 +1531,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree153" type="Sprite2D" parent="Decor" unique_id=766924917]
 texture_filter = 1
@@ -1464,6 +1544,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree167" type="Sprite2D" parent="Decor" unique_id=180154699]
 texture_filter = 1
@@ -1476,6 +1557,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree168" type="Sprite2D" parent="Decor" unique_id=1586016080]
 texture_filter = 1
@@ -1488,6 +1570,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree169" type="Sprite2D" parent="Decor" unique_id=1285208707]
 texture_filter = 1
@@ -1500,6 +1583,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree170" type="Sprite2D" parent="Decor" unique_id=275038312]
 texture_filter = 1
@@ -1512,6 +1596,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree154" type="Sprite2D" parent="Decor" unique_id=782814120]
 texture_filter = 1
@@ -1524,6 +1609,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree155" type="Sprite2D" parent="Decor" unique_id=1108277801]
 texture_filter = 1
@@ -1536,6 +1622,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree156" type="Sprite2D" parent="Decor" unique_id=849526864]
 texture_filter = 1
@@ -1548,6 +1635,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree157" type="Sprite2D" parent="Decor" unique_id=1655264891]
 texture_filter = 1
@@ -1560,6 +1648,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree2" type="Sprite2D" parent="Decor" unique_id=1329567674]
 texture_filter = 1
@@ -1572,6 +1661,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree4" type="Sprite2D" parent="Decor" unique_id=724102305]
 texture_filter = 1
@@ -1584,6 +1674,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree19" type="Sprite2D" parent="Decor" unique_id=980815118]
 texture_filter = 1
@@ -1596,6 +1687,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree20" type="Sprite2D" parent="Decor" unique_id=1749670186]
 texture_filter = 1
@@ -1608,6 +1700,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree21" type="Sprite2D" parent="Decor" unique_id=45650296]
 texture_filter = 1
@@ -1620,6 +1713,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree22" type="Sprite2D" parent="Decor" unique_id=1032271277]
 texture_filter = 1
@@ -1632,6 +1726,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree23" type="Sprite2D" parent="Decor" unique_id=1777872585]
 texture_filter = 1
@@ -1644,6 +1739,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree93" type="Sprite2D" parent="Decor" unique_id=284469478]
 texture_filter = 1
@@ -1656,6 +1752,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree98" type="Sprite2D" parent="Decor" unique_id=1511992275]
 texture_filter = 1
@@ -1668,6 +1765,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree94" type="Sprite2D" parent="Decor" unique_id=1911575261]
 texture_filter = 1
@@ -1680,6 +1778,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree95" type="Sprite2D" parent="Decor" unique_id=14833533]
 texture_filter = 1
@@ -1692,6 +1791,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree96" type="Sprite2D" parent="Decor" unique_id=1485481061]
 texture_filter = 1
@@ -1704,6 +1804,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree34" type="Sprite2D" parent="Decor" unique_id=1119401548]
 texture_filter = 1
@@ -1716,6 +1817,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree92" type="Sprite2D" parent="Decor" unique_id=1318721321]
 texture_filter = 1
@@ -1728,6 +1830,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree35" type="Sprite2D" parent="Decor" unique_id=815379142]
 texture_filter = 1
@@ -1740,6 +1843,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree123" type="Sprite2D" parent="Decor" unique_id=683255093]
 texture_filter = 1
@@ -1752,6 +1856,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree99" type="Sprite2D" parent="Decor" unique_id=2083940003]
 texture_filter = 1
@@ -1764,6 +1869,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree100" type="Sprite2D" parent="Decor" unique_id=151064910]
 texture_filter = 1
@@ -1776,6 +1882,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree36" type="Sprite2D" parent="Decor" unique_id=567773603]
 texture_filter = 1
@@ -1788,6 +1895,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree37" type="Sprite2D" parent="Decor" unique_id=1317312008]
 texture_filter = 1
@@ -1800,6 +1908,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree38" type="Sprite2D" parent="Decor" unique_id=1092120544]
 texture_filter = 1
@@ -1812,6 +1921,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree231" type="Sprite2D" parent="Decor" unique_id=376349869]
 texture_filter = 1
@@ -1824,6 +1934,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree232" type="Sprite2D" parent="Decor" unique_id=74462118]
 texture_filter = 1
@@ -1836,6 +1947,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree233" type="Sprite2D" parent="Decor" unique_id=127581080]
 texture_filter = 1
@@ -1848,6 +1960,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree234" type="Sprite2D" parent="Decor" unique_id=931559011]
 texture_filter = 1
@@ -1860,6 +1973,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree235" type="Sprite2D" parent="Decor" unique_id=1394173]
 texture_filter = 1
@@ -1872,6 +1986,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree130" type="Sprite2D" parent="Decor" unique_id=1064269325]
 texture_filter = 1
@@ -1884,6 +1999,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree131" type="Sprite2D" parent="Decor" unique_id=875808016]
 texture_filter = 1
@@ -1896,6 +2012,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree132" type="Sprite2D" parent="Decor" unique_id=1116598562]
 texture_filter = 1
@@ -1908,6 +2025,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree39" type="Sprite2D" parent="Decor" unique_id=1715805825]
 texture_filter = 1
@@ -1920,6 +2038,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree91" type="Sprite2D" parent="Decor" unique_id=460093636]
 texture_filter = 1
@@ -1932,6 +2051,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree227" type="Sprite2D" parent="Decor" unique_id=934442931]
 texture_filter = 1
@@ -1944,6 +2064,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree228" type="Sprite2D" parent="Decor" unique_id=498281025]
 texture_filter = 1
@@ -1956,6 +2077,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree263" type="Sprite2D" parent="Decor" unique_id=1403555828]
 texture_filter = 1
@@ -1968,6 +2090,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree229" type="Sprite2D" parent="Decor" unique_id=162432864]
 texture_filter = 1
@@ -1980,6 +2103,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree230" type="Sprite2D" parent="Decor" unique_id=450540592]
 texture_filter = 1
@@ -1992,6 +2116,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree242" type="Sprite2D" parent="Decor" unique_id=2138600485]
 texture_filter = 1
@@ -2004,6 +2129,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree243" type="Sprite2D" parent="Decor" unique_id=1484985912]
 texture_filter = 1
@@ -2016,6 +2142,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree244" type="Sprite2D" parent="Decor" unique_id=533856392]
 texture_filter = 1
@@ -2028,6 +2155,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree40" type="Sprite2D" parent="Decor" unique_id=1450439844]
 texture_filter = 1
@@ -2040,6 +2168,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree41" type="Sprite2D" parent="Decor" unique_id=1516090662]
 texture_filter = 1
@@ -2052,6 +2181,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree54" type="Sprite2D" parent="Decor" unique_id=2075060419]
 texture_filter = 1
@@ -2064,6 +2194,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree55" type="Sprite2D" parent="Decor" unique_id=1323335313]
 texture_filter = 1
@@ -2076,6 +2207,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree56" type="Sprite2D" parent="Decor" unique_id=168300449]
 texture_filter = 1
@@ -2088,6 +2220,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree57" type="Sprite2D" parent="Decor" unique_id=1107729445]
 texture_filter = 1
@@ -2100,6 +2233,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree69" type="Sprite2D" parent="Decor" unique_id=1834495297]
 texture_filter = 1
@@ -2112,6 +2246,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree70" type="Sprite2D" parent="Decor" unique_id=1213244407]
 texture_filter = 1
@@ -2124,6 +2259,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree71" type="Sprite2D" parent="Decor" unique_id=598054580]
 texture_filter = 1
@@ -2136,6 +2272,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree72" type="Sprite2D" parent="Decor" unique_id=1844859022]
 texture_filter = 1
@@ -2148,6 +2285,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree51" type="Sprite2D" parent="Decor" unique_id=90107962]
 texture_filter = 1
@@ -2160,6 +2298,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree60" type="Sprite2D" parent="Decor" unique_id=354795822]
 texture_filter = 1
@@ -2172,6 +2311,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree61" type="Sprite2D" parent="Decor" unique_id=1787754968]
 texture_filter = 1
@@ -2184,6 +2324,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree58" type="Sprite2D" parent="Decor" unique_id=633590991]
 texture_filter = 1
@@ -2196,6 +2337,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree59" type="Sprite2D" parent="Decor" unique_id=499613746]
 texture_filter = 1
@@ -2208,6 +2350,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree62" type="Sprite2D" parent="Decor" unique_id=1514445944]
 texture_filter = 1
@@ -2220,6 +2363,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree63" type="Sprite2D" parent="Decor" unique_id=1359941857]
 texture_filter = 1
@@ -2232,6 +2376,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree101" type="Sprite2D" parent="Decor" unique_id=1748795169]
 texture_filter = 1
@@ -2244,6 +2389,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree67" type="Sprite2D" parent="Decor" unique_id=988481672]
 texture_filter = 1
@@ -2256,6 +2402,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree68" type="Sprite2D" parent="Decor" unique_id=447602091]
 texture_filter = 1
@@ -2268,6 +2415,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree52" type="Sprite2D" parent="Decor" unique_id=1302753280]
 texture_filter = 1
@@ -2280,6 +2428,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree53" type="Sprite2D" parent="Decor" unique_id=1486976606]
 texture_filter = 1
@@ -2292,6 +2441,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree80" type="Sprite2D" parent="Decor" unique_id=1942061112]
 texture_filter = 1
@@ -2304,6 +2454,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree73" type="Sprite2D" parent="Decor" unique_id=1179766925]
 texture_filter = 1
@@ -2316,6 +2467,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree74" type="Sprite2D" parent="Decor" unique_id=1088702481]
 texture_filter = 1
@@ -2328,6 +2480,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree75" type="Sprite2D" parent="Decor" unique_id=1935891950]
 texture_filter = 1
@@ -2340,6 +2493,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree83" type="Sprite2D" parent="Decor" unique_id=1649950044]
 texture_filter = 1
@@ -2352,6 +2506,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree76" type="Sprite2D" parent="Decor" unique_id=1466081471]
 texture_filter = 1
@@ -2364,6 +2519,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree82" type="Sprite2D" parent="Decor" unique_id=588115248]
 texture_filter = 1
@@ -2376,6 +2532,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree77" type="Sprite2D" parent="Decor" unique_id=336297104]
 texture_filter = 1
@@ -2388,6 +2545,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree163" type="Sprite2D" parent="Decor" unique_id=145574009]
 texture_filter = 1
@@ -2400,6 +2558,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree164" type="Sprite2D" parent="Decor" unique_id=479419386]
 texture_filter = 1
@@ -2412,6 +2571,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree165" type="Sprite2D" parent="Decor" unique_id=254730001]
 texture_filter = 1
@@ -2424,6 +2584,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree166" type="Sprite2D" parent="Decor" unique_id=1112455956]
 texture_filter = 1
@@ -2436,6 +2597,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree84" type="Sprite2D" parent="Decor" unique_id=639580223]
 texture_filter = 1
@@ -2448,6 +2610,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree85" type="Sprite2D" parent="Decor" unique_id=1017306102]
 texture_filter = 1
@@ -2460,6 +2623,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree78" type="Sprite2D" parent="Decor" unique_id=277909052]
 texture_filter = 1
@@ -2472,6 +2636,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree79" type="Sprite2D" parent="Decor" unique_id=1876451691]
 texture_filter = 1
@@ -2484,6 +2649,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree81" type="Sprite2D" parent="Decor" unique_id=946679834]
 texture_filter = 1
@@ -2496,6 +2662,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree158" type="Sprite2D" parent="Decor" unique_id=1893566015]
 texture_filter = 1
@@ -2508,6 +2675,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree159" type="Sprite2D" parent="Decor" unique_id=1248469271]
 texture_filter = 1
@@ -2520,6 +2688,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree160" type="Sprite2D" parent="Decor" unique_id=1153586641]
 texture_filter = 1
@@ -2532,6 +2701,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree161" type="Sprite2D" parent="Decor" unique_id=1029707180]
 texture_filter = 1
@@ -2544,6 +2714,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree162" type="Sprite2D" parent="Decor" unique_id=377509714]
 texture_filter = 1
@@ -2556,6 +2727,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree210" type="Sprite2D" parent="Decor" unique_id=466147754]
 texture_filter = 1
@@ -2568,6 +2740,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree216" type="Sprite2D" parent="Decor" unique_id=437621062]
 texture_filter = 1
@@ -2580,6 +2753,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree265" type="Sprite2D" parent="Decor" unique_id=1172426974]
 texture_filter = 1
@@ -2592,6 +2766,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree268" type="Sprite2D" parent="Decor" unique_id=619297770]
 texture_filter = 1
@@ -2604,6 +2779,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree271" type="Sprite2D" parent="Decor" unique_id=1865699799]
 texture_filter = 1
@@ -2616,6 +2792,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree273" type="Sprite2D" parent="Decor" unique_id=1711239007]
 texture_filter = 1
@@ -2628,6 +2805,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree275" type="Sprite2D" parent="Decor" unique_id=1606977866]
 texture_filter = 1
@@ -2640,6 +2818,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree281" type="Sprite2D" parent="Decor" unique_id=418449614]
 texture_filter = 1
@@ -2652,6 +2831,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree283" type="Sprite2D" parent="Decor" unique_id=414468090]
 texture_filter = 1
@@ -2664,6 +2844,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree209" type="Sprite2D" parent="Decor" unique_id=1726997920]
 texture_filter = 1
@@ -2677,6 +2858,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree211" type="Sprite2D" parent="Decor" unique_id=1700686913]
 texture_filter = 1
@@ -2690,6 +2872,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree212" type="Sprite2D" parent="Decor" unique_id=650815981]
 texture_filter = 1
@@ -2703,6 +2886,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree236" type="Sprite2D" parent="Decor" unique_id=1165699332]
 texture_filter = 1
@@ -2716,6 +2900,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree237" type="Sprite2D" parent="Decor" unique_id=1136603976]
 texture_filter = 1
@@ -2729,6 +2914,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree238" type="Sprite2D" parent="Decor" unique_id=1863845922]
 texture_filter = 1
@@ -2742,6 +2928,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree239" type="Sprite2D" parent="Decor" unique_id=1922871672]
 texture_filter = 1
@@ -2755,6 +2942,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree240" type="Sprite2D" parent="Decor" unique_id=541633181]
 texture_filter = 1
@@ -2768,6 +2956,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree241" type="Sprite2D" parent="Decor" unique_id=1038427176]
 texture_filter = 1
@@ -2781,6 +2970,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree213" type="Sprite2D" parent="Decor" unique_id=771291817]
 texture_filter = 1
@@ -2794,6 +2984,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree214" type="Sprite2D" parent="Decor" unique_id=874930077]
 texture_filter = 1
@@ -2807,6 +2998,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree217" type="Sprite2D" parent="Decor" unique_id=2073055804]
 texture_filter = 1
@@ -2820,6 +3012,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree218" type="Sprite2D" parent="Decor" unique_id=894175748]
 texture_filter = 1
@@ -2833,6 +3026,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree219" type="Sprite2D" parent="Decor" unique_id=1843668452]
 texture_filter = 1
@@ -2846,6 +3040,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree245" type="Sprite2D" parent="Decor" unique_id=93981837]
 texture_filter = 1
@@ -2859,6 +3054,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree246" type="Sprite2D" parent="Decor" unique_id=176323767]
 texture_filter = 1
@@ -2872,6 +3068,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree247" type="Sprite2D" parent="Decor" unique_id=2080878876]
 texture_filter = 1
@@ -2885,6 +3082,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree248" type="Sprite2D" parent="Decor" unique_id=1365117426]
 texture_filter = 1
@@ -2898,6 +3096,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="tree249" type="Sprite2D" parent="Decor" unique_id=284449438]
 texture_filter = 1
@@ -2911,6 +3110,7 @@ blob_offset = Vector2(30, -30)
 cast_skew = 0.0
 cast_squash = 1.0
 cast_offset = Vector2(12, 6)
+grass_carve_radius = 0.1
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=257837528]
 unique_name_in_owner = true
@@ -3124,3 +3324,6 @@ unique_name_in_owner = true
 zoom = Vector2(3, 3)
 position_smoothing_enabled = true
 position_smoothing_speed = 10.0
+
+[node name="MaskGen" type="Node" parent="." unique_id=2037842369]
+script = ExtResource("23_ebg2g")

@@ -392,7 +392,7 @@ func _is_on_enemy_path(tap_pos: Vector2, type: String = "spear") -> bool:
 func _is_on_decor(tap_pos: Vector2, type: String = "spear") -> bool:
 	var ext: Vector2 = TowerVisuals.base_extents(type)
 	for d in get_tree().get_nodes_in_group("decor"):
-		if not is_instance_valid(d):
+		if not is_instance_valid(d) or not d.blocks_building:
 			continue
 		var delta: Vector2 = tap_pos - d.block_center
 		# Squash Y the same way the footprint ellipse does — the ground is seen
