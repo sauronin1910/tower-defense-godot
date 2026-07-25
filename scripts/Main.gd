@@ -387,7 +387,20 @@ func _is_on_enemy_path(tap_pos: Vector2, type: String = "spear") -> bool:
 	params.collide_with_bodies = true
 	params.collide_with_areas = false
 	return space.intersect_shape(params, 1).size() > 0
-
+# Decor (trees, rocks, crystals) has no collision shapes, so blocking is a plain
+# distance test against the "decor" group — same approach as tower spacing.
+func _is_on_decor(tap_pos: Vector2, type: String = "spear") -> bool:
+	var ext: Vector2 = TowerVisuals.base_extents(type)
+	for d in get_tree().get_nodes_in_group("decor"):
+		if not is_instance_valid(d):
+			continue
+		var delta: Vector2 = tap_pos - d.block_center
+		# Squash Y the same way the footprint ellipse does — the ground is seen
+		# at an angle, so a given gap looks shorter vertically on screen.
+		delta.y /= TowerVisuals.FOOTPRINT_VERTICAL_RATIO
+		if delta.length() < ext.x + d.block_extent:
+			return true
+	return false
 
 func _is_too_close_to_tower(tap_pos: Vector2, type: String = "spear") -> bool:
 	var new_radius: float = TowerVisuals.footprint_radius(type)
@@ -651,6 +664,8 @@ func _can_place_tower_at(pos: Vector2, type: String) -> bool:
 	if gold < cost:
 		return false
 	if _is_on_enemy_path(pos, type):
+		return false
+	if _is_on_decor(pos, type):
 		return false
 	if _is_too_close_to_tower(pos, type):
 		return false

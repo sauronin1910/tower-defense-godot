@@ -133,7 +133,7 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 func _process(delta):
 	_advance_flag_animation(delta)
 	# Same depth sorting as enemies, so units pass in front of / behind towers.
-	z_index = clampi(int(global_position.y), -4000, 4000)
+	z_index = clampi(int(global_position.y) + 2000, 0, 8000)
 	if range_visible and range_reveal < 1.0:
 		range_reveal = min(range_reveal + delta * 6.0, 1.0)
 		queue_redraw()

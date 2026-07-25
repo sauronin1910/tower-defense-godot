@@ -242,7 +242,7 @@ func _process(delta):
 		progress_ratio = min(target, max(progress_ratio, limit))
 		_update_lane(delta)
 		# Depth sorting: whoever stands further down the screen draws in front.
-		z_index = clampi(int(global_position.y), -4000, 4000)
+		z_index = clampi(int(global_position.y) + 2000, 0, 8000)
 
 	# Frame-animated types: pick a facing from the path, then step frames
 	if uses_directional_walk:
