@@ -1,9 +1,0 @@
-{
-  "id": "evt-1783131482440-4d983184",
-  "trigger": "feature_created",
-  "timestamp": "2026-07-04T02:18:02.440Z",
-  "projectPath": "D:\\Projects/TowerDefense",
-  "projectName": "TowerDefense",
-  "featureId": "feature-1783131482367-73f9cojplfr",
-  "featureName": "Setup Godot Project Structure"
-}

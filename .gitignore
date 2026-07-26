@@ -1,4 +1,14 @@
-﻿.godot/
-*.import
-export.cfg
+﻿# Godot
+.godot/
+/android/
 export_presets.cfg
+
+# Generated output — never edit or commit
+graphify-out/
+
+# Local tooling state
+.automaker/
+
+# Stray artifacts
+fix_line59.py
+gradient.png.import
