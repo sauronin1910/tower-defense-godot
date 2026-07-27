@@ -1,6 +1,7 @@
+class_name DecorSprite
 extends Sprite2D
 
-# Depth-sorts a hand-placed decor sprite the same way enemies and towers do, and
+# Depth-sorts a decor sprite the same way enemies and towers do, and
 # optionally gives it a shadow. Shadows go into the shared ShadowLayer
 # (a CanvasGroup) so overlapping ones don't stack into dark blotches — they are
 # drawn opaque there, and the group's own alpha sets how dark shadows end up.
@@ -50,7 +51,6 @@ func _ready() -> void:
 		block_center = to_global(Vector2(0.0, bottom_y))
 		var opaque_w: float = ob.size.x * abs(scale.x)
 		block_extent = opaque_w * block_radius
-		const CARVE_VERTICAL_RATIO: float = 0.55       # small circle to bridge tile seams
 		add_to_group("decor")
 
 	match shadow_mode:

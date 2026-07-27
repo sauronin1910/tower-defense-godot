@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/EnemyType.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "hobgoblin"
+health = 150
+speed = 60.0
+gold = 30
+leak_damage = 3
+texture_path = "res://assets/sprites/Enemy/hobgoblin.png"
+scale = 0.135
+wiggle = {
+"bob": {
+"amp": 9.0,
+"freq": 3.0
+},
+"rock": {
+"amp": 0.064,
+"freq": 13.5
+}
+}

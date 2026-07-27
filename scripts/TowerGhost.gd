@@ -17,6 +17,16 @@ const CELL_SIZE: float = 12.0        # fine cells, ~1/8 of a 96px map tile
 const GRID_EXTENT: float = 96.0      # half-width of the overlay area, in pixels
 const ROAD_MASK: int = 1 << 4        # must match Main.gd ROAD_COLLISION_MASK
 
+# Road-ness per snapped grid cell, keyed by Vector2i cell coordinate. The grid
+# is snapped to CELL_SIZE and the road never moves during a level, so each cell
+# only ever needs one physics query — previously all (2*count+1)^2 = 289 cells
+# were re-queried on every single frame of the drag. The ghost is created fresh
+# per drag, so the cache can't outlive the level.
+var _road_cache: Dictionary = {}
+
+# Last snapped grid origin, so a stationary ghost stops redrawing.
+var _last_base: Vector2i = Vector2i(-99999, -99999)
+
 
 func _ready() -> void:
 	z_index = 20
@@ -59,11 +69,26 @@ func set_valid(valid: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	# Grow the range ring open, then hold it; grid needs a redraw each frame anyway
-	if range_reveal < 1.0:
+	# Grow the range ring open, then hold it
+	var animating: bool = range_reveal < 1.0
+	if animating:
 		range_reveal = min(range_reveal + delta * 6.0, 1.0)
-	# The grid follows the cursor, so it must redraw as the ghost moves
-	queue_redraw()
+	# The grid is snapped to CELL_SIZE, so it only changes when the cursor
+	# crosses a cell boundary — no need to redraw on every mouse jitter.
+	var base := Vector2i(floori(global_position.x / CELL_SIZE), floori(global_position.y / CELL_SIZE))
+	if animating or base != _last_base:
+		_last_base = base
+		queue_redraw()
+
+
+# True if the given world point sits on a blocked road tile.
+# Answers come from _road_cache after the first query for that cell.
+func _is_road_at_cell(cell: Vector2i, world_point: Vector2) -> bool:
+	if _road_cache.has(cell):
+		return _road_cache[cell]
+	var result: bool = _is_road_at(world_point)
+	_road_cache[cell] = result
+	return result
 
 
 # True if the given world point sits on a blocked road tile
@@ -93,13 +118,14 @@ func _draw_placement_grid() -> void:
 	# Snap the cursor to the fine grid so cells sit still as the mouse moves
 	var origin: Vector2 = global_position
 	var count: int = int(GRID_EXTENT / CELL_SIZE)
-	var base_x: float = floor(origin.x / CELL_SIZE)
-	var base_y: float = floor(origin.y / CELL_SIZE)
+	var base_x: int = floori(origin.x / CELL_SIZE)
+	var base_y: int = floori(origin.y / CELL_SIZE)
 	var cell_vec := Vector2(CELL_SIZE, CELL_SIZE)
 	for dy in range(-count, count + 1):
 		for dx in range(-count, count + 1):
-			var top_left_world := Vector2((base_x + dx) * CELL_SIZE, (base_y + dy) * CELL_SIZE)
+			var cell := Vector2i(base_x + dx, base_y + dy)
+			var top_left_world := Vector2(float(cell.x) * CELL_SIZE, float(cell.y) * CELL_SIZE)
 			var center_world := top_left_world + cell_vec * 0.5
-			var color := red if _is_road_at(center_world) else green
+			var color := red if _is_road_at_cell(cell, center_world) else green
 			# _draw is in local space, so convert the world rect back to local
 			draw_rect(Rect2(top_left_world - global_position, cell_vec), color, true)

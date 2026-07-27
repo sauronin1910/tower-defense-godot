@@ -1,7 +1,11 @@
 extends Node
 
 # One-shot mask generator (v3 — geometry-accurate, shape-query).
-# Attach to a temporary Node in the scene, run the scene once.
+#
+# EDITOR-ONLY TOOL. Never put this node in Main.tscn: the sampling loop below is
+# ~1.3M blocking physics queries and save_png() cannot write to res:// in an
+# exported build. Run `scenes/MaskGenTool.tscn` (F6) instead — it instances Main
+# and adds this node next to it. See CLAUDE.md → Regenerating the grass mask.
 #
 # Samples the ROAD COLLISION geometry at sub-tile resolution using the SAME
 # physics query style that the working tower-placement check uses:
@@ -29,6 +33,16 @@ var _done: bool = false
 
 
 var _frames_waited: int = 0
+
+
+func _ready() -> void:
+	# Hard stop in an exported build: res:// is read-only there, and the sampling
+	# pass would freeze the game for many seconds before failing to save.
+	if not OS.has_feature("editor"):
+		push_error("MaskGen: editor-only tool, refusing to run in an exported build")
+		_done = true
+		queue_free()
+
 
 func _physics_process(_delta: float) -> void:
 	if _done:

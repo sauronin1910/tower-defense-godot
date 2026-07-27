@@ -1,14 +1,20 @@
-﻿# Godot
+# Godot
 .godot/
 /android/
 export_presets.cfg
 
-# Generated output — never edit or commit
+# Generated output - never edit or commit
 graphify-out/
 
 # Local tooling state
 .automaker/
 
-# Stray artifacts
-fix_line59.py
-gradient.png.import
+# Editor save-temps and hand-made backups. These got committed in bulk once
+# (17 Main.tscn*.tmp files); ignoring the patterns is what stops a repeat.
+*.tmp
+*.backup
+*.patch
+
+# NOTE: *.import files ARE tracked on purpose. Godot regenerates them on first
+# open, but with fresh uids - anything referencing an asset by uid breaks on a
+# clean clone. Do not add them here.

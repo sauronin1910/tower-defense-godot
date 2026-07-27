@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EnemyType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/EnemyType.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "slime_big"
+health = 60
+speed = 45.0
+gold = 15
+leak_damage = 2
+splits_into = "slime_mini"
+split_count = 3
+texture_path = "res://assets/sprites/Enemy/slime_big.png"
+scale = 0.1575
+wiggle = {
+"pulse": {
+"amp": 0.2,
+"freq": 5.0
+}
+}

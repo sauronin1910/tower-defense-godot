@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/EnemyType.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "goblin_fast"
+health = 45
+speed = 120.0
+gold = 15
+leak_damage = 1
+texture_path = "res://assets/sprites/Enemy/goblin_fast.png"
+scale = 0.1125
+wiggle = {
+"bob": {
+"amp": 20.55,
+"amp2": 6.87,
+"freq": 14.0,
+"freq2": 4.2
+},
+"rock": {
+"amp": 0.147,
+"freq": 31.5
+}
+}

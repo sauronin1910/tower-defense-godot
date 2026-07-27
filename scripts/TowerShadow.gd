@@ -2,8 +2,8 @@ class_name TowerShadow
 extends Node2D
 
 # A simple blob shadow: a flattened, semi-transparent dark ellipse drawn at the
-# tower's base (the node origin). Created via TowerVisuals.make_shadow(type) so
-# every tower/ghost gets a consistent shadow without an art asset.
+# node origin. Enemy.gd and DecorSprite.gd build one directly and call setup();
+# towers use TowerVisuals.make_cast_shadow instead.
 
 var radius: float = 48.0                       # horizontal radius (map px)
 var vertical_ratio: float = 0.7                # squash on Y (matches footprint)

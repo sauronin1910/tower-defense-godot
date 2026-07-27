@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="DecorKind" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/DecorKind.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "rock_001"
+texture_path = "res://assets/decor/rocks/rock_001.png"
+material_path = "res://data/decor/materials/decor_grass.tres"
+texture_filter = 1
+default_scale = Vector2(0.55, 0.5295)
+ground_anchor = 0.45
+carves_grass = true
+blocks_building = true
+block_radius = 0.45
+shadow_mode = 1
+blob_width = 0.4
+blob_squash = 0.45
+blob_offset = Vector2(10, -12)
+cast_skew = 0.9
+cast_squash = 1
+cast_offset = Vector2(2, 1)

@@ -1,0 +1,30 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3]
+
+[ext_resource type="Shader" uid="uid://5i7vida8dfix" path="res://shaders/decor_grass_wind.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" uid="uid://xhcm8ib85hs0" path="res://shaders/noise.png" id="2_noise"]
+[ext_resource type="Texture2D" uid="uid://cf5p1gypeowc2" path="res://shaders/gradient.png" id="3_gradient"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/noise_tex = ExtResource("2_noise")
+shader_parameter/gradient_tex = ExtResource("3_gradient")
+shader_parameter/wind_strength = 0.0
+shader_parameter/wind_speed = 1.2
+shader_parameter/grass_enabled = true
+shader_parameter/blade_freq = 4.0
+shader_parameter/blade_thickness = 1.5
+shader_parameter/streak_width = 2.55
+shader_parameter/wind_scale = 0.004
+shader_parameter/root_height = 0.35
+shader_parameter/band_bottom = 1.0
+shader_parameter/band_height = 0.1
+shader_parameter/arc = -0.3
+shader_parameter/length_var = -2.4
+shader_parameter/fine_detail = 0.1
+shader_parameter/bend_amount = 0.9
+shader_parameter/sway_speed = 17.6
+shader_parameter/shadow_tone = 0.15
+shader_parameter/light_tone = 0.55
+shader_parameter/streak_scale = 24.0
+shader_parameter/grass_alpha = 1.0
+shader_parameter/as_shadow = false

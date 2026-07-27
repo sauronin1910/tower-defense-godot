@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=4]
+
+[ext_resource type="PackedScene" uid="uid://m55k5fvnulhl" path="res://scenes/Main.tscn" id="1_main"]
+[ext_resource type="Script" uid="uid://ckyc3rqsyah2x" path="res://scripts/MaskGen.gd" id="2_maskgen"]
+
+[node name="MaskGenTool" type="Node" unique_id=1001]
+
+[node name="Main" parent="." instance=ExtResource("1_main") unique_id=1002]
+
+[node name="MaskGen" type="Node" parent="." unique_id=1003]
+script = ExtResource("2_maskgen")
+tilemap_path = NodePath("../Main/TileMapLayer")

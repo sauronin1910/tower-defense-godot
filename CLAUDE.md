@@ -53,6 +53,12 @@ has caused broken files more than once.
 ## Layout
 
 ```
+data/
+  enemies/*.tres            one EnemyType per enemy — the whole type table
+  towers/*.tres             one TowerType per tower
+  decor/kinds/*.tres        one DecorKind per prop (texture, shadow, carving)
+  decor/materials/*.tres    the two shared decor materials (wind / grass fringe)
+  decor/placements.json     where every copy stands — 168 rows, one per line
 assets/
   grass_mask.png            generated — do not hand-edit
   terrain/                  tileset sources (road SVG, grass PNG)
@@ -60,7 +66,7 @@ assets/
     Towers/spear_tower/     Spear_Tower_1..5.png (flag idle), Projectile_Spear.png
     Enemy/                  static enemy PNGs
     Enemy/small_goblin/     <dir>_side/small_goblin_<dir>_side_01..09.png
-  decor/                    hand-placed props (trees, rocks, crystals)
+  decor/                    prop art (trees, rocks, crystals)
 scenes/                     Main.tscn, Tower.tscn, Projectile.tscn, UI scenes
 scripts/                    all GDScript
 shaders/                    .gdshader files + gradient.png, noise.png, clouds.png
@@ -73,7 +79,12 @@ shaders/                    .gdshader files + gradient.png, noise.png, clouds.pn
 ### Core scripts
 
 **`Main.gd`** — game loop: waves, gold, placement, camera, speed control.
-`WAVE_CONFIG` holds 13 waves; endless mode repeats the last entry.
+`WAVE_CONFIG` holds 13 waves; endless mode repeats the last entry. Rows are
+**sparse** `{enemy_id: count}` — list only what a wave contains.
+
+`start_wave()` expands the row into `spawn_queue`, a flat list of ids, and
+`_on_spawn_timer_timeout` just pops from it. `total_enemies_to_spawn` is the
+queue's size, so the count can't drift from what actually spawns.
 
 Placement goes through `_can_place_tower_at(pos, type)`, which chains:
 gold check → `_is_on_enemy_path` (road collision) → `_is_on_decor` → `_is_too_close_to_tower`.
@@ -81,29 +92,68 @@ The drag ghost reuses the same function, so validity feedback stays in sync
 automatically.
 
 **`TowerVisuals.gd`** (`RefCounted`, all static) — **single source of truth** for
-tower visuals. Both `Tower.gd` and `TowerGhost.gd` read from here; that's the
-whole point, so don't reintroduce per-script duplicates.
+tower definitions: art, range *and* combat stats. `Tower.gd`, `TowerGhost.gd`
+and `Main.gd` all read from here; that's the whole point, so don't reintroduce
+per-script duplicates.
 
-Owns: per-type `DATA` (sprite paths, frame counts, range, projectile, muzzle),
+Cost, damage and fire rate used to live in `Tower._ready()`, with a second copy
+of the prices in `Main.TOWER_COSTS`. `total_gold_invested` — and so the sell
+refund — is seeded from the tower's own copy, so a price changed in only one
+place silently paid the wrong refund. Both copies are gone.
+
+Owns: per-type `DATA` (sprite paths, frame counts, range, projectile, muzzle,
+cost, damage, fire_rate),
 `scale_for()`, `base_offset()` (measures opaque pixels so transparent padding is
 ignored), `footprint_radius()`, `opaque_local_rect()` (snug click hitbox),
 `base_extents()` / `base_query_shape()` (placement ellipse from the sprite's
-bottom slice), and factories `make_cast_shadow()` / `make_shadow()`.
+bottom slice), and the factory `make_cast_shadow()`.
 
 Towers render 240px tall with the sprite's **base** on the placement point.
 
-**`Enemy.gd`** (`PathFollow2D`) — stats per type, HP bar, movement, animation.
+**`enemy_types.gd`** (`class_name EnemyTypes`, `RefCounted`, all static) — the
+registry: scans `data/enemies/` and keys every `EnemyType` by its `id`.
+`TowerVisuals` does the same for `data/towers/`; both go through
+`ResourceRegistry.load_dir()`.
+
+Adding an enemy is **one step — drop a `.tres` in `data/enemies/`.** It used to
+be five: two `if/elif` chains in `Enemy.gd`, a key in every row of
+`WAVE_CONFIG`, a branch in the unrolled cumulative chain in
+`_on_spawn_timer_timeout`, and the hand-written sum in `start_wave`. Don't let
+any of them grow back.
+
+**`Enemy.gd`** (`PathFollow2D`) — HP bar, movement, animation. All per-type
+numbers come from `EnemyTypes.entry()`, which never returns null: an unknown id
+warns and yields a visible placeholder.
 
 Two animation styles coexist: **procedural** wiggle (sin-based bob/pulse) for
 static-sprite types, and **frame-based** directional walk for `goblin_small`.
-A type must use one or the other — running both makes them fight.
+A type must use one or the other — running both makes them fight. The data
+enforces this by shape: `walk_path` selects frames, `texture` selects a static
+sprite, and frame-animated types carry an empty `wiggle`.
 
 **`Tower.gd`** (`Area2D`) — per-tower stats, upgrade levels, shooting, build-pop.
 `shoot_timer` is stored as a member so `_apply_level_stats()` can refresh
 `wait_time`; otherwise fire-rate upgrades silently do nothing.
 
-**`DecorSprite.gd`** (`Sprite2D`) — hand-placed props. Handles depth sorting,
-shadow creation, and build blocking. Configure one node, then Ctrl+D copies.
+**`DecorSprite.gd`** (`class_name DecorSprite`, `Sprite2D`) — one prop. Handles
+depth sorting, shadow creation, and build blocking. Not placed by hand any
+more: `DecorSpawner` builds these from data and configures them via
+`DecorKind.apply_to()`.
+
+**`DecorSpawner.gd`** (`@tool`, `Node2D`) — the `Decor` node in Main.tscn.
+Reads `data/decor/placements.json`, looks each row's `kind` up in `DecorKinds`,
+and instantiates a `DecorSprite` per row.
+
+Main.tscn used to hold all 204 props as nodes: 3326 lines, 241 nodes, and about
+2000 of those lines were the same nine properties that Ctrl+D had copied along
+with the position. It is now 610 lines and 37 nodes.
+
+Editor placement survives because the script is `@tool`: it spawns the props at
+edit time so they can still be dragged by eye, but adds them **without an
+owner**, which is what stops Godot serialising them back into the scene. A
+`bake_now` checkbox writes the current children back to the JSON. **Moves exist
+only in the tree until baked** — `reload_now`, reopening the scene or a script
+reload all rebuild from the file and discard unbaked drags.
 
 **`MaskGen.gd`** — one-shot tool, not runtime code. See workflow below.
 
@@ -191,13 +241,18 @@ Re-run it whenever road collision polygons change, or decor is moved, added,
 rescaled, or its `carves_grass` flag flipped. Stale mask = a rim hanging where an
 object no longer is.
 
-1. Add a plain `Node` child to Main's **root**, name it `MaskGen`, attach `scripts/MaskGen.gd`
-2. Run the scene once. Watch Output for `road_pixels=` and `carved N decor pixels` — both must be non-zero
+1. Open `scenes/MaskGenTool.tscn` and play **that scene** (F6). It instances
+   Main and puts the `MaskGen` node beside it, so Main.tscn itself stays clean
+2. Watch Output for `road_pixels=` and `carved N decor pixels` — both must be non-zero
 3. Close the game, **restart Godot** (or Reimport the PNG) so the new file is picked up
-4. **Delete the MaskGen node**, or it regenerates on every launch
 
-**The script must be its own child node, never attached to the root.** Doing that
-overwrites `Main.gd` on the root and the scene comes up blank.
+**Never add `MaskGen` to Main.tscn.** It ran there once and cost ~1.3M blocking
+physics queries on every launch, plus a `save_png` to `res://` that can only fail
+in an exported build. `MaskGen.gd` now refuses to run unless
+`OS.has_feature("editor")`, and it must never be the project's main scene.
+
+**The script must be its own child node, never attached to a scene root.** Doing
+that overwrites the root's script and the scene comes up blank.
 
 Tuning knobs, all global: `SUBDIV` (mask resolution — cost grows fast, 38 is
 ~1.8M physics queries and a visible freeze), `PROBE_RADIUS` (keep ≥ 1.0; below
@@ -208,17 +263,63 @@ counts as ground contact), `CARVE_DILATE`.
 Colliders are **not** registered on physics frame 1 — the script waits ~30 frames
 before sampling, otherwise `road_pixels` comes back 0.
 
+### Adding an enemy or tower type
+
+Copy an existing `.tres` in `data/enemies/` or `data/towers/`, rename it, and
+edit it in the inspector. Set `id` to match the filename — the registry keys on
+`id`, and a duplicate or empty one is skipped with an error in Output.
+
+For an enemy: either `texture_path` + `scale` (static sprite, optional
+`wiggle`), **or** `walk_path` + `walk_prefix` + `walk_height` (directional
+frames, no `wiggle`) — never both. Then add the id to a `WAVE_CONFIG` row.
+
+For a tower it's the `.tres` plus a dock button wired in `Main._ready()`, since
+the three buttons are still placed by hand in `Main.tscn`.
+
+**Registries are cached statically.** Like the `TowerVisuals` measurement
+caches, they load once and survive a scene restart — restart Godot after
+editing a `.tres` if the change doesn't show up.
+
 ### Placing decor
 
-Children of the `Decor` node in Main.tscn. Configure one, then Ctrl+D and drag.
-Vary rotation, scale and `Flip H` so copies don't read as clones.
+Select the `Decor` node in Main.tscn and tick **`edit_mode`**. Drag the props
+around, then tick **`bake_now`**, which saves and drops back out of edit mode.
 
-Per-node exports appear at the **top** of the inspector, above `Texture`:
-`ground_anchor`, `shadow_mode`, shadow tuning groups, `blocks_building` +
-`block_radius`, `carves_grass`.
+`edit_mode` exists because of Godot's selection rule: the 2D editor won't let
+you click a node whose `owner` isn't the edited scene — and giving it an owner
+is exactly what makes the scene file swallow it again. So the spawner spawns
+props unowned normally (visible, not clickable, scene stays 610 lines) and owned
+while editing (draggable, and the scene would take all 168 if you saved it
+then). Bake strips ownership again.
 
-Shadows are built in `_ready()`, so they're invisible in the editor — judge them
-only in a running scene. `block_center` is likewise computed once at startup.
+`bake_now` is the save button — nothing else persists a move, Ctrl+S does not.
+`reload_now` throws the current children away and rebuilds from the file, which
+is how you undo a bad drag.
+
+Vary rotation, scale and `Flip H` so copies don't read as clones; `bake` only
+writes those fields when they differ from the kind, so a plain copy stays a
+two-field row.
+
+To add a **new prop type**, drop a `.tres` in `data/decor/kinds/` — that is the
+whole procedure, same as enemies. `id` must match the filename. Then place
+copies of it and bake.
+
+To add **more copies** of an existing prop, turn on `edit_mode`, duplicate a
+spawned node in the viewport, and bake. A hand-added `Sprite2D` works too: bake matches it to a kind
+by texture path if it has no `decor_kind` metadata.
+
+Per-prop settings live on the `DecorKind`, not the node: `ground_anchor`,
+`shadow_mode`, the shadow tuning values, `blocks_building` + `block_radius`,
+`carves_grass`. Editing one changes every copy at once — which is the point, and
+also why the registry cache matters (below).
+
+Shadows are built in `DecorSprite._ready()`, so they're invisible in the editor —
+judge them only in a running scene. `block_center` is likewise computed once at
+startup.
+
+`DecorKinds` caches like the other registries, so `reload_now` clears it before
+respawning. After hand-editing a `.tres`, tick `reload_now` rather than hunting
+for a stale value.
 
 Decor carving is by **silhouette**, not radius. A per-object radius was tried and
 rejected: shapes differ too much (round canopies vs narrow trunks vs wide boulder

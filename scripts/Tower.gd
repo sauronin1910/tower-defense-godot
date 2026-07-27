@@ -35,6 +35,9 @@ var footprint_radius: float = 48.0
 
 # Idle animation state (flag waving)
 var frame_textures: Array = []
+# Cached in _ready — the flag animation swaps a texture every 0.1s and used to
+# re-resolve the node path each time.
+var sprite_node: Sprite2D = null
 var cast_shadow: Sprite2D = null
 var frame_index: int = 0
 var frame_timer: float = 0.0
@@ -43,19 +46,13 @@ const FRAME_DURATION: float = 0.1
 
 func _ready():
 	add_to_group("towers")
-	# Stats per tower type; visuals and range come from TowerVisuals
-	if tower_type == "arrow":
-		base_fire_rate = 1.5
-		tower_cost = 75
-		base_tower_damage = 8
-	elif tower_type == "shells":
-		base_fire_rate = 0.5
-		tower_cost = 120
-		base_tower_damage = 30
-	else: # spear (default)
-		base_fire_rate = 1.0
-		tower_cost = 50
-		base_tower_damage = 10
+	# Every per-type number — art, range, price and combat stats — comes from
+	# the type's .tres. Tower used to keep its own copy of cost/damage/rate,
+	# which meant a price change had to be made here AND in Main to keep the
+	# sell refund honest.
+	base_fire_rate = TowerVisuals.base_fire_rate(tower_type)
+	tower_cost = TowerVisuals.cost(tower_type)
+	base_tower_damage = TowerVisuals.base_damage(tower_type)
 
 	projectile_texture_path = TowerVisuals.projectile_path(tower_type)
 	base_attack_range = TowerVisuals.attack_range(tower_type)
@@ -73,6 +70,7 @@ func _ready():
 		
 	# Load visuals: animation frames if this type has them, otherwise one texture
 	var sprite = get_node("Sprite2D")
+	sprite_node = sprite
 	frame_textures = TowerVisuals.load_frames(tower_type)
 	if frame_textures.is_empty():
 		sprite.texture = null
@@ -138,13 +136,6 @@ func _process(delta):
 		range_reveal = min(range_reveal + delta * 6.0, 1.0)
 		queue_redraw()
 
-	# Manually check distance to all enemies in the scene
-	enemies_in_range.clear()
-	var all_enemies = get_tree().get_nodes_in_group("enemies")
-	for enemy in all_enemies:
-		if is_instance_valid(enemy) and global_position.distance_to(enemy.global_position) <= attack_range:
-			enemies_in_range.append(enemy)
-
 
 func _advance_flag_animation(delta: float) -> void:
 	if frame_textures.size() < 2:
@@ -154,13 +145,28 @@ func _advance_flag_animation(delta: float) -> void:
 		return
 	frame_timer -= FRAME_DURATION
 	frame_index = (frame_index + 1) % frame_textures.size()
-	get_node("Sprite2D").texture = frame_textures[frame_index]
+	if is_instance_valid(sprite_node):
+		sprite_node.texture = frame_textures[frame_index]
 	# Keep the cast shadow waving in sync with the flag
 	if is_instance_valid(cast_shadow):
 		cast_shadow.texture = frame_textures[frame_index]
 
 
+# Enemies in range, rebuilt on demand. This used to run every frame in _process,
+# which made target selection cost (towers x enemies) per frame for a list that
+# is only ever read when the shoot timer fires — roughly once a second. Scanning
+# here is both ~60x cheaper and more accurate, since it sees current positions
+# rather than a list that could be a frame stale.
+func _refresh_enemies_in_range() -> void:
+	enemies_in_range.clear()
+	var range_sq: float = attack_range * attack_range
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if is_instance_valid(enemy) and global_position.distance_squared_to(enemy.global_position) <= range_sq:
+			enemies_in_range.append(enemy)
+
+
 func _on_shoot_timer():
+	_refresh_enemies_in_range()
 	if enemies_in_range.is_empty():
 		return
 
@@ -207,10 +213,6 @@ func _draw() -> void:
 	var ring_r: float = attack_range * range_reveal
 	draw_arc(Vector2.ZERO, ring_r, 0.0, TAU, 64, Color(0.0, 0.0, 0.0, 1.0), 2.0)
 
-
-func set_footprint_visible(_value: bool) -> void:
-	# Footprint overlay removed; kept as a no-op so Main can call it safely
-	pass
 
 func show_range() -> void:
 	range_visible = true

@@ -6,10 +6,14 @@ signal enemy_reached_end(damage_amount)
 # Signal emitted when enemy is defeated by combat — carries gold reward
 signal enemy_defeated(gold_reward)
 
-signal split_requested(spawn_position, spawn_progress_ratio)
+# Carries WHAT to spawn as well as where, so Main doesn't have to know which
+# enemy splits into which — that's the dying unit's splits_into/split_count.
+signal split_requested(spawn_position, spawn_progress_ratio, spawn_type, spawn_count)
 
-# Exported variable for enemy type selection
-@export var enemy_type: String = "peasant"
+# EnemyType id, matching a .tres in res://data/enemies/. Main sets this on
+# spawn; the default only applies to an Enemy placed by hand in a scene.
+# (It was "peasant" — a type that stopped existing, so every such enemy warned.)
+@export var enemy_type: String = "slime"
 
 # Global tuning for the larger map. Base values below stay readable as
 # "design speed"; these scale every type at once.
@@ -20,23 +24,18 @@ const ANIM_SPEED_MULTIPLIER: float = 2.0
 # Used by types that ship per-direction frame folders instead of one static PNG.
 const WALK_FRAME_COUNT: int = 9
 const WALK_FRAME_DURATION: float = 0.0576
-# On-map height in pixels for frame-animated types. Scale is derived from this
-# and the frame's own resolution, so the source size doesn't matter.
-const GOBLIN_SMALL_HEIGHT: float = 120.0
+# On-map height in pixels for frame-animated types is the per-type walk_height
+# field on EnemyType; scale is derived from it and the frame's own resolution,
+# so the source size doesn't matter.
 # Round the sprite scale to whole numbers when upscaling, so pixel art stays
 # crisp instead of picking up uneven stair-stepping.
 const SNAP_PIXEL_SCALE: bool = true
 
-# ── Spacing and overtaking ──
+# ── Spacing ──
 # Minimum spacing between enemies along the path, in world pixels.
 const MIN_FOLLOW_GAP: float = 30.0
-# Sideways lanes so faster units can overtake instead of queueing forever.
-const LANE_WIDTH: float = 26.0        # how far aside a passing unit steps
 const LANE_MAX: float = 34.0          # never stray further than this from the path centre
-const LANE_LERP_SPEED: float = 6.0    # how quickly it slides into / out of a lane
 const LANE_SPAWN_SPREAD: float = 12.0 # small random lane at spawn so units don't stack perfectly
-const OVERTAKE_LOOKAHEAD: float = 95.0 # spot the unit ahead this early, in world px
-const YIELD_LOOKBEHIND: float = 70.0   # notice someone coming up behind this early
 # ── Crowd separation (replaces the lane logic) ──
 const CROWD_RANGE: float = 70.0   # look this far along the path for neighbours
 const CROWD_WIDTH: float = 30.0   # lateral gap they try to keep between each other
@@ -50,6 +49,13 @@ var max_health: int = 0
 
 # Gold reward when defeated in combat
 var gold_reward: int = 0
+
+# Base health this unit costs if it reaches the end of the path
+var leak_damage: int = 1
+
+# This type's EnemyType resource, resolved once in _ready
+var _data: EnemyType = null
+var _wiggle: Dictionary = {}
 
 var hp_bar_bg: ColorRect = null
 var hp_bar_fill: ColorRect = null
@@ -68,10 +74,15 @@ var uses_directional_walk: bool = false
 
 # Lane state
 var lane_offset: float = 0.0
-var target_lane: float = 0.0
 var spawn_lane: float = 0.0
 var _path_dir: Vector2 = Vector2.RIGHT
-var overtake_side: float = 1.0   # this unit's preferred side to pass on (+1 right, -1 left)
+
+# One neighbour scan per frame, shared by the follow limit and the crowd push.
+# Both used to walk every sibling separately, so a wave of n enemies cost 2n^2
+# comparisons per frame; now it's n^2 with a single array allocation.
+var _scan_frame: int = -1
+var _scan_limit: float = 1.0
+var _scan_push: float = 0.0
 
 func _ready():
 	print("Enemy created with type: ", enemy_type)
@@ -80,87 +91,43 @@ func _ready():
 	loop = false
 	rotates = false
 	
-	# Set stats based on enemy type directly
-	if enemy_type == "slime":
-		health = 20
-		max_health = health
-		speed = 60
-		gold_reward = 5
-	elif enemy_type == "slime_big":
-		health = 60
-		max_health = health
-		speed = 45
-		gold_reward = 15
-	elif enemy_type == "goblin_small":
-		health = 40
-		max_health = health
-		speed = 90
-		gold_reward = 10
-	elif enemy_type == "goblin_fast":
-		health = 45
-		max_health = health
-		speed = 120
-		gold_reward = 15
-	elif enemy_type == "hobgoblin":
-		health = 150
-		max_health = health
-		speed = 60
-		gold_reward = 30
-	elif enemy_type == "slime_mini":
-		health = 15
-		max_health = health
-		speed = 35
-		gold_reward = 1
-	else:
-		# fallback for peasant/knight (keep for compatibility, but shouldnt be used)
-		health = 30
-		max_health = health
-		speed = 100
-		gold_reward = 10
-	
+	# Stats AND art come from one EnemyType resource — res://data/enemies/<id>.tres.
+	# These used to be two parallel if/elif chains kept in step by hand.
+	_data = EnemyTypes.entry(enemy_type)
+	health = _data.health
+	max_health = health
+	speed = _data.speed
+	gold_reward = _data.gold
+	leak_damage = _data.leak_damage
+	_wiggle = _data.wiggle
+
 	# Scale every type at once for the bigger map
 	speed *= SPEED_MULTIPLIER
-	
+
 	print("Enemy type: ", enemy_type, " - Health: ", health, " - Speed: ", speed)
-	
+
 	# Apply texture to sprite
 	sprite_node = get_node("Sprite2D")
-	if enemy_type == "slime":
-		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
-		sprite_node.scale = Vector2(0.1125, 0.1125)
-	elif enemy_type == "slime_big":
-		sprite_node.texture = preload("res://assets/sprites/Enemy/slime_big.png")
-		sprite_node.scale = Vector2(0.1575, 0.1575)
-	elif enemy_type == "goblin_small":
-		# 4-direction walk cycle: assets/sprites/Enemy/small_goblin/<dir>_side/
-		_load_directional_walk("res://assets/sprites/Enemy/small_goblin", "small_goblin")
+	if _data.uses_walk_frames():
+		# 4-direction walk cycle: <walk_path>/<dir>_side/<prefix>_<dir>_side_NN.png
+		_load_directional_walk(_data.walk_path, _data.walk_prefix, _data.walk_frame_count)
 		var first: Texture2D = _first_walk_frame()
 		if first != null:
 			sprite_node.texture = first
-			sprite_node.scale = _scale_for_height(first, GOBLIN_SMALL_HEIGHT)
+			sprite_node.scale = _scale_for_height(first, _data.walk_height)
 		else:
-			push_warning("Enemy: no walk frames loaded for goblin_small")
-	elif enemy_type == "goblin_fast":
-		sprite_node.texture = preload("res://assets/sprites/Enemy/goblin_fast.png")
-		sprite_node.scale = Vector2(0.1125, 0.1125)
-	elif enemy_type == "hobgoblin":
-		sprite_node.texture = preload("res://assets/sprites/Enemy/hobgoblin.png")
-		sprite_node.scale = Vector2(0.135, 0.135)
-	elif enemy_type == "slime_mini":
-		sprite_node.texture = preload("res://assets/sprites/Enemy/slime.png")
-		sprite_node.scale = Vector2(0.0675, 0.0675)
+			push_warning("Enemy: no walk frames loaded for %s" % enemy_type)
 	else:
-		sprite_node.texture = preload("res://assets/sprites/Peasant.png")
-		sprite_node.scale = Vector2(0.1125, 0.1125)
-	
+		sprite_node.texture = load(_data.texture_path)
+		var s: float = _data.scale
+		sprite_node.scale = Vector2(s, s)
+
 	# Start at the beginning of the path
 	progress_ratio = 0.0
 	base_scale = get_node("Sprite2D").scale
 	# Small random lane so units don't spawn perfectly stacked
 	spawn_lane = randf_range(-LANE_SPAWN_SPREAD, LANE_SPAWN_SPREAD)
 	lane_offset = spawn_lane
-	target_lane = spawn_lane
-	overtake_side = 1.0 if randf() < 0.5 else -1.0
 
 	# Calculate HP bar offset based on sprite size
 	sprite_node = get_node("Sprite2D")
@@ -208,29 +175,13 @@ func _process(delta):
 	# keeping their relative rhythms intact
 	anim_time += delta * ANIM_SPEED_MULTIPLIER
 
-	sprite_node = get_node("Sprite2D")
+	# sprite_node is resolved once in _ready; re-fetching it here cost a node
+	# path lookup per enemy per frame.
 
 	# Procedural wiggle only for types WITHOUT real frame animation — otherwise
-	# the two animations fight each other.
-	if enemy_type == "slime":
-		# Scale pulse - 8 Hz, +/-15% amplitude
-		var pulse: float = 1.0 + sin(anim_time * 8.0) * 0.15
-		sprite_node.scale = Vector2(base_scale.x * pulse, base_scale.y * (2.0 - pulse))
-
-	elif enemy_type == "slime_big":
-		# Slower deeper pulse
-		var pulse: float = 1.0 + sin(anim_time * 5.0) * 0.2
-		sprite_node.scale = Vector2(base_scale.x * pulse, base_scale.y * (2.0 - pulse))
-
-	elif enemy_type == "goblin_fast":
-		# Faster bobbing + rocking + subtle secondary bobbing
-		sprite_node.offset.y = sin(anim_time * 14.0) * 20.55 + sin(anim_time * 4.2) * 6.87
-		sprite_node.rotation = sin(anim_time * 31.5) * 0.147
-
-	elif enemy_type == "hobgoblin":
-		# Slow heavy rocking
-		sprite_node.rotation = sin(anim_time * 13.5) * 0.064
-		sprite_node.offset.y = sin(anim_time * 3.0) * 9.0
+	# the two animations fight each other. Parameters come from the type's
+	# "wiggle" entry; an empty dictionary means "no wiggle".
+	_apply_wiggle()
 
 	# Move along the path. Blocked only by units in the SAME lane — a faster unit
 	# steps aside (see _update_lane) and passes instead of piling up behind.
@@ -240,7 +191,8 @@ func _process(delta):
 		var target: float = progress_ratio + delta * speed / curve_len
 		var limit: float = _follow_limit(curve_len)
 		progress_ratio = min(target, max(progress_ratio, limit))
-		_update_lane(delta)
+		# Reuses this frame's neighbour scan — see _scan_neighbours
+		_update_lane(delta, curve_len)
 		# Depth sorting: whoever stands further down the screen draws in front.
 		z_index = clampi(int(global_position.y) + 2000, 0, 8000)
 
@@ -255,13 +207,8 @@ func _process(delta):
 	
 	# Check if enemy has reached the end of the path
 	if progress_ratio >= 1.0:
-		var damage: int = 1
-		if enemy_type == "slime_big":
-			damage = 2
-		elif enemy_type == "hobgoblin":
-			damage = 3
-		print(enemy_type, " reached base! Dealing ", damage, " damage.")
-		enemy_reached_end.emit(damage)
+		print(enemy_type, " reached base! Dealing ", leak_damage, " damage.")
+		enemy_reached_end.emit(leak_damage)
 		queue_free()
 
 	# Smooth HP bar interpolation
@@ -278,24 +225,42 @@ func _process(delta):
 			hp_bar_fill.color = Color(0.9, 0.2, 0.2, 1.0)
 
 
+# Procedural squash / bob / rock, driven by the type's "wiggle" parameters.
+# Same three motions the per-type if/elif chain used to hand-code, with the
+# same numbers — they just live on the EnemyType resource now.
+func _apply_wiggle() -> void:
+	if _wiggle.is_empty() or not is_instance_valid(sprite_node):
+		return
+
+	if _wiggle.has("pulse"):
+		var p: Dictionary = _wiggle["pulse"]
+		var pulse: float = 1.0 + sin(anim_time * float(p["freq"])) * float(p["amp"])
+		sprite_node.scale = Vector2(base_scale.x * pulse, base_scale.y * (2.0 - pulse))
+
+	if _wiggle.has("bob"):
+		var b: Dictionary = _wiggle["bob"]
+		var y: float = sin(anim_time * float(b["freq"])) * float(b["amp"])
+		# Optional second, slower wave layered on top
+		if b.has("freq2"):
+			y += sin(anim_time * float(b["freq2"])) * float(b["amp2"])
+		sprite_node.offset.y = y
+
+	if _wiggle.has("rock"):
+		var r: Dictionary = _wiggle["rock"]
+		sprite_node.rotation = sin(anim_time * float(r["freq"])) * float(r["amp"])
+
+
 func take_damage(damage: int):
 	health -= damage
-	_update_hp_bar()
 	if health <= 0:
 		print(enemy_type, " defeated")
-		if enemy_type == "slime_big":
-			split_requested.emit(global_position, progress_ratio)
+		if _data != null and _data.splits():
+			split_requested.emit(global_position, progress_ratio, _data.splits_into, _data.split_count)
 		enemy_defeated.emit(gold_reward)
 		queue_free()
 
-func _update_hp_bar() -> void:
-	# This is called from take_damage() but we no longer update the size directly here.
-	# Actual smooth interpolation happens in _process.
-	pass
-
-
 # ════════════════════════════════════════════
-#  SPACING, LANES AND OVERTAKING
+#  SPACING AND CROWD SEPARATION
 # ════════════════════════════════════════════
 
 # Tangent of the path at our current position — used both for facing and for
@@ -311,124 +276,76 @@ func _update_path_dir(curve_len: float) -> void:
 		_path_dir = d.normalized()
 
 
+# Single pass over the siblings producing BOTH the follow limit and the crowd
+# push. Guarded by the frame counter so calling it from _follow_limit and again
+# from _update_lane in the same frame only walks the list once.
+#
+# Side effect of sharing the pass: the push is measured against the progress we
+# had before this frame's advance, a sub-pixel difference at these speeds. It
+# does not touch the stateless tie-break below, which is what kept the earlier
+# lane systems from oscillating.
+func _scan_neighbours(curve_len: float) -> void:
+	var frame: int = Engine.get_process_frames()
+	if _scan_frame == frame:
+		return
+	_scan_frame = frame
+	_scan_limit = 1.0
+	_scan_push = 0.0
+	if curve_len <= 0.0:
+		return
+	var gap_ratio: float = MIN_FOLLOW_GAP / curve_len
+	for other in get_parent().get_children():
+		if other == self or not is_instance_valid(other):
+			continue
+		if not (other is PathFollow2D) or not ("lane_offset" in other):
+			continue
+		var lateral: float = other.lane_offset - lane_offset
+		var delta_progress: float = other.progress_ratio - progress_ratio
+
+		# ── follow limit: only units AHEAD of us, in roughly our lane ──
+		if delta_progress > 0.0 and abs(lateral) <= CROWD_WIDTH * 0.5:
+			var cap: float = other.progress_ratio - gap_ratio
+			if cap < _scan_limit:
+				_scan_limit = cap
+
+		# ── crowd push: any neighbour near us, ahead or behind ──
+		var along: float = abs(delta_progress) * curve_len
+		if along > CROWD_RANGE or abs(lateral) >= CROWD_WIDTH:
+			continue
+		# closer along the path AND closer sideways = stronger shove
+		var near: float = 1.0 - along / CROWD_RANGE
+		var overlap: float = (CROWD_WIDTH - abs(lateral)) / CROWD_WIDTH
+		var dir: float = 0.0
+		if abs(lateral) < 0.5:
+			# dead centre on each other — break the tie the same way every
+			# frame, otherwise they'd shove back and forth
+			dir = -1.0 if get_instance_id() < other.get_instance_id() else 1.0
+		else:
+			dir = -signf(lateral)
+		_scan_push += dir * near * overlap
+
+
 # How far this enemy may advance without bumping the one ahead IN ITS LANE.
 # Units in another lane are free to pass.
 func _follow_limit(curve_len: float) -> float:
-	var gap_ratio: float = MIN_FOLLOW_GAP / curve_len
-	var limit: float = 1.0
-	for other in get_parent().get_children():
-		if other == self or not is_instance_valid(other):
-			continue
-		if not (other is PathFollow2D) or not ("lane_offset" in other):
-			continue
-		if other.progress_ratio <= progress_ratio:
-			continue
-		if abs(other.lane_offset - lane_offset) > CROWD_WIDTH * 0.5:
-			continue
-		var cap: float = other.progress_ratio - gap_ratio
-		if cap < limit:
-			limit = cap
-	return limit
-
-
-# Nearest unit ahead of us in our own lane, spotted early enough to step aside
-# before we actually run into it.
-func _blocker_ahead() -> Node:
-	var curve_len: float = get_parent().curve.get_baked_length()
-	if curve_len <= 0.0:
-		return null
-	var reach: float = OVERTAKE_LOOKAHEAD / curve_len
-	var best: Node = null
-	var best_progress: float = 2.0
-	for other in get_parent().get_children():
-		if other == self or not is_instance_valid(other):
-			continue
-		if not (other is PathFollow2D) or not ("lane_offset" in other):
-			continue
-		if other.progress_ratio <= progress_ratio:
-			continue
-		if other.progress_ratio - progress_ratio > reach:
-			continue
-		if abs(other.lane_offset - lane_offset) > LANE_WIDTH * 0.7:
-			continue
-		if other.progress_ratio < best_progress:
-			best_progress = other.progress_ratio
-			best = other
-	return best
+	_scan_neighbours(curve_len)
+	return _scan_limit
 
 
 # Continuous crowd separation instead of discrete lanes: every neighbour nearby
 # contributes a sideways shove, and a weak pull returns us to the road centre.
 # No states to flip between, so nothing can oscillate.
-func _update_lane(delta: float) -> void:
-	var curve_len: float = get_parent().curve.get_baked_length()
-	var push: float = 0.0
-	if curve_len > 0.0:
-		for other in get_parent().get_children():
-			if other == self or not is_instance_valid(other):
-				continue
-			if not (other is PathFollow2D) or not ("lane_offset" in other):
-				continue
-			var along: float = abs(other.progress_ratio - progress_ratio) * curve_len
-			if along > CROWD_RANGE:
-				continue
-			var lateral: float = other.lane_offset - lane_offset
-			if abs(lateral) >= CROWD_WIDTH:
-				continue
-			# closer along the path AND closer sideways = stronger shove
-			var near: float = 1.0 - along / CROWD_RANGE
-			var overlap: float = (CROWD_WIDTH - abs(lateral)) / CROWD_WIDTH
-			var dir: float = 0.0
-			if abs(lateral) < 0.5:
-				# dead centre on each other — break the tie the same way every
-				# frame, otherwise they'd shove back and forth
-				dir = -1.0 if get_instance_id() < other.get_instance_id() else 1.0
-			else:
-				dir = -signf(lateral)
-			push += dir * near * overlap
+func _update_lane(delta: float, curve_len: float = -1.0) -> void:
+	if curve_len < 0.0:
+		curve_len = get_parent().curve.get_baked_length()
+	_scan_neighbours(curve_len)
+	var push: float = _scan_push
 	lane_offset += push * CROWD_PUSH * delta
 	lane_offset = lerp(lane_offset, 0.0, min(delta * CROWD_RETURN, 1.0))
 	lane_offset = clamp(lane_offset, -LANE_MAX, LANE_MAX)
 	var perp: Vector2 = _path_dir.orthogonal()
 	h_offset = perp.x * lane_offset
 	v_offset = perp.y * lane_offset
-	
-	# Is anyone near us already sitting in that lane? Checks both ahead and behind,
-# since stepping into an occupied lane would just move the collision sideways.
-# Anyone right behind us in our lane? That's who we're getting out of the way of.
-func _follower_behind() -> Node:
-	var curve_len: float = get_parent().curve.get_baked_length()
-	if curve_len <= 0.0:
-		return null
-	var reach: float = YIELD_LOOKBEHIND / curve_len
-	for other in get_parent().get_children():
-		if other == self or not is_instance_valid(other):
-			continue
-		if not (other is PathFollow2D) or not ("lane_offset" in other):
-			continue
-		if other.progress_ratio >= progress_ratio:
-			continue
-		if progress_ratio - other.progress_ratio > reach:
-			continue
-		if abs(other.lane_offset - lane_offset) > LANE_WIDTH * 0.7:
-			continue
-		return other
-	return null
-func _lane_taken(lane: float) -> bool:
-	var curve_len: float = get_parent().curve.get_baked_length()
-	if curve_len <= 0.0:
-		return false
-	var reach: float = OVERTAKE_LOOKAHEAD / curve_len
-	for other in get_parent().get_children():
-		if other == self or not is_instance_valid(other):
-			continue
-		if not (other is PathFollow2D) or not ("lane_offset" in other):
-			continue
-		if abs(other.progress_ratio - progress_ratio) > reach:
-			continue
-		if abs(other.lane_offset - lane) < LANE_WIDTH * 0.7:
-			return true
-	return false
 
 
 # ════════════════════════════════════════════
@@ -437,7 +354,7 @@ func _lane_taken(lane: float) -> bool:
 
 # Loads four folders of walk frames laid out as:
 #   <base_path>/<dir>_side/<prefix>_<dir>_side_NN.png   (NN = 01..WALK_FRAME_COUNT)
-func _load_directional_walk(base_path: String, prefix: String) -> void:
+func _load_directional_walk(base_path: String, prefix: String, frame_count: int = WALK_FRAME_COUNT) -> void:
 	var folders := {
 		"front": "front_side",
 		"back": "back_side",
@@ -447,7 +364,7 @@ func _load_directional_walk(base_path: String, prefix: String) -> void:
 	var loaded_any: bool = false
 	for key in folders.keys():
 		var arr: Array = []
-		for i in range(1, WALK_FRAME_COUNT + 1):
+		for i in range(1, frame_count + 1):
 			var p: String = "%s/%s/%s_%s_%02d.png" % [base_path, folders[key], prefix, folders[key], i]
 			var tex: Texture2D = load(p)
 			if tex == null:

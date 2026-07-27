@@ -1,9 +1,14 @@
 class_name TowerVisuals
 extends RefCounted
 
-# Single source of truth for tower visuals and range.
-# Both Tower.gd (the placed tower) and TowerGhost.gd (the drag preview) read
-# from here, so the ghost can never drift out of sync with the real tower again.
+# Single source of truth for tower DEFINITIONS — art, range and combat stats.
+# Tower.gd (the placed tower), TowerGhost.gd (the drag preview) and Main.gd (the
+# shop) all read from here, so none of them can drift out of sync.
+#
+# Cost, damage and fire rate used to live in Tower._ready(), with a second copy
+# of the prices in Main.TOWER_COSTS. Since total_gold_invested — and therefore
+# the sell refund — is seeded from the tower's own copy, a price edited in only
+# one of the two places silently paid the wrong refund. There is one copy now.
 
 # On-map height of a tower sprite, in map pixels (tile = 96)
 const TARGET_HEIGHT: float = 240.0
@@ -30,46 +35,46 @@ const SHADOW_ALPHA: float = 0.33            # darkness (0 = invisible, 1 = solid
 const SHADOW_OFFSET_X: float = 20.0         # base offset from the tower foot (+ = right)
 const SHADOW_OFFSET_Y: float = 5.0          # base offset (+ = down)
 
-# path: file path; use a %d placeholder when frames > 1
-# frames: 1 = static sprite, >1 = animation frames numbered from 1
-const DATA := {
-	"spear": {
-		"path": "res://assets/sprites/Towers/spear_tower/Spear_Tower_%d.png",
-		"frames": 5,
-		"range": 180.0,
-		"projectile": "res://assets/sprites/Towers/spear_tower/Projectile_Spear.png",
-		"muzzle": 0.4,
-	},
-	"arrow": {
-		"path": "res://assets/sprites/Tower_basic_arrow.png",
-		"frames": 1,
-		"range": 200.0,
-		"projectile": "res://assets/sprites/arrow.png",
-		"muzzle": 0.75,
-	},
-	"shells": {
-		"path": "res://assets/sprites/Tower_basic_shells.png",
-		"frames": 1,
-		"range": 130.0,
-		"projectile": "res://assets/sprites/Shell.png",
-		"muzzle": 0.75,
-	},
-}
+# Per-type numbers live in res://data/towers/*.tres (see TowerType.gd). Adding a
+# tower is one .tres plus a dock button; nothing here needs editing.
+const DIR: String = "res://data/towers"
+const DEFAULT_TYPE: String = "spear"
+
+static var _by_id: Dictionary = {}
+static var _loaded: bool = false
 
 
-static func _entry(type: String) -> Dictionary:
-	if DATA.has(type):
-		return DATA[type]
-	return DATA["spear"]
+static func _load() -> void:
+	if _loaded:
+		return
+	_loaded = true
+	_by_id = ResourceRegistry.load_dir(DIR, "TowerVisuals")
+
+
+# The type table, id -> TowerType.
+static func all() -> Dictionary:
+	_load()
+	return _by_id
+
+
+static func _entry(type: String) -> TowerType:
+	_load()
+	if _by_id.has(type):
+		return _by_id[type]
+	if _by_id.has(DEFAULT_TYPE):
+		push_warning("TowerVisuals: unknown tower type '%s', using %s" % [type, DEFAULT_TYPE])
+		return _by_id[DEFAULT_TYPE]
+	push_error("TowerVisuals: no tower types loaded from %s" % DIR)
+	return TowerType.new()
 
 
 static func frame_paths(type: String) -> Array:
-	var entry: Dictionary = _entry(type)
-	if int(entry["frames"]) <= 1:
-		return [entry["path"]]
+	var entry: TowerType = _entry(type)
+	if entry.frame_count <= 1:
+		return [entry.sprite_path]
 	var paths: Array = []
-	for i in range(1, int(entry["frames"]) + 1):
-		paths.append(entry["path"] % i)
+	for i in range(1, entry.frame_count + 1):
+		paths.append(entry.sprite_path % i)
 	return paths
 
 
@@ -194,59 +199,30 @@ static func opaque_local_rect(type: String) -> Rect2:
 
 
 static func attack_range(type: String) -> float:
-	return float(_entry(type)["range"])
+	return _entry(type).attack_range
+
+
+# Build price. Also seeds Tower.total_gold_invested, so the sell refund follows.
+static func cost(type: String) -> int:
+	return _entry(type).cost
+
+
+static func base_damage(type: String) -> int:
+	return _entry(type).damage
+
+
+static func base_fire_rate(type: String) -> float:
+	return _entry(type).fire_rate
 
 
 static func projectile_path(type: String) -> String:
-	return str(_entry(type)["projectile"])
+	return _entry(type).projectile_path
 
 
 # Where shots leave the tower, relative to its origin (which sits at the base).
 # "muzzle" is a fraction of TARGET_HEIGHT: 0.0 = ground, 1.0 = very top.
 static func muzzle_offset(type: String) -> Vector2:
-	return Vector2(0.0, -TARGET_HEIGHT * float(_entry(type)["muzzle"]))
-	
-# Builds a grass tuft (ColorRect + grass_tuft.gdshader) that hugs the front of
-# the tower base. Sized to the footprint width; placed by Tower.gd under the
-# sprite, above the shadow. Returns null if the shader can't load.
-static func make_grass_tuft(type: String) -> ColorRect:
-	var sh: Shader = load("res://shaders/grass_tuft.gdshader")
-	if sh == null:
-		return null
-	var r: float = footprint_radius(type)
-	var tuft := ColorRect.new()
-	# Square rect; the elliptical grass ring is computed inside the shader.
-	var w: float = r * 3.0
-	var h: float = r * 3.0
-	tuft.size = Vector2(w, h)
-	# Center on the base, nudged up so the ring sits around the foot.
-	tuft.position = Vector2(-w * 0.5, -h * 0.6)
-	tuft.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var mat := ShaderMaterial.new()
-	mat.shader = sh
-	var grad: Texture2D = load("res://shaders/gradient.png")
-	if grad != null:
-		mat.set_shader_parameter("gradient_tex", grad)
-	var noise: Texture2D = load("res://shaders/noise.png")
-	if noise != null:
-		mat.set_shader_parameter("noise_tex", noise)
-	mat.set_shader_parameter("ring_radius", 0.7)
-	mat.set_shader_parameter("ring_softness", 0.35)
-	mat.set_shader_parameter("vertical_ratio", 0.5)
-	mat.set_shader_parameter("edge_jitter", 0.15)
-	mat.set_shader_parameter("grass_alpha", 1.0)
-	mat.set_shader_parameter("tone", 0.4)
-	tuft.material = mat
-	return tuft
-
-
-# Creates a ready-to-use blob shadow node for a tower of this type. The caller
-# adds it as the FIRST child of the tower so it draws under the sprite, at the
-# base (node origin). Kept for enemies (variant A); towers use make_cast_shadow.
-static func make_shadow(type: String) -> TowerShadow:
-	var shadow := TowerShadow.new()
-	shadow.setup(footprint_radius(type), FOOTPRINT_VERTICAL_RATIO)
-	return shadow
+	return Vector2(0.0, -TARGET_HEIGHT * _entry(type).muzzle)
 
 
 # Builds a cast-shadow Sprite2D (variant B): same silhouette as the sprite,

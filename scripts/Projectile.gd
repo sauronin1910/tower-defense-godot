@@ -1,4 +1,4 @@
-extends Area2D
+extends Node2D
 
 # Exported variables for projectile configuration
 @export var speed: float = 400.0
@@ -20,12 +20,8 @@ var texture_path: String = ""
 
 
 func _ready():
-	# Create and set collision shape programmatically
-	var collision_shape = get_node("CollisionShape2D")
-	var circle_shape = CircleShape2D.new()
-	circle_shape.radius = 10.0
-	collision_shape.shape = circle_shape
-
+	# No collision shape: hits are a distance test in _process, so physics never
+	# sees a projectile.
 	# Set sprite texture from the path provided by the tower
 	var sprite = get_node("Sprite2D")
 	if texture_path != "":

@@ -1,27 +1,26 @@
 extends Node2D
 # ── Wave Configuration: 7 defined waves, then endless uses last entry ──
+# Sparse: list only what a wave actually contains. Keys are EnemyType ids from
+# res://data/enemies/. A new enemy needs no edit here unless you want it in a
+# wave, and the spawn order within a wave is the key order below.
 const WAVE_CONFIG := [
-	{"slime": 8,  "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 1
-	{"slime": 12, "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 2
-	{"slime": 8,  "slime_big": 2, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 0},   # Wave 3
-	{"slime": 10, "slime_big": 0, "goblin_small": 4, "goblin_fast": 0, "hobgoblin": 0},   # Wave 4
-	{"slime": 6,  "slime_big": 3, "goblin_small": 6, "goblin_fast": 0, "hobgoblin": 0},   # Wave 5
-	{"slime": 0,  "slime_big": 4, "goblin_small": 8, "goblin_fast": 2, "hobgoblin": 0},   # Wave 6
-	{"slime": 5,  "slime_big": 3, "goblin_small": 5, "goblin_fast": 5, "hobgoblin": 0},   # Wave 7
-	{"slime": 0,  "slime_big": 5, "goblin_small": 6, "goblin_fast": 6, "hobgoblin": 1},   # Wave 8
-	{"slime": 0,  "slime_big": 0, "goblin_small": 8, "goblin_fast": 8, "hobgoblin": 2},   # Wave 9
-	{"slime": 0,  "slime_big": 6, "goblin_small": 5, "goblin_fast": 8, "hobgoblin": 3},   # Wave 10
-	{"slime": 0,  "slime_big": 4, "goblin_small": 6, "goblin_fast": 10, "hobgoblin": 5},  # Wave 11
-	{"slime": 0,  "slime_big": 8, "goblin_small": 4, "goblin_fast": 8, "hobgoblin": 8},   # Wave 12
-	{"slime": 0,  "slime_big": 0, "goblin_small": 0, "goblin_fast": 0, "hobgoblin": 15},  # Wave 13 (BOSS)
+	{"slime": 8},                                                              # Wave 1
+	{"slime": 12},                                                             # Wave 2
+	{"slime": 8,  "slime_big": 2},                                             # Wave 3
+	{"slime": 10, "goblin_small": 4},                                          # Wave 4
+	{"slime": 6,  "slime_big": 3, "goblin_small": 6},                          # Wave 5
+	{"slime_big": 4, "goblin_small": 8, "goblin_fast": 2},                     # Wave 6
+	{"slime": 5,  "slime_big": 3, "goblin_small": 5, "goblin_fast": 5},        # Wave 7
+	{"slime_big": 5, "goblin_small": 6, "goblin_fast": 6, "hobgoblin": 1},     # Wave 8
+	{"goblin_small": 8, "goblin_fast": 8, "hobgoblin": 2},                     # Wave 9
+	{"slime_big": 6, "goblin_small": 5, "goblin_fast": 8, "hobgoblin": 3},     # Wave 10
+	{"slime_big": 4, "goblin_small": 6, "goblin_fast": 10, "hobgoblin": 5},    # Wave 11
+	{"slime_big": 8, "goblin_small": 4, "goblin_fast": 8, "hobgoblin": 8},     # Wave 12
+	{"hobgoblin": 15},                                                         # Wave 13 (BOSS)
 ]
 const MAX_WAVE := 13
-# -- Tower Costs --  
-const TOWER_COSTS := {
-	"spear": 50,
-	"arrow": 75,
-	"shells": 120,
-}
+# Tower prices live in res://data/towers/*.tres — the same copy the placed tower
+# seeds total_gold_invested from, so shop price and sell refund can't disagree.
 
 @onready var spawn_timer: Timer = $SpawnTimer
 @onready var next_wave_timer: Timer = $NextWaveTimer
@@ -40,6 +39,8 @@ var wave_in_progress: bool = false
 var enemies_spawned: int = 0
 var total_enemies_to_spawn: int = 0
 var active_enemy_count: int = 0
+# Flat list of enemy ids left to spawn this wave, built by _build_spawn_queue
+var spawn_queue: Array = []
 
 # Selected tower type
 var selected_tower_type: String = "spear"
@@ -56,6 +57,7 @@ var enemy_scene = preload("res://scenes/Enemy.tscn")
 @onready var restart_button: Button = $CanvasLayer/GameOverScreen/RestartButton
 @onready var pause_menu: Control = %PauseMenu
 @onready var resume_button: Button = %ResumeButton
+@onready var retry_button: Button = %RetryButton
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var upgrade_panel = %TowerUpgradePanel
 @onready var start_wave_button: Button = %StartWaveButton
@@ -125,6 +127,10 @@ func _ready():
 	# Pause menu setup
 	if is_instance_valid(resume_button):
 		resume_button.pressed.connect(_on_resume_pressed)
+	# Same teardown as the Game Over restart: unpause, drop the speed multiplier,
+	# rebuild the scene. Reusing it keeps the two paths from drifting apart.
+	if is_instance_valid(retry_button):
+		retry_button.pressed.connect(_on_restart_pressed)
 	if is_instance_valid(main_menu_button):
 		main_menu_button.pressed.connect(_on_main_menu_pressed)
 	if is_instance_valid(pause_menu):
@@ -164,31 +170,31 @@ func _ready():
 		level_complete.visible = false
 
 
+# The queue is built once per wave, so spawning is a pop instead of the
+# hand-unrolled cumulative if-chain this replaced — which had to grow a branch
+# for every new enemy type, in the right order, to keep the counts aligned.
 func _on_spawn_timer_timeout():
 	if not wave_in_progress:
 		return
-	if enemies_spawned >= total_enemies_to_spawn:
+	if spawn_queue.is_empty():
 		return
-	var config: Dictionary = _get_wave_config(current_wave_number)
-	var cumulative: int = config.slime
-	if enemies_spawned < cumulative:
-		_spawn_enemy("slime")
-		return
-	cumulative += config.slime_big
-	if enemies_spawned < cumulative:
-		_spawn_enemy("slime_big")
-		return
-	cumulative += config.goblin_small
-	if enemies_spawned < cumulative:
-		_spawn_enemy("goblin_small")
-		return
-	cumulative += config.goblin_fast
-	if enemies_spawned < cumulative:
-		_spawn_enemy("goblin_fast")
-		return
-	cumulative += config.hobgoblin
-	if enemies_spawned < cumulative:
-		_spawn_enemy("hobgoblin")
+	_spawn_enemy(spawn_queue.pop_front())
+
+
+# Expands {id: count} into a flat spawn order. Unknown ids are dropped with a
+# warning rather than spawning placeholders through a whole wave.
+func _build_spawn_queue(config: Dictionary) -> Array:
+	var queue: Array = []
+	for id in config:
+		var count: int = int(config[id])
+		if count <= 0:
+			continue
+		if not EnemyTypes.known(id):
+			push_warning("Main: wave references unknown enemy id '%s'" % id)
+			continue
+		for i in range(count):
+			queue.append(id)
+	return queue
 
 
 func _spawn_enemy(type: String) -> void:
@@ -233,8 +239,8 @@ func start_wave(wave_num: int) -> void:
 	current_wave_number = wave_num
 	wave_in_progress = true
 	enemies_spawned = 0
-	var config: Dictionary = _get_wave_config(wave_num)
-	total_enemies_to_spawn = config.slime + config.slime_big + config.goblin_small + config.goblin_fast + config.hobgoblin
+	spawn_queue = _build_spawn_queue(_get_wave_config(wave_num))
+	total_enemies_to_spawn = spawn_queue.size()
 	active_enemy_count = 0
 
 	spawn_timer.start()
@@ -286,13 +292,6 @@ func _unhandled_input(event):
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		_toggle_pause()
 		get_viewport().set_input_as_handled()
-		return
-
-	# Update ghost during drag
-	if is_dragging_tower and event is InputEventMouseMotion:
-		if is_instance_valid(tower_ghost):
-			tower_ghost.position = get_local_mouse_position()
-			_update_ghost_validity()
 		return
 
 	# Release drag
@@ -357,24 +356,28 @@ func _unhandled_input(event):
 				selected_tower = null
 
 
+# Walks the UI layer instead of naming each control. The old version listed
+# every button by path, so adding one to the dock silently let clicks through
+# to the map until someone remembered to edit this function too.
 func _is_ui_hit(tap_pos: Vector2) -> bool:
-	var spear_btn: Button = $CanvasLayer/Control/TowerButtonsDock/SpearButton
-	var arrow_btn: Button = $CanvasLayer/Control/TowerButtonsDock/ArrowButton
-	var shells_btn: Button = $CanvasLayer/Control/TowerButtonsDock/ShellsButton
-	if is_instance_valid(spear_btn) and spear_btn.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(arrow_btn) and arrow_btn.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(shells_btn) and shells_btn.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(start_wave_button) and start_wave_button.visible and start_wave_button.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(upgrade_panel) and upgrade_panel.visible and upgrade_panel.contains_point(tap_pos):
-		return true
-	if is_instance_valid(speed_button) and speed_button.get_global_rect().has_point(tap_pos):
-		return true
-	if is_instance_valid(build_button) and build_button.get_global_rect().has_point(tap_pos):
-		return true
+	return _control_hit(get_node_or_null("CanvasLayer"), tap_pos)
+
+
+# Any visible Control that isn't MOUSE_FILTER_IGNORE counts as UI. Recursion
+# continues through ignored nodes: the full-screen Control wrapper ignores the
+# mouse, but the buttons parented under it do not.
+func _control_hit(node: Node, tap_pos: Vector2) -> bool:
+	if node == null:
+		return false
+	for child in node.get_children():
+		if child is CanvasItem and not child.visible:
+			continue
+		if child is Control:
+			var c: Control = child
+			if c.mouse_filter != Control.MOUSE_FILTER_IGNORE and c.get_global_rect().has_point(tap_pos):
+				return true
+		if _control_hit(child, tap_pos):
+			return true
 	return false
 
 
@@ -550,6 +553,22 @@ func _zoom_at(_screen_pos: Vector2, delta_zoom: float) -> void:
 
 
 func _process(delta: float) -> void:
+	# Drag is polled here, not driven by motion events: a control under the
+	# pointer swallows the motion, which froze the ghost whenever it crossed a
+	# button. Polling the button state is also the only way to notice a release
+	# that never arrives because it happened outside the window.
+	if is_dragging_tower:
+		var mouse: Vector2 = get_viewport().get_mouse_position()
+		var inside: bool = get_viewport().get_visible_rect().has_point(mouse)
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			if inside:
+				_finish_drag()
+			else:
+				_cancel_drag()
+		elif is_instance_valid(tower_ghost):
+			tower_ghost.position = get_local_mouse_position()
+			_update_ghost_validity()
+
 	# Smooth zoom lerp
 	if is_instance_valid(game_camera):
 		var current: float = game_camera.zoom.x
@@ -623,20 +642,13 @@ func _on_level_complete_next() -> void:
 #  TOWER DRAG-AND-DROP PLACEMENT
 # ════════════════════════════════════════════
 
-func _set_all_footprints_visible(value: bool) -> void:
-	for tower in get_tree().get_nodes_in_group("towers"):
-		if is_instance_valid(tower):
-			tower.set_footprint_visible(value)
-
-
 func _start_drag(type: String) -> void:
-	var cost: int = TOWER_COSTS[type]
+	var cost: int = TowerVisuals.cost(type)
 	if gold < cost:
 		print("Not enough gold to build ", type)
 		return
 	dragging_tower_type = type
 	is_dragging_tower = true
-	_set_all_footprints_visible(true)
 	if is_instance_valid(tower_buttons_dock):
 		dock_was_open = tower_buttons_dock.visible
 		tower_buttons_dock.visible = false
@@ -660,7 +672,7 @@ func _update_ghost_validity() -> void:
 
 
 func _can_place_tower_at(pos: Vector2, type: String) -> bool:
-	var cost: int = TOWER_COSTS[type]
+	var cost: int = TowerVisuals.cost(type)
 	if gold < cost:
 		return false
 	if _is_on_enemy_path(pos, type):
@@ -672,11 +684,30 @@ func _can_place_tower_at(pos: Vector2, type: String) -> bool:
 	return true
 
 
+# Alt-tabbing mid-drag never delivers the button release, so without this the
+# ghost stays glued to the cursor after coming back.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_dragging_tower:
+		_cancel_drag()
+
+
+# Drops the ghost without spending gold. Used when the drag ends somewhere the
+# player can't have meant as a placement.
+func _cancel_drag() -> void:
+	if not is_dragging_tower:
+		return
+	is_dragging_tower = false
+	if is_instance_valid(tower_ghost):
+		tower_ghost.queue_free()
+	tower_ghost = null
+	if dock_was_open and is_instance_valid(tower_buttons_dock):
+		tower_buttons_dock.visible = true
+
+
 func _finish_drag() -> void:
 	if not is_dragging_tower:
 		return
 	is_dragging_tower = false
-	_set_all_footprints_visible(false)
 	var final_pos: Vector2 = Vector2.ZERO
 	if is_instance_valid(tower_ghost):
 		final_pos = tower_ghost.position
@@ -689,7 +720,7 @@ func _finish_drag() -> void:
 
 
 func _place_tower_at(pos: Vector2, type: String) -> void:
-	var cost: int = TOWER_COSTS[type]
+	var cost: int = TowerVisuals.cost(type)
 	gold -= cost
 	_update_labels()
 	var tower_scene := preload("res://scenes/Tower.tscn")
@@ -704,10 +735,12 @@ func _place_tower_at(pos: Vector2, type: String) -> void:
 #  SLIME SPLIT
 # ════════════════════════════════════════════
 
-func _on_slime_split(_spawn_position: Vector2, spawn_progress_ratio: float) -> void:
-	for i in range(3):
+# What spawns, and how many, comes from the dying unit's EnemyType — Main no
+# longer needs to know that a slime_big becomes three slime_minis.
+func _on_slime_split(_spawn_position: Vector2, spawn_progress_ratio: float, spawn_type: String, spawn_count: int) -> void:
+	for i in range(spawn_count):
 		var enemy: PathFollow2D = enemy_scene.instantiate() as PathFollow2D
-		enemy.enemy_type = "slime_mini"
+		enemy.enemy_type = spawn_type
 		var path: Path2D = $EnemyPath as Path2D
 		path.add_child(enemy)
 		enemy.progress_ratio = clamp(spawn_progress_ratio - 0.005 * i, 0.0, 0.999)

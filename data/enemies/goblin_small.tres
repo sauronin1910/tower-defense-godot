@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/EnemyType.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "goblin_small"
+health = 40
+speed = 90.0
+gold = 10
+leak_damage = 1
+walk_path = "res://assets/sprites/Enemy/small_goblin"
+walk_prefix = "small_goblin"
+walk_frame_count = 9
+walk_height = 120.0
