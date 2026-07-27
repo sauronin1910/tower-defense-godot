@@ -25,16 +25,17 @@ theme_override_constants/separation = 16
 
 [node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-text = "LEVEL COMPLETE!"
+text = "YOU WIN!"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 32
 
 [node name="SubtitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-text = "All 13 waves defeated"
+text = "All 14 waves defeated"
 horizontal_alignment = 1
 
 [node name="NextLevelButton" type="Button" parent="CenterContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 disabled = true
 text = "Next Level (coming soon)"

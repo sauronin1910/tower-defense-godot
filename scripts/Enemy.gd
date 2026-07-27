@@ -53,6 +53,12 @@ var gold_reward: int = 0
 # Base health this unit costs if it reaches the end of the path
 var leak_damage: int = 1
 
+# Death is one-way. queue_free() only takes effect at the end of the frame and
+# is_instance_valid() stays true until then, so without this a second projectile
+# landing in the same frame would run take_damage() on an already-dead unit and
+# emit enemy_defeated twice.
+var _dead: bool = false
+
 # This type's EnemyType resource, resolved once in _ready
 var _data: EnemyType = null
 var _wiggle: Dictionary = {}
@@ -206,7 +212,8 @@ func _process(delta):
 		progress_ratio = 1.0
 	
 	# Check if enemy has reached the end of the path
-	if progress_ratio >= 1.0:
+	if progress_ratio >= 1.0 and not _dead:
+		_dead = true
 		print(enemy_type, " reached base! Dealing ", leak_damage, " damage.")
 		enemy_reached_end.emit(leak_damage)
 		queue_free()
@@ -251,8 +258,11 @@ func _apply_wiggle() -> void:
 
 
 func take_damage(damage: int):
+	if _dead:
+		return
 	health -= damage
 	if health <= 0:
+		_dead = true
 		print(enemy_type, " defeated")
 		if _data != null and _data.splits():
 			split_requested.emit(global_position, progress_ratio, _data.splits_into, _data.split_count)

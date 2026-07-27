@@ -16,9 +16,10 @@ const WAVE_CONFIG := [
 	{"slime_big": 6, "goblin_small": 5, "goblin_fast": 8, "hobgoblin": 3},     # Wave 10
 	{"slime_big": 4, "goblin_small": 6, "goblin_fast": 10, "hobgoblin": 5},    # Wave 11
 	{"slime_big": 8, "goblin_small": 4, "goblin_fast": 8, "hobgoblin": 8},     # Wave 12
-	{"hobgoblin": 15},                                                         # Wave 13 (BOSS)
+	{"hobgoblin": 15},                                                         # Wave 13
+	{"goblin_fast": 18, "hobgoblin": 16},                                      # Wave 14 (BOSS)
 ]
-const MAX_WAVE := 13
+const MAX_WAVE := 14
 # Tower prices live in res://data/towers/*.tres — the same copy the placed tower
 # seeds total_gold_invested from, so shop price and sell refund can't disagree.
 
@@ -54,7 +55,7 @@ var enemy_scene = preload("res://scenes/Enemy.tscn")
 @onready var gold_label: Label = $CanvasLayer/Control/GoldLabel
 
 @onready var game_over_screen: Control = $CanvasLayer/GameOverScreen
-@onready var restart_button: Button = $CanvasLayer/GameOverScreen/RestartButton
+@onready var restart_button: Button = %RestartButton
 @onready var pause_menu: Control = %PauseMenu
 @onready var resume_button: Button = %ResumeButton
 @onready var retry_button: Button = %RetryButton
@@ -614,11 +615,19 @@ func _trigger_level_complete() -> void:
 	print("LEVEL COMPLETE!")
 	spawn_timer.stop()
 	next_wave_timer.stop()
+	if is_instance_valid(start_wave_button):
+		start_wave_button.visible = false
+
+	# Beat before the win screen, so the last kill is on screen rather than
+	# instantly covered. Real seconds on purpose: ignore_time_scale, or the wait
+	# would be 0.75s at 4x speed, and process_always so the timer survives the
+	# pause that follows.
+	Engine.time_scale = 1.0
+	await get_tree().create_timer(3.0, true, false, true).timeout
+
 	get_tree().paused = true
 	if is_instance_valid(level_complete):
 		level_complete.visible = true
-	if is_instance_valid(start_wave_button):
-		start_wave_button.visible = false
 
 
 func _on_level_complete_retry() -> void:

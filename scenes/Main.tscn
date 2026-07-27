@@ -517,30 +517,39 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="GameOverBG" type="ColorRect" parent="CanvasLayer/GameOverScreen" unique_id=1915018511]
-layout_mode = 0
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 740.0
-offset_bottom = 1300.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 1
 color = Color(0, 0, 0, 0.7)
 
-[node name="GameOverLabel" type="Label" parent="CanvasLayer/GameOverScreen" unique_id=1096342460]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/GameOverScreen" unique_id=743068891]
 layout_mode = 1
-offset_left = 200.0
-offset_top = 480.0
-offset_right = 520.0
-offset_bottom = 560.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/GameOverScreen/CenterContainer" unique_id=743068892]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="GameOverLabel" type="Label" parent="CanvasLayer/GameOverScreen/CenterContainer/VBoxContainer" unique_id=1096342460]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
 text = "GAME OVER"
 horizontal_alignment = 1
 
-[node name="RestartButton" type="Button" parent="CanvasLayer/GameOverScreen" unique_id=1576916921]
+[node name="RestartButton" type="Button" parent="CanvasLayer/GameOverScreen/CenterContainer/VBoxContainer" unique_id=1576916921]
+unique_name_in_owner = true
 process_mode = 2
-layout_mode = 1
-offset_left = 290.0
-offset_top = 600.0
-offset_right = 430.0
-offset_bottom = 660.0
+custom_minimum_size = Vector2(240, 80)
+layout_mode = 2
 text = "Restart"
 
 [node name="PauseMenu" type="Control" parent="CanvasLayer" unique_id=907364521]

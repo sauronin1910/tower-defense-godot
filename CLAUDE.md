@@ -79,7 +79,7 @@ shaders/                    .gdshader files + gradient.png, noise.png, clouds.pn
 ### Core scripts
 
 **`Main.gd`** — game loop: waves, gold, placement, camera, speed control.
-`WAVE_CONFIG` holds 13 waves; endless mode repeats the last entry. Rows are
+`WAVE_CONFIG` holds 14 waves; endless mode repeats the last entry. Rows are
 **sparse** `{enemy_id: count}` — list only what a wave contains.
 
 `start_wave()` expands the row into `spawn_queue`, a flat list of ids, and
@@ -407,3 +407,23 @@ Content first, mechanics second. That order is deliberate.
 - **Progression system** (the big one): enemies grant XP, level-up offers a choice
   HoMM-style. Local buffs arrive as pickable cards to apply to a chosen tower;
   global buffs (economy, all-towers) apply immediately with no card
+
+Found during a code review, not yet addressed:
+
+- **Crowd separation overshoots at large `delta`.** `lane_offset += push *
+  CROWD_PUSH * delta` (`Enemy.gd`) is an explicit integration, so a big step
+  jumps past the target. Needs sub-stepping or a clamp. This is **not** caused
+  by `Engine.time_scale` and won't be fixed by removing it
+- **`Engine.time_scale` is a global speed hack.** It also speeds up the camera
+  zoom lerp, tower range reveal, the build-pop tween and cloud drift, and it's
+  assigned in five places that must stay in sync. The fix is a `GameSpeed`
+  multiplier threaded through gameplay `delta` and the three timers — Godot 4
+  has no per-subtree time scale. Worth doing when progression lands and tweens
+  stop being cosmetic
+- **Four `.import` files have no source art** (`assets/decor/grass_01.png`,
+  `assets/road_cobblestone.png`, `assets/sprites/Enemy/Goblin_faster.png`,
+  `assets/sprites/Enemy/Slime_bigger.png`). Deliberately kept — that art may
+  come back. Don't "clean" them up
+- **The decor round-trip is unverified in the editor.** `edit_mode` → drag →
+  `bake_now` → `reload_now` has never been run end to end. Check it before
+  relying on it for a big placement session
