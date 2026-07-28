@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_script")
 id = "arrow"
-sprite_path = "res://assets/sprites/Tower_basic_arrow.png"
-frame_count = 1
+sprite_path = "res://assets/sprites/Towers/arrow_tower/arrow_tower_%02d.png"
+frame_count = 9
 attack_range = 200.0
 projectile_path = "res://assets/sprites/arrow.png"
 muzzle = 0.75
