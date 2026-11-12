@@ -4,7 +4,7 @@ A medieval-fantasy tower defense prototype in Godot 4 and GDScript, built with A
 
 ![Wave 10: slimes and goblins push into the tower line, slimes split, then the camera zooms out to the whole map](docs/media/gameplay.gif)
 
-One playable map, 14 waves, 3 tower types and 6 enemy types. This is a finished prototype: the lessons from it now feed a new project designed from scratch.
+**Status: in development.** So far: one playable map, 14 waves, 3 tower types and 6 enemy types.
 
 ## Gameplay
 
