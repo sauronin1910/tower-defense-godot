@@ -22,7 +22,7 @@ A medieval-fantasy tower defense prototype in Godot 4 and GDScript, built with A
 
 ## How it was built
 
-The code was written with AI coding agents (Codex CLI and OpenCode) running Qwen models locally in LM Studio. See `opencode.json` for the local model setup.
+The code was written with AI coding agents (Codex CLI and OpenCode) running Qwen models locally in LM Studio. See `opencode.json` for the local model setup. Recent updates, mainly fixes for critical bugs, were made with Claude.
 
 - **Agent rules.** [`CLAUDE.md`](CLAUDE.md) is the single source of truth for any agent working here: surgical find-and-replace edits only, Python for multi-line edits, UTF-8 without BOM, line counts checked before and after every edit, and a commit after each working feature as a rollback net.
 - **Codebase analysis.** The project was mapped into a knowledge graph with Graphify (348 nodes, 511 edges). The graph surfaced defects and showed where to split the main game script.
