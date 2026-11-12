@@ -18,3 +18,6 @@ graphify-out/
 # NOTE: *.import files ARE tracked on purpose. Godot regenerates them on first
 # open, but with fresh uids - anything referencing an asset by uid breaks on a
 # clean clone. Do not add them here.
+
+# Obsidian window state - changes every time the vault is opened
+docs/.obsidian/workspace*.json
